@@ -304,28 +304,22 @@ def test_get_eligible_person_for_non_worship_leader_role_with_teaching_on_same_d
     # Assert
     assert eligible_person == person
 
-def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_preaching():
+def test_get_eligible_person_for_special_condition_1_pastor_preaching():
     # Arrange
-    role = Role.WORSHIPLEADER
+    role = Role.EMCEE
     reference_date = date(2024, 6, 30)
     event_dates = [reference_date]
-    person1 = Person(name='NotGee',
-                     roles=[role],
-                     blockout_dates=[],
-                     preaching_dates=[],
-                     teaching_dates=[],
-                     on_leave=False)
-    person2 = Person(name='Gee',
-                     roles=[role],
-                     blockout_dates=[],
-                     preaching_dates=[],
-                     teaching_dates=[],
-                     on_leave=False)
-    preacher = Preacher(name='Kris',
+    person = Person(name='Lulu',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    teaching_dates=[],
+                    on_leave=False)
+    preacher = Preacher(name='Edmund',
                         graphics_support='Test',
                         dates=[reference_date])
     
-    team = [person1, person2]
+    team = [person]
     preachers = [preacher]
 
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
@@ -334,50 +328,24 @@ def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_pre
     eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
 
     # Assert
-    assert eligible_person == person1
+    assert eligible_person == person
 
-def test_get_eligible_person_for_other_role_when_special_condition_pastor_preaching():
+def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
     # Arrange
-    role = Role.BACKUP
+    role = Role.EMCEE
     reference_date = date(2024, 6, 30)
     event_dates = [reference_date]
-    special_person = Person(name='Gee',
-                            roles=[Role.WORSHIPLEADER, role],
-                            blockout_dates=[],
-                            preaching_dates=[],
-                            teaching_dates=[],
-                            on_leave=False)
-    preacher = Preacher(name='Kris',
-                        graphics_support='Test',
-                        dates=[reference_date])
-    
-    team = [special_person]
-    preachers = [preacher]
-
-    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
-
-    # Assert
-    assert eligible_person == special_person
-
-def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_is_not_preaching():
-    # Arrange
-    role = Role.WORSHIPLEADER
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    special_person = Person(name='Gee',
-                            roles=[role],
-                            blockout_dates=[],
-                            preaching_dates=[],
-                            teaching_dates=[],
-                            on_leave=False)
+    person = Person(name='Lulu',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    teaching_dates=[],
+                    on_leave=False)
     preacher = Preacher(name='TestPreacher',
                         graphics_support='Test',
                         dates=[reference_date])
     
-    team = [special_person]
+    team = [person]
     preachers = [preacher]
 
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
@@ -386,7 +354,85 @@ def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_is_
     eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
 
     # Assert
-    assert eligible_person == special_person
+    assert eligible_person == None
+
+def test_get_eligible_person_for_special_condition_2_pastor_preaching():
+    # Arrange
+    role = Role.WORSHIPLEADER
+    reference_date = date(2024, 6, 30)
+    event_dates = [reference_date]
+    person = Person(name='Gee',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    teaching_dates=[],
+                    on_leave=False)
+    preacher = Preacher(name='Kris',
+                        graphics_support='Test',
+                        dates=[reference_date])
+    
+    team = [person]
+    preachers = [preacher]
+
+    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
+
+    # Assert
+    assert eligible_person == None
+
+def test_get_eligible_person_for_special_condition_2_other_role():
+    # Arrange
+    role = Role.BACKUP
+    reference_date = date(2024, 6, 30)
+    event_dates = [reference_date]
+    person = Person(name='Gee',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    teaching_dates=[],
+                    on_leave=False)
+    preacher = Preacher(name='Kris',
+                        graphics_support='Test',
+                        dates=[reference_date])
+    
+    team = [person]
+    preachers = [preacher]
+
+    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
+
+    # Assert
+    assert eligible_person == person
+
+def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
+    # Arrange
+    role = Role.WORSHIPLEADER
+    reference_date = date(2024, 6, 30)
+    event_dates = [reference_date]
+    person = Person(name='Gee',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    teaching_dates=[],
+                    on_leave=False)
+    preacher = Preacher(name='TestPreacher',
+                        graphics_support='Test',
+                        dates=[reference_date])
+    
+    team = [person]
+    preachers = [preacher]
+
+    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
+
+    # Assert
+    assert eligible_person == person
 
 def test_get_next_worship_leader():
     # Arrange
