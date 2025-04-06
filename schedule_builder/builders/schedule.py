@@ -112,14 +112,14 @@ class Schedule:
                 logging.debug(f"{person.name} is not capable of {role}")
                 continue
 
-            # Special condition: Assign Lulu for Emcee only when Pastor Edmund is preaching
+            # Special condition 1: Assign Lulu for Emcee only when Pastor Edmund is preaching
             if (person.name == "Lulu"
                 and role == Role.EMCEE
                 and (not preacher or (preacher and preacher.name != "Edmund"))):
                 logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher.name}")
                 continue
 
-            # Special condition: Do not assign Gee for worship leading when Kris is preaching
+            # Special condition 2: Do not assign Gee for worship leading when Kris is preaching
             if (person.name == "Gee"
                 and role == Role.WORSHIPLEADER
                 and preacher.name == "Kris"):
