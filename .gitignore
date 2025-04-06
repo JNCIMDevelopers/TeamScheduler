@@ -177,7 +177,7 @@ cython_debug/
 schedule_details.html
 schedule.csv
 
-# Decrypted team data
+# Program data
 team.json
 preaching.json
 rotation.json
