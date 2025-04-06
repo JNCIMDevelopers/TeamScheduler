@@ -331,7 +331,7 @@ def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_pre
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher_name=preacher.name)
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
 
     # Assert
     assert eligible_person == person1
@@ -357,7 +357,7 @@ def test_get_eligible_person_for_other_role_when_special_condition_pastor_preach
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher_name=preacher.name)
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
 
     # Assert
     assert eligible_person == special_person
@@ -383,7 +383,7 @@ def test_get_eligible_person_for_worshipleader_when_special_condition_pastor_is_
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher_name=preacher.name)
+    eligible_person = schedule.get_eligible_person(role=role, team=team, date=reference_date, preacher=preacher)
 
     # Assert
     assert eligible_person == special_person

@@ -269,7 +269,7 @@ def test_get_person_status_on_date_unassigned():
     # Assert
     assert status == "UNASSIGNED"
 
-def test_get_assigned_preacher_and_graphics_support():
+def test_get_assigned_preacher():
     # Arrange
     role = Role.ACOUSTIC
     reference_date = date(2024, 7, 7)
@@ -288,11 +288,10 @@ def test_get_assigned_preacher_and_graphics_support():
     event = Event(date=reference_date, team=[person], preachers=[preacher1, preacher2])
 
     # Act
-    preacher_name, graphics_name = event.get_assigned_preacher_and_graphics_support()
+    preacher = event.get_assigned_preacher()
 
     # Assert
-    assert preacher_name == preacher1.name
-    assert graphics_name == preacher1.graphics_support
+    assert preacher == preacher1
 
 def test_is_assignable_if_needed():
     # Arrange

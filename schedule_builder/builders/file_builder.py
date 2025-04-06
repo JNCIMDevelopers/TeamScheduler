@@ -172,9 +172,9 @@ def get_schedule_data_for_csv(events: List[Event]) -> List[List[str]]:
     preacher_row = ["PREACHER"]
     graphics_row = ["GRAPHICS"]
     for event in events:
-        preacher, graphics_support = event.get_assigned_preacher_and_graphics_support()
-        preacher_row.append(preacher if preacher else "")
-        graphics_row.append(graphics_support if graphics_support else "")
+        preacher = event.get_assigned_preacher()
+        preacher_row.append(preacher.name if preacher and preacher.name else "")
+        graphics_row.append(preacher.graphics_support if preacher and preacher.graphics_support else "")
     data.append(preacher_row)
     data.append(graphics_row)
 
