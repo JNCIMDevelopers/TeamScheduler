@@ -135,21 +135,17 @@ class Event:
         else:
             return "UNASSIGNED"
 
-    def get_assigned_preacher_and_graphics_support(self) -> Tuple[str, str]:
+    def get_assigned_preacher(self) -> Preacher:
         """
-        Returns the assigned preacher and graphics support for the event date.
+        Returns the assigned preacher for the event date.
 
         Returns:
-            Tuple[str, str]: A tuple containing the preacher's name and graphics support, or None if not assigned.
+            Preacher: The assigned preacher, or None if not assigned.
         """
-        return next(
-            (
-                (preacher.name, preacher.graphics_support)
-                for preacher in self.preachers
-                if self.date in preacher.dates
-            ),
-            None,
-        )
+        for preacher in self.preachers:
+            if self.date in preacher.dates:
+                return preacher
+        return None
     
     def is_assignable_if_needed(self, role: Role, person: Person) -> bool:
         """
@@ -176,12 +172,12 @@ class Event:
         Returns:
             str: A string representation of the Event.
         """
-        preacher, graphics_support = self.get_assigned_preacher_and_graphics_support()
+        preacher = self.get_assigned_preacher()
         assigned_roles = self.get_assigned_roles()
         unassigned_roles = self.get_unassigned_roles()
         unassigned_names = self.get_unassigned_names()
 
-        preacher_and_graphics_str = (f"PREACHER: {preacher}\nGRAPHICS: {graphics_support}")
+        preacher_and_graphics_str = (f"PREACHER: {preacher.name}\nGRAPHICS: {preacher.graphics_support}")
         assigned_roles_str = "\n".join(f"{role.value}: {self.roles[role]}" for role in assigned_roles)
         unassigned_roles_str = "\n".join(
             f"{role.value} &rarr; Can be assigned to: {", ".join(

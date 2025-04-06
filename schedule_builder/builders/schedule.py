@@ -69,11 +69,11 @@ class Schedule:
 
             # Initialize event
             event = Event(date=event_date, team=self.team, preachers=self.preachers)
-            preacher, _ = event.get_assigned_preacher_and_graphics_support()
+            preacher = event.get_assigned_preacher()
 
             for role in Role:
                 # Get eligible person
-                eligible_person = self.get_eligible_person(role=role, team=team_copy, date=event_date, preacher_name=preacher)
+                eligible_person = self.get_eligible_person(role=role, team=team_copy, date=event_date, preacher=preacher)
 
                 if eligible_person:
                     # Assign role to person
@@ -87,7 +87,7 @@ class Schedule:
 
         return (self.events, self.team)
 
-    def get_eligible_person(self, role: Role, team: List[Person], date: date, preacher_name: str = None) -> Person:
+    def get_eligible_person(self, role: Role, team: List[Person], date: date, preacher: Preacher = None) -> Person:
         """
         Finds and returns an eligible person for a given role on a specific date.
 
@@ -95,7 +95,7 @@ class Schedule:
             role (Role): The role to be assigned.
             team (List[Person]): List of team members available for assignment.
             date (date): The date of the event.
-            preacher_name (str, optional): Name of the preacher. Defaults to None.
+            preacher (Preacher, optional): The assigned preacher. Defaults to None.
 
         Returns:
             Person: The eligible person for the role, or None if no eligible person is found.
@@ -115,15 +115,15 @@ class Schedule:
             # Special condition: Assign Lulu for Emcee only when Pastor Edmund is preaching
             if (person.name == "Lulu"
                 and role == Role.EMCEE
-                and (not preacher_name or (preacher_name and preacher_name != "Edmund"))):
-                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher_name}")
+                and (not preacher or (preacher and preacher.name != "Edmund"))):
+                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher.name}")
                 continue
 
             # Special condition: Do not assign Gee for worship leading when Kris is preaching
             if (person.name == "Gee"
                 and role == Role.WORSHIPLEADER
-                and preacher_name == "Kris"):
-                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher_name}")
+                and preacher.name == "Kris"):
+                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher.name}")
                 continue
 
             # Eligiblity Criteria
