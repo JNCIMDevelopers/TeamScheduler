@@ -45,7 +45,7 @@ Each role is assigned randomly while considering only from the eligible persons 
 - ELECTRIC GUITAR
 
 ## Special Considerations
-There are cases where no one is available for a role (ex. Worship Leader).
+There are cases where no one is available for a role (ex. Worship Leader)
 - Manual triage is required to shuffle the assignments.
 - This may cause the revised schedule to break at least one of the assignment eligiblity criterias.
 
@@ -77,12 +77,12 @@ Install required packages:
 pip install -r requirements.txt
 ```
 
-## Execution Instructions
 Make sure you have the following files in the root directory:
 - team.json
 - preaching.json
 - rotation.json
 
+## Execution Instructions
 To run the program:
 ```sh
 python main.py
