@@ -1,0 +1,12 @@
+[
+    {
+        "preacher": "Jane",
+        "graphics": "Jack",
+        "dates": ["2025-02-23", "2025-03-02"]
+    },
+    {
+        "preacher": "John",
+        "graphics": "Julie",
+        "dates": ["2025-01-05", "2025-01-19", "2025-02-02"]
+    }
+]

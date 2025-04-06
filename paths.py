@@ -1,0 +1,7 @@
+TEAM_DATA_FILE_PATH = "team.json"
+PREACHING_DATA_FILE_PATH = "preaching.json"
+ROTATION_DATA_FILE_PATH = "rotation.json"
+OUTPUT_FOLDER_PATH = "output"
+LOG_FILE_PATH = f"{OUTPUT_FOLDER_PATH}/app_log.log"
+SCHEDULE_DETAILS_HTML_FILE_PATH = f"{OUTPUT_FOLDER_PATH}/schedule_details.html"
+SCHEDULE_CSV_FILE_PATH = f"{OUTPUT_FOLDER_PATH}/schedule.csv"

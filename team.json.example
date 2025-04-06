@@ -1,0 +1,18 @@
+[
+    {
+        "name": "Jane",
+        "roles": ["WORSHIPLEADER", "EMCEE", "ACOUSTIC", "ACOUSTIC", "KEYS", "DRUMS"],
+        "blockout_dates": ["2025-05-18", "2025-05-25", "2025-06-01", "2025-06-08"],
+        "preaching_dates": [],
+        "teaching_dates": ["2025-01-18"],
+        "on_leave": true
+    },
+    {
+        "name": "John",
+        "roles": ["BASS", "AUDIO", "LIVE", "LYRICS", "SUNDAYSCHOOLTEACHER", "BACKUP", "ELECTRIC"],
+        "blockout_dates": [],
+        "preaching_dates": ["2025-01-26", "2025-03-30", "2025-06-15"],
+        "teaching_dates": [],
+        "on_leave": false
+    }
+]

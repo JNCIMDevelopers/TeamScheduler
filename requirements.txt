@@ -1,0 +1,4 @@
+customtkinter
+pytest
+python-dateutil
+tkcalendar
