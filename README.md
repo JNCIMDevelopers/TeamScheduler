@@ -78,9 +78,9 @@ pip install -r requirements.txt
 ```
 
 Make sure you have the following files in the root directory:
-- team.json
-- preaching.json
-- rotation.json
+- **team.json** - The team member data
+- **preaching.json** - The preaching schedule data
+- **rotation.json** - Worship leader rotation order by name
 
 ## Execution Instructions
 To run the program:
@@ -91,3 +91,8 @@ To run the tests:
 ```sh
 python -m pytest
 ```
+
+## Output
+- **schedule.csv** - The schedule
+- **schedule_details.html** - An overview of the team, roles, and individual Sunday events
+- **app_log.log** - The log file
