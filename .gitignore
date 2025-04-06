@@ -172,3 +172,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Program output
+schedule_details.html
+schedule.csv
+
+# Decrypted team data
+team.json
+preaching.json
+rotation.json
