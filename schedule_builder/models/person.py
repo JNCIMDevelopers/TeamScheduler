@@ -60,6 +60,7 @@ class Person:
         # Time windows
         self.worship_leader_role_time_window = timedelta(weeks=4)
         self.sunday_school_teacher_role_time_window = timedelta(weeks=4)
+        self.emcee_role_time_window = timedelta(weeks=2)
         self.preaching_time_window = timedelta(weeks=1)
 
         # Limit for consecutive assigned event dates
@@ -118,6 +119,11 @@ class Person:
             return (
                 self.last_assigned_dates[role] is None
                 or date - self.last_assigned_dates[role] > self.sunday_school_teacher_role_time_window
+            )
+        elif role == Role.EMCEE:
+            return (
+                self.last_assigned_dates[role] is None
+                or date - self.last_assigned_dates[role] > self.emcee_role_time_window
             )
         return True
 
