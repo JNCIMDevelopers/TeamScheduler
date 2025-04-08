@@ -26,7 +26,9 @@ Each role is assigned randomly while considering only from the eligible persons 
     - They are preaching within the next 2 Sundays
     - They were assigned to that role within the last 4 weeks
     - They are teaching the youth the same week
-- A person can't be assigned to a Sunday School Teacher role for 2 consecutive weeks to allow for rotation among team
+- To allow for better rotation among the team, a person can't be assigned a certain role if they've been assigned to it recently:
+    - Sunday School Teacher - within the last 4 weeks
+    - Emcee - within the last 2 weeks
 
 **NOTE:** There could be additional custom conditions.
 

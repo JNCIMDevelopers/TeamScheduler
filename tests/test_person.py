@@ -101,7 +101,7 @@ def test_was_not_assigned_too_recently_to_role():
     reference_date = date(2024, 7, 7)
     role = Role.ACOUSTIC
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[Role.WORSHIPLEADER, role, Role.LYRICS],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
@@ -118,7 +118,7 @@ def test_was_not_assigned_too_recently_to_role_with_no_assignments():
     reference_date = date(2024, 6, 30)
     role = Role.WORSHIPLEADER
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[role, Role.ACOUSTIC, Role.LYRICS],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
@@ -135,7 +135,7 @@ def test_was_not_assigned_too_recently_to_role_worship_leader_4_weeks_ago():
     reference_date = date(2025, 4, 5)
     role = Role.WORSHIPLEADER
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[role],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
@@ -153,7 +153,7 @@ def test_was_not_assigned_too_recently_to_role_worship_leader_over_4_weeks_ago()
     reference_date = date(2025, 4, 5)
     role = Role.WORSHIPLEADER
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[role],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
@@ -171,7 +171,7 @@ def test_was_not_assigned_too_recently_to_role_sunday_school_teacher_4_weeks_ago
     reference_date = date(2024, 7, 28)
     role = Role.SUNDAYSCHOOLTEACHER
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[role],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
@@ -189,7 +189,43 @@ def test_was_not_assigned_too_recently_to_role_sunday_school_teacher_over_4_week
     reference_date = date(2024, 8, 4)
     role = Role.SUNDAYSCHOOLTEACHER
     person = Person(name='TestName',
-                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    on_leave=False)
+    
+    # Act
+    person.assign_event(date=last_assigned_date, role=role)
+    not_assigned_recently = person.was_not_assigned_too_recently_to_role(role=role, date=reference_date)
+
+    # Assert
+    assert not_assigned_recently == True
+
+def test_was_not_assigned_too_recently_to_role_emcee_2_weeks_ago():
+    # Arrange
+    last_assigned_date = date(2025, 3, 23)
+    reference_date = date(2025, 4, 6)
+    role = Role.EMCEE
+    person = Person(name='TestName',
+                    roles=[role],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    on_leave=False)
+    
+    # Act
+    person.assign_event(date=last_assigned_date, role=role)
+    not_assigned_recently = person.was_not_assigned_too_recently_to_role(role=role, date=reference_date)
+
+    # Assert
+    assert not_assigned_recently == False
+
+def test_was_not_assigned_too_recently_to_role_emcee_over_2_weeks_ago():
+    # Arrange
+    last_assigned_date = date(2025, 3, 16)
+    reference_date = date(2025, 4, 6)
+    role = Role.EMCEE
+    person = Person(name='TestName',
+                    roles=[role],
                     blockout_dates=[],
                     preaching_dates=[],
                     on_leave=False)
