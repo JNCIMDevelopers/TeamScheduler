@@ -20,6 +20,13 @@ class Person:
         assigned_dates (List[date]): The dates when the person has been assigned to an event.
         last_assigned_dates (dict): A dictionary mapping each role to the last date the person was assigned to that role.
 
+    Class-Level Constants:
+        WORSHIP_LEADER_ROLE_TIME_WINDOW (timedelta): Time window for assigning a worship leader role (default: 4 weeks).
+        SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW (timedelta): Time window for assigning a Sunday school teacher role (default: 4 weeks).
+        EMCEE_ROLE_TIME_WINDOW (timedelta): Time window for assigning an emcee role (default: 2 weeks).
+        PREACHING_TIME_WINDOW (timedelta): Time window for assigning a preaching role (default: 1 week).
+        CONSECUTIVE_ASSIGNMENTS_LIMIT (int): Limit for consecutive assigned event dates (default: 3).
+
     Methods:
         assign_event(date): Assigns the person to an event on the given date.
         get_next_preaching_date(reference_date): Returns the next preaching date after the given reference date.
@@ -27,6 +34,11 @@ class Person:
         is_unavailable_due_to_preaching(reference_date): Checks if the person is unavailable due to an upcoming preaching date.
         assigned_too_many_times_recently(reference_date): Checks if the person has been assigned too many times recently.
     """
+    WORSHIP_LEADER_ROLE_TIME_WINDOW = timedelta(weeks=4)
+    SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW = timedelta(weeks=4)
+    EMCEE_ROLE_TIME_WINDOW = timedelta(weeks=2)
+    PREACHING_TIME_WINDOW = timedelta(weeks=1)
+    CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
 
     def __init__(
         self,
@@ -56,15 +68,6 @@ class Person:
         self.on_leave = on_leave
         self.assigned_dates: List[date] = []
         self.last_assigned_dates = {role: None for role in roles}
-
-        # Time windows
-        self.worship_leader_role_time_window = timedelta(weeks=4)
-        self.sunday_school_teacher_role_time_window = timedelta(weeks=4)
-        self.emcee_role_time_window = timedelta(weeks=2)
-        self.preaching_time_window = timedelta(weeks=1)
-
-        # Limit for consecutive assigned event dates
-        self.consecutive_assignments_limit = 3
 
     def assign_event(self, date: date, role: Role) -> None:
         """
@@ -113,17 +116,17 @@ class Person:
         if role == Role.WORSHIPLEADER:
             return (
                 self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > self.worship_leader_role_time_window
+                or date - self.last_assigned_dates[role] > Person.WORSHIP_LEADER_ROLE_TIME_WINDOW
             )
         elif role == Role.SUNDAYSCHOOLTEACHER:
             return (
                 self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > self.sunday_school_teacher_role_time_window
+                or date - self.last_assigned_dates[role] > Person.SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW
             )
         elif role == Role.EMCEE:
             return (
                 self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > self.emcee_role_time_window
+                or date - self.last_assigned_dates[role] > Person.EMCEE_ROLE_TIME_WINDOW
             )
         return True
 
@@ -142,7 +145,7 @@ class Person:
 
         # Unavailable if date is too close to next preaching date based on time window
         next_date = self.get_next_preaching_date(reference_date)
-        if next_date and next_date - reference_date <= self.preaching_time_window:
+        if next_date and next_date - reference_date <= Person.PREACHING_TIME_WINDOW:
             return True
 
         return False
@@ -161,11 +164,11 @@ class Person:
             return False
 
         # Check if total assigned/preaching dates is less than the limit
-        if (len(self.assigned_dates or []) + len(self.preaching_dates or []) < self.consecutive_assignments_limit):
+        if (len(self.assigned_dates or []) + len(self.preaching_dates or []) < Person.CONSECUTIVE_ASSIGNMENTS_LIMIT):
             return False
 
         # Calculate the past date outside of the consecutive assignment limit
-        past_reference_date = reference_date - timedelta(weeks=self.consecutive_assignments_limit)
+        past_reference_date = reference_date - timedelta(weeks=Person.CONSECUTIVE_ASSIGNMENTS_LIMIT)
 
         # Count dates assigned within past time window
         all_dates = set(self.assigned_dates + self.preaching_dates)
@@ -173,7 +176,7 @@ class Person:
             1 for date in all_dates if past_reference_date <= date <= reference_date
         )
 
-        return dates_between_count >= self.consecutive_assignments_limit
+        return dates_between_count >= Person.CONSECUTIVE_ASSIGNMENTS_LIMIT
 
     def __str__(self) -> str:
         """
