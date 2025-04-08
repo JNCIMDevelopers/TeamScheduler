@@ -17,7 +17,6 @@ class Role(StrEnum):
         LYRICS (str): Lyrics projection role.
         SUNDAYSCHOOLTEACHER (str): Sunday school teacher role.
         BACKUP (str): Backup singer role.
-        ELECTRIC (str): Electric guitar role.
 
     Note: The roles are listed in descending order of priority.
     """
@@ -32,7 +31,6 @@ class Role(StrEnum):
     LYRICS = "LYRICS"
     SUNDAYSCHOOLTEACHER = "SUNDAY SCHOOL TEACHER"
     BACKUP = "BACKUP"
-    ELECTRIC = "ELECTRIC GUITAR"
 
     @staticmethod
     def get_schedule_order():
@@ -54,7 +52,6 @@ class Role(StrEnum):
             Role.AUDIO, 
             Role.LIVE, 
             Role.LYRICS, 
-            Role.BACKUP, 
-            Role.ELECTRIC, 
+            Role.BACKUP,
             Role.SUNDAYSCHOOLTEACHER
         ]

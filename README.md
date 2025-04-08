@@ -44,7 +44,6 @@ Each role is assigned randomly while considering only from the eligible persons 
 - LYRICS
 - SUNDAY SCHOOL TEACHER
 - BACKUP
-- ELECTRIC GUITAR
 
 ## Special Considerations
 There are cases where no one is available for a role (ex. Worship Leader)

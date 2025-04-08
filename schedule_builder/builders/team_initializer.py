@@ -54,7 +54,6 @@ class TeamInitializer:
         Returns:
             List[Person]: A list of initialized Person objects.
         """
-        # Generate team data file
         with open(resource_path(TEAM_DATA_FILE_PATH), "r") as f:
             persons_data = json.load(f)
 
@@ -92,7 +91,6 @@ class TeamInitializer:
         Returns:
             List[Preacher]: A list of initialized Preacher objects.
         """
-        # Generate preaching data file
         with open(resource_path(PREACHING_DATA_FILE_PATH), "r") as f:
             preaching_data = json.load(f)
 
@@ -117,7 +115,6 @@ class TeamInitializer:
         Returns:
             List[str]: A list of names.
         """
-        # Generate preaching data file
         with open(resource_path(ROTATION_DATA_FILE_PATH), "r") as f:
             names = json.load(f)
 
@@ -127,9 +124,9 @@ class TeamInitializer:
 
     def initialize_team(self):
         """
-        Initializes and returns both persons and preachers.
+        Initializes and returns person, preachers, and rotation.
 
         Returns:
-            tuple: A tuple containing a list of Person objects and a list of Preacher objects.
+            tuple: A tuple containing a list of Person objects, Preacher objects and rotation names.
         """
         return (self.initialize_persons(), self.initialize_preachers(), self.initialize_rotation())
