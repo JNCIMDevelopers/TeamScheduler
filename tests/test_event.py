@@ -140,7 +140,53 @@ def test_get_unassigned_names():
     assert len(unassigned_names) == 1
     assert person2.name in unassigned_names
 
-def test_get_person_status_on_date_onleave():
+def test_get_person_by_name():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 7, 7)
+    person1 = Person(name='TestOne',
+                     roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                     blockout_dates=[],
+                     preaching_dates=[],
+                     on_leave=False)
+    person2 = Person(name='TestTwo',
+                     roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                     blockout_dates=[],
+                     preaching_dates=[],
+                     on_leave=False)
+    
+    event = Event(date=reference_date, team=[person1, person2])
+
+    # Act
+    person = event.get_person_by_name(name=person2.name)
+
+    # Assert
+    assert person == person2
+
+def test_get_person_by_name_with_invalid_name():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 7, 7)
+    person1 = Person(name='TestOne',
+                     roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                     blockout_dates=[],
+                     preaching_dates=[],
+                     on_leave=False)
+    person2 = Person(name='TestTwo',
+                     roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                     blockout_dates=[],
+                     preaching_dates=[],
+                     on_leave=False)
+    
+    event = Event(date=reference_date, team=[person1, person2])
+
+    # Act
+    person = event.get_person_by_name(name="UnknownName")
+
+    # Assert
+    assert person == None
+
+def test_get_person_status_on_date_when_on_leave():
     # Arrange
     reference_date = date(2024, 7, 21)
     person = Person(name='AssignedName',
@@ -158,7 +204,25 @@ def test_get_person_status_on_date_onleave():
     # Assert
     assert status == "ON-LEAVE"
 
-def test_get_person_status_on_date_assigned():
+def test_get_person_status_on_date_when_blockout():
+    # Arrange
+    reference_date = date(2024, 7, 21)
+    person = Person(name='AssignedName',
+                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    blockout_dates=[reference_date],
+                    preaching_dates=[reference_date],
+                    on_leave=False)
+    
+    person.assigned_dates = [date(2024, 6, 30), date(2024, 7, 7), date(2024, 7, 14)]
+    event = Event(date=reference_date, team=[person])
+
+    # Act
+    status = event.get_person_status_on_date(person=person, date=reference_date)
+
+    # Assert
+    assert status == "BLOCKOUT"
+
+def test_get_person_status_on_date_when_assigned():
     # Arrange
     reference_date = date(2024, 7, 21)
     person = Person(name='AssignedName',
@@ -176,7 +240,7 @@ def test_get_person_status_on_date_assigned():
     # Assert
     assert status == "ASSIGNED"
 
-def test_get_person_status_on_date_preaching():
+def test_get_person_status_on_date_when_preaching():
     # Arrange
     reference_date = date(2024, 7, 21)
     person = Person(name='AssignedName',
@@ -194,7 +258,7 @@ def test_get_person_status_on_date_preaching():
     # Assert
     assert status == "PREACHING"
 
-def test_get_person_status_on_date_break():
+def test_get_person_status_on_date__when_on_break():
     # Arrange
     reference_date = date(2024, 7, 21)
     person = Person(name='AssignedName',
@@ -250,7 +314,7 @@ def test_get_person_status_on_date_teaching_without_worship_leader_role():
     # Assert
     assert status == "UNASSIGNED"
 
-def test_get_person_status_on_date_unassigned():
+def test_get_person_status_on_date_when_unassigned():
     # Arrange
     reference_date = date(2024, 7, 21)
     person = Person(name='AssignedName',
@@ -271,7 +335,6 @@ def test_get_person_status_on_date_unassigned():
 
 def test_get_assigned_preacher():
     # Arrange
-    role = Role.ACOUSTIC
     reference_date = date(2024, 7, 7)
     person = Person(name='TestName',
                     roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
@@ -292,6 +355,29 @@ def test_get_assigned_preacher():
 
     # Assert
     assert preacher == preacher1
+
+def test_get_assigned_preacher_when_no_preacher():
+    # Arrange
+    reference_date = date(2024, 7, 7)
+    person = Person(name='TestName',
+                    roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+                    blockout_dates=[],
+                    preaching_dates=[],
+                    on_leave=False)
+    preacher1 = Preacher(name='TestPreacher1',
+                         graphics_support='TestGraphics1',
+                         dates=[date(2024, 7, 14)])
+    preacher2 = Preacher(name='TestPreacher2',
+                         graphics_support='TestGraphics2',
+                         dates=[date(2024, 7, 21)])
+    
+    event = Event(date=reference_date, team=[person], preachers=[preacher1, preacher2])
+
+    # Act
+    preacher = event.get_assigned_preacher()
+
+    # Assert
+    assert preacher == None
 
 def test_is_assignable_if_needed():
     # Arrange
