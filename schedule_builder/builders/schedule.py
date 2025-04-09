@@ -65,7 +65,7 @@ class Schedule:
             team_copy = copy.copy(self.team)
             if team_copy is None:
                 logging.warning("Team is empty for schedule.")
-                return []
+                return ([], [])
 
             # Initialize event
             event = Event(date=event_date, team=self.team, preachers=self.preachers)
