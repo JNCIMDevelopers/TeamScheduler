@@ -14,6 +14,7 @@ from ..eligibility.rules import (
     PreachingDateRule,
     RoleTimeWindowRule,
     ConsecutiveAssignmentLimitRule,
+    ConsecutiveRoleAssignmentLimitRule,
     WorshipLeaderTeachingRule,
     WorshipLeaderPreachingConflictRule,
     LuluEmceeRule,
@@ -75,6 +76,10 @@ class Schedule:
                 PreachingDateRule(),
                 RoleTimeWindowRule(),
                 ConsecutiveAssignmentLimitRule(),
+                ConsecutiveRoleAssignmentLimitRule(
+                    assignment_limit=self.default_role_assignment_limit,
+                    time_window=timedelta(weeks=self.default_role_assignment_limit)
+                ),
                 WorshipLeaderTeachingRule(),
                 WorshipLeaderPreachingConflictRule()
             ]
@@ -154,25 +159,6 @@ class Schedule:
         logging.warning(f"No eligible person for {role} on {date}")
 
         return None
-
-    def was_assigned_role_consecutively_too_many_times(self, name: str, role: Role, date: date) -> bool:
-        """
-        Checks if a person was assigned a specific role too many times consecutively within a limit.
-
-        Args:
-            name (str): Name of the person.
-            role (Role): The role to check.
-            date (date): The reference date.
-
-        Returns:
-            bool: True if the person was assigned the role too many times consecutively, False otherwise.
-        """
-        past_assigned_names = [
-            event.roles[role]
-            for event in self.events
-            if date - event.date <= timedelta(weeks=self.default_role_assignment_limit)
-        ]
-        return past_assigned_names.count(name) >= self.default_role_assignment_limit
     
     def get_next_worship_leader(self, eligible_persons: List[Person]) -> Person:
         """

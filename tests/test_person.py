@@ -31,6 +31,8 @@ def test_assign_event():
     assert date_two in person.assigned_dates
     assert person.last_assigned_dates[role_one] == date_one
     assert person.last_assigned_dates[role_two] == date_two
+    assert date_one in person.role_assigned_dates[role_one]
+    assert date_two in person.role_assigned_dates[role_two]
 
 
 @pytest.mark.parametrize('p_dates', [None, []])

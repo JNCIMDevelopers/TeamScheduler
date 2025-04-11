@@ -1,5 +1,5 @@
 # Standard Library Imports
-from datetime import date
+from datetime import date, timedelta
 
 # Local Imports
 from .eligibility_rule import EligibilityRule
@@ -31,6 +31,21 @@ class RoleTimeWindowRule(EligibilityRule):
 class ConsecutiveAssignmentLimitRule(EligibilityRule):
     def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:
         return not person.assigned_too_many_times_recently(reference_date=event_date)
+
+class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
+    def __init__(self, assignment_limit: int, time_window: timedelta):
+        self.assignment_limit = assignment_limit
+        self.time_window = time_window
+
+    def is_eligible(self, person: Person, role: Role, event_date: date, preacher=None) -> bool:
+        # Get all assigned dates for the person within the time window
+        past_assigned_dates = [
+            assigned_date
+            for assigned_date in person.role_assigned_dates[role]
+            if event_date - assigned_date <= self.time_window
+        ]
+
+        return len(past_assigned_dates) < self.assignment_limit
 
 class WorshipLeaderTeachingRule(EligibilityRule):
     def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:

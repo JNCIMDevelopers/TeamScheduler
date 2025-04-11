@@ -68,6 +68,7 @@ class Person:
         self.on_leave = on_leave
         self.assigned_dates: List[date] = []
         self.last_assigned_dates = {role: None for role in roles}
+        self.role_assigned_dates = {role: [] for role in roles}
 
     def assign_event(self, date: date, role: Role) -> None:
         """
@@ -78,6 +79,7 @@ class Person:
         """
         self.assigned_dates.append(date)
         self.last_assigned_dates[role] = date
+        self.role_assigned_dates[role].append(date)
 
     def get_next_preaching_date(self, reference_date: date) -> date:
         """
