@@ -6,9 +6,22 @@ import random
 from typing import Tuple, List
 
 # Local Imports
+from ..eligibility.eligibility_checker import EligibilityChecker
+from ..eligibility.rules import (
+    RoleCapabilityRule,
+    OnLeaveRule,
+    BlockoutDateRule,
+    PreachingDateRule,
+    RoleTimeWindowRule,
+    ConsecutiveAssignmentLimitRule,
+    WorshipLeaderTeachingRule,
+    WorshipLeaderPreachingConflictRule,
+    LuluEmceeRule,
+    GeeWorshipLeaderRule,
+)
+from ..models.event import Event
 from ..models.person import Person
 from ..models.preacher import Preacher
-from ..models.event import Event
 from ..models.role import Role
 
 
@@ -49,6 +62,23 @@ class Schedule:
 
         self.worship_leader_name_rotation = rotation
         self.worship_leader_index = 0
+
+        # Initialize the EligibilityChecker with all rules
+        # The order of rules determine the sequence they are evaluated
+        self.eligibility_checker = EligibilityChecker(
+            rules=[
+                RoleCapabilityRule(),
+                LuluEmceeRule(),
+                GeeWorshipLeaderRule(),
+                OnLeaveRule(),
+                BlockoutDateRule(),
+                PreachingDateRule(),
+                RoleTimeWindowRule(),
+                ConsecutiveAssignmentLimitRule(),
+                WorshipLeaderTeachingRule(),
+                WorshipLeaderPreachingConflictRule()
+            ]
+        )
 
     def build(self) -> Tuple[List[Event], List[Person]]:
         """
@@ -104,69 +134,17 @@ class Schedule:
             logging.warning("Team is empty when getting eligible person.")
             return None
 
-        # Get eligible persons from the team
-        eligible_persons = []
-        for person in team:
-            # If person is not capable of role, skip person
-            if role not in person.roles:
-                logging.debug(f"{person.name} is not capable of {role}")
-                continue
-
-            # Special condition 1: Assign Lulu for Emcee only when Pastor Edmund is preaching
-            if (person.name == "Lulu"
-                and role == Role.EMCEE
-                and (not preacher or (preacher and preacher.name != "Edmund"))):
-                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher.name}")
-                continue
-
-            # Special condition 2: Do not assign Gee for worship leading when Kris is preaching
-            if (person.name == "Gee"
-                and role == Role.WORSHIPLEADER
-                and preacher.name == "Kris"):
-                logging.debug(f"Skipped {person.name} for {role} due to assigned preacher {preacher.name}")
-                continue
-
-            # Eligiblity Criteria
-            isOnLeave = person.on_leave
-            isBlockedout = date in person.blockout_dates
-            isPreaching = date in person.preaching_dates
-            isAssignedTooManyTimesRecently = person.assigned_too_many_times_recently(reference_date=date)
-            wasNotAssignedRoleTooRecently = person.was_not_assigned_too_recently_to_role(role=role, date=date)
-            wasAssignedRoleConsecutivelyTooManyTimes = self.was_assigned_role_consecutively_too_many_times(name=person.name, role=role, date=date)
-
-            # Eligiblity Criteria for Worship Leader Role
-            isWorshipLeaderRole = role == Role.WORSHIPLEADER
-            isTeaching = date in person.teaching_dates if isWorshipLeaderRole else False
-            isUnavailableToWorshipLeadDueToPreaching = person.is_unavailable_due_to_preaching(reference_date=date) if isWorshipLeaderRole else False
-
-            logging.debug(f"""Person: {person.name}
-                          Role: {str(role)}
-                          isOnLeave: {isOnLeave}
-                          isBlockedout: {isBlockedout}
-                          isPreaching: {isPreaching}
-                          isAssignedTooManyTimesRecently: {isAssignedTooManyTimesRecently}
-                          wasNotAssignedRoleTooRecently: {wasNotAssignedRoleTooRecently}
-                          wasAssignedRoleConsecutivelyTooManyTimes: {wasAssignedRoleConsecutivelyTooManyTimes}
-                          isWorshipLeaderRole: {isWorshipLeaderRole}
-                          isTeaching: {isTeaching}
-                          isUnavailableToWorshipLeadDueToPreaching: {isUnavailableToWorshipLeadDueToPreaching}""")
-
-            if (not isOnLeave
-                and not isBlockedout
-                and not isPreaching
-                and not isAssignedTooManyTimesRecently
-                and wasNotAssignedRoleTooRecently
-                and not wasAssignedRoleConsecutivelyTooManyTimes
-                and (not isWorshipLeaderRole 
-                     or (not isTeaching and not isUnavailableToWorshipLeadDueToPreaching)
-                )):
-                eligible_persons.append(person)
+        # Get eligible persons from the team using the EligibilityChecker
+        eligible_persons = [
+            person for person in team
+            if self.eligibility_checker.is_eligible(person, role, date, preacher)
+        ]
 
         # Return random eligible team member
         if eligible_persons:
             logging.info(f"Eligible Persons for {role} on {date}: {[p.name for p in eligible_persons]}")
 
-            if (role == Role.WORSHIPLEADER):
+            if role == Role.WORSHIPLEADER:
                 next_worship_leader = self.get_next_worship_leader(eligible_persons=eligible_persons)
                 if next_worship_leader:
                     return next_worship_leader
