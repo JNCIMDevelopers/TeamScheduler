@@ -88,11 +88,8 @@ class Event:
         Returns:
             List[str]: A list of unassigned person names.
         """
-        unassigned_persons = [person.name for person in self.team]
-        for role, assigned_person in self.roles.items():
-            if assigned_person:
-                unassigned_persons.remove(assigned_person)
-        return unassigned_persons
+        assigned_names = {assigned_name for assigned_name in self.roles.values()}
+        return [person.name for person in self.team if person.name not in assigned_names]
 
     def get_person_by_name(self, name: str) -> Person:
         """
