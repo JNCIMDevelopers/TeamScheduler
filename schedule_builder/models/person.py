@@ -94,15 +94,8 @@ class Person:
         if not self.preaching_dates:
             return None
 
-        future_dates = [
-            preaching_date
-            for preaching_date in self.preaching_dates
-            if preaching_date >= reference_date
-        ]
-        if not future_dates:
-            return None
-
-        return min(future_dates, key=lambda x: abs(x - reference_date))
+        future_dates = [d for d in self.preaching_dates if d >= reference_date]
+        return min(future_dates, default=None)
 
     def was_not_assigned_too_recently_to_role(self, role: Role, date: date) -> bool:
         """
