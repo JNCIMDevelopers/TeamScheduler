@@ -115,22 +115,21 @@ class Person:
         Returns:
             bool: True if the person was not assigned to the role too recently, False otherwise.
         """
+        time_window = None
+        
         if role == Role.WORSHIPLEADER:
-            return (
-                self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > Person.WORSHIP_LEADER_ROLE_TIME_WINDOW
-            )
+            time_window = Person.WORSHIP_LEADER_ROLE_TIME_WINDOW
         elif role == Role.SUNDAYSCHOOLTEACHER:
-            return (
-                self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > Person.SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW
-            )
+            time_window = Person.SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW
         elif role == Role.EMCEE:
-            return (
-                self.last_assigned_dates[role] is None
-                or date - self.last_assigned_dates[role] > Person.EMCEE_ROLE_TIME_WINDOW
-            )
-        return True
+            time_window = Person.EMCEE_ROLE_TIME_WINDOW
+        else:
+            return True
+
+        return (
+            self.last_assigned_dates[role] is None
+            or date - self.last_assigned_dates[role] > time_window
+        )
 
     def is_unavailable_due_to_preaching(self, reference_date: date) -> bool:
         """
