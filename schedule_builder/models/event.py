@@ -142,10 +142,7 @@ class Event:
         Returns:
             Preacher: The assigned preacher, or None if not assigned.
         """
-        for preacher in self.preachers:
-            if self.date in preacher.dates:
-                return preacher
-        return None
+        return next((preacher for preacher in self.preachers if self.date in preacher.dates), None)
     
     def is_assignable_if_needed(self, role: Role, person: Person) -> bool:
         """
