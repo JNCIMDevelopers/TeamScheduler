@@ -104,10 +104,7 @@ class Event:
         Returns:
             Person: The person object, or None if not found.
         """
-        for idx, person in enumerate(self.team):
-            if person.name == name:
-                return person
-        return None
+        return next((person for person in self.team if person.name == name), None)
 
     def get_person_status_on_date(self, person: Person, date: date) -> str:
         """
