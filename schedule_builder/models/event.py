@@ -54,14 +54,14 @@ class Event:
         Raises:
             ValueError: If the role is already assigned or not valid.
         """
-        if role in Role:
-            if self.roles[role] is None:
-                self.roles[role] = person.name
-                person.assign_event(date=self.date, role=role)
-            else:
-                raise ValueError(f"{role.name} already has a person assigned.")
-        else:
+        if role not in Role:
             raise ValueError(f"{role} is not a valid role.")
+
+        if self.roles[role] is not None:
+            raise ValueError(f"{role.name} already has a person assigned.")
+
+        self.roles[role] = person.name
+        person.assign_event(date=self.date, role=role)
 
     def get_assigned_roles(self) -> List[Role]:
         """
