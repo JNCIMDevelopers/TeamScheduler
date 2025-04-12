@@ -161,23 +161,17 @@ class Person:
         Returns:
             bool: True if the person has been assigned too many times recently, False otherwise.
         """
-        if not self.assigned_dates and not self.preaching_dates:
-            return False
+        # Calculate the start date of the time window
+        time_window = timedelta(weeks=Person.CONSECUTIVE_ASSIGNMENTS_LIMIT)
+        past_reference_date = reference_date - time_window
 
-        # Check if total assigned/preaching dates is less than the limit
-        if (len(self.assigned_dates or []) + len(self.preaching_dates or []) < Person.CONSECUTIVE_ASSIGNMENTS_LIMIT):
-            return False
+        # Get all assigned dates within time window
+        all_dates = self.assigned_dates + self.preaching_dates
+        dates_within_time_window = [
+            date for date in all_dates if past_reference_date <= date <= reference_date
+        ]
 
-        # Calculate the past date outside of the consecutive assignment limit
-        past_reference_date = reference_date - timedelta(weeks=Person.CONSECUTIVE_ASSIGNMENTS_LIMIT)
-
-        # Count dates assigned within past time window
-        all_dates = set(self.assigned_dates + self.preaching_dates)
-        dates_between_count = sum(
-            1 for date in all_dates if past_reference_date <= date <= reference_date
-        )
-
-        return dates_between_count >= Person.CONSECUTIVE_ASSIGNMENTS_LIMIT
+        return len(dates_within_time_window) >= Person.CONSECUTIVE_ASSIGNMENTS_LIMIT
 
     def __str__(self) -> str:
         """
