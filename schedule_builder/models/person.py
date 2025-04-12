@@ -141,15 +141,8 @@ class Person:
         Returns:
             bool: True if the person is unavailable due to preaching, False otherwise.
         """
-        if not self.preaching_dates:
-            return False
-
-        # Unavailable if date is too close to next preaching date based on time window
         next_date = self.get_next_preaching_date(reference_date)
-        if next_date and next_date - reference_date <= Person.PREACHING_TIME_WINDOW:
-            return True
-
-        return False
+        return bool(next_date and next_date - reference_date <= Person.PREACHING_TIME_WINDOW)
 
     def assigned_too_many_times_recently(self, reference_date: date) -> bool:
         """
