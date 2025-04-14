@@ -20,6 +20,7 @@ from ..eligibility.rules import (
     LuluEmceeRule,
     GeeWorshipLeaderRule,
 )
+from ..helpers.worship_leader_selector import WorshipLeaderSelector
 from ..models.event import Event
 from ..models.person import Person
 from ..models.preacher import Preacher
@@ -63,6 +64,8 @@ class Schedule:
 
         self.worship_leader_name_rotation = rotation
         self.worship_leader_index = 0
+
+        self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
 
         # Initialize the EligibilityChecker with all rules
         # The order of rules determine the sequence they are evaluated
@@ -149,50 +152,13 @@ class Schedule:
         if eligible_persons:
             logging.info(f"Eligible Persons for {role} on {date}: {[p.name for p in eligible_persons]}")
 
+            # If the role is WORSHIPLEADER, get the next worship leader from the rotation
             if role == Role.WORSHIPLEADER:
-                next_worship_leader = self.get_next_worship_leader(eligible_persons=eligible_persons)
+                next_worship_leader = self.worship_leader_selector.get_next(eligible_persons=eligible_persons)
                 if next_worship_leader:
                     return next_worship_leader
 
             return random.choice(eligible_persons)
 
         logging.warning(f"No eligible person for {role} on {date}")
-
-        return None
-    
-    def get_next_worship_leader(self, eligible_persons: List[Person]) -> Person:
-        """
-        Finds and returns the next eligible worship leader from the rotation list.
-
-        The method iterates through the list of worship leaders in a round-robin fashion,
-        starting from the current index. It returns the first eligible worship leader found
-        in the `eligible_persons` list. The index is updated only if a valid worship leader
-        is returned, ensuring the next call starts from the correct position in the rotation.
-
-        Args:
-            eligible_persons (List[Person]): A list of persons who are eligible for the role of worship leader.
-
-        Returns:
-            Person: The next eligible worship leader based on the rotation, or None if no eligible person is found.
-        """
-        if not eligible_persons or not self.worship_leader_name_rotation:
-            return None
-
-        # Start checking from the current index
-        next_index = self.worship_leader_index
-        
-        # Iterate through the list to find the next eligible worship leader
-        for _ in range(len(self.worship_leader_name_rotation)):
-            worship_leader_name = self.worship_leader_name_rotation[next_index]
-            worship_leader = next((p for p in eligible_persons if p.name == worship_leader_name), None)
-            
-            if worship_leader:
-                # Update the index only if a valid worship leader is found
-                self.worship_leader_index = (next_index + 1) % len(self.worship_leader_name_rotation)
-                return worship_leader
-
-            # Move to the next index in the rotation
-            next_index = (next_index + 1) % len(self.worship_leader_name_rotation)
-
-        # If no eligible worship leader is found, return None
         return None
