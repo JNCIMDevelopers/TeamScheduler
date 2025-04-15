@@ -3,6 +3,7 @@ from datetime import date
 from typing import List, Tuple
 
 # Local Imports
+from ..eligibility.rules import ConsecutiveAssignmentLimitRule
 from ..models.person import Person
 from ..models.preacher import Preacher
 from ..models.role import Role
@@ -122,7 +123,7 @@ class Event:
             return "ASSIGNED"
         elif date in person.preaching_dates:
             return "PREACHING"
-        elif person.assigned_too_many_times_recently(reference_date=date):
+        elif not ConsecutiveAssignmentLimitRule().is_eligible(person=person, role=None, event_date=date):
             return "BREAK"
         elif Role.WORSHIPLEADER in person.roles and date in person.teaching_dates:
             return "TEACHING"

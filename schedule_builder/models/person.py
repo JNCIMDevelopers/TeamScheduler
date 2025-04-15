@@ -27,9 +27,7 @@ class Person:
     Methods:
         assign_event(date): Assigns the person to an event on the given date.
         get_next_preaching_date(reference_date): Returns the next preaching date after the given reference date.
-        was_not_assigned_too_recently_to_role(role, date): Checks if the person was not assigned to a role too recently.
         is_unavailable_due_to_preaching(reference_date): Checks if the person is unavailable due to an upcoming preaching date.
-        assigned_too_many_times_recently(reference_date): Checks if the person has been assigned too many times recently.
     """
     PREACHING_TIME_WINDOW = timedelta(weeks=1)
     CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
@@ -103,28 +101,6 @@ class Person:
         """
         next_date = self.get_next_preaching_date(reference_date)
         return bool(next_date and next_date - reference_date <= Person.PREACHING_TIME_WINDOW)
-
-    def assigned_too_many_times_recently(self, reference_date: date) -> bool:
-        """
-        Checks if the person has been assigned too many times recently.
-
-        Args:
-            reference_date (date): The reference date to check.
-
-        Returns:
-            bool: True if the person has been assigned too many times recently, False otherwise.
-        """
-        # Calculate the start date of the time window
-        time_window = timedelta(weeks=Person.CONSECUTIVE_ASSIGNMENTS_LIMIT)
-        past_reference_date = reference_date - time_window
-
-        # Get all assigned dates within time window
-        all_dates = self.assigned_dates + self.preaching_dates
-        dates_within_time_window = [
-            date for date in all_dates if past_reference_date <= date <= reference_date
-        ]
-
-        return len(dates_within_time_window) >= Person.CONSECUTIVE_ASSIGNMENTS_LIMIT
 
     def __str__(self) -> str:
         """
