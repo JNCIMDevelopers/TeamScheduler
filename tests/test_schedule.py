@@ -523,7 +523,7 @@ def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
     )
 
     # Assert
-    assert eligible_person == None
+    assert eligible_person is None
 
 
 def test_get_eligible_person_for_special_condition_2_pastor_preaching():
@@ -552,7 +552,7 @@ def test_get_eligible_person_for_special_condition_2_pastor_preaching():
     )
 
     # Assert
-    assert eligible_person == None
+    assert eligible_person is None
 
 
 def test_get_eligible_person_for_special_condition_2_other_role():

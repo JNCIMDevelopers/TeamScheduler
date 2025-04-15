@@ -67,7 +67,7 @@ def test_get_next_worship_leader_when_rotation_does_not_match_any_persons(team):
     worship_leader = selector.get_next(eligible_persons=team)
 
     # Assert
-    assert worship_leader == None
+    assert worship_leader is None
 
 
 def test_get_next_worship_leader_when_team_is_empty():
@@ -80,7 +80,7 @@ def test_get_next_worship_leader_when_team_is_empty():
     worship_leader = selector.get_next(eligible_persons=team)
 
     # Assert
-    assert worship_leader == None
+    assert worship_leader is None
 
 
 def test_get_next_worship_leader_when_rotation_is_empty(team):
@@ -92,4 +92,4 @@ def test_get_next_worship_leader_when_rotation_is_empty(team):
     worship_leader = selector.get_next(eligible_persons=team)
 
     # Assert
-    assert worship_leader == None
+    assert worship_leader is None

@@ -164,7 +164,6 @@ def test_get_unassigned_names():
 
 def test_get_person_by_name():
     # Arrange
-    role = Role.ACOUSTIC
     reference_date = date(2024, 7, 7)
     person1 = Person(
         name="TestOne",
@@ -192,7 +191,6 @@ def test_get_person_by_name():
 
 def test_get_person_by_name_with_invalid_name():
     # Arrange
-    role = Role.ACOUSTIC
     reference_date = date(2024, 7, 7)
     person1 = Person(
         name="TestOne",
@@ -215,7 +213,7 @@ def test_get_person_by_name_with_invalid_name():
     person = event.get_person_by_name(name="UnknownName")
 
     # Assert
-    assert person == None
+    assert person is None
 
 
 def test_get_person_status_on_date_when_on_leave():
@@ -449,7 +447,7 @@ def test_get_assigned_preacher_when_no_preacher():
     preacher = event.get_assigned_preacher()
 
     # Assert
-    assert preacher == None
+    assert preacher is None
 
 
 def test_is_assignable_if_needed():
@@ -469,7 +467,7 @@ def test_is_assignable_if_needed():
     is_assignable = event.is_assignable_if_needed(role=role, person=person)
 
     # Assert
-    assert is_assignable == True
+    assert is_assignable is True
 
 
 def test_is_assignable_if_needed_when_on_leave():
@@ -489,7 +487,7 @@ def test_is_assignable_if_needed_when_on_leave():
     is_assignable = event.is_assignable_if_needed(role=role, person=person)
 
     # Assert
-    assert is_assignable == False
+    assert is_assignable is False
 
 
 def test_is_assignable_if_needed_when_not_capable_of_role():
@@ -509,7 +507,7 @@ def test_is_assignable_if_needed_when_not_capable_of_role():
     is_assignable = event.is_assignable_if_needed(role=role, person=person)
 
     # Assert
-    assert is_assignable == False
+    assert is_assignable is False
 
 
 def test_is_assignable_if_needed_when_blocked_out():
@@ -529,7 +527,7 @@ def test_is_assignable_if_needed_when_blocked_out():
     is_assignable = event.is_assignable_if_needed(role=role, person=person)
 
     # Assert
-    assert is_assignable == False
+    assert is_assignable is False
 
 
 def test_is_assignable_if_needed_when_preaching():
@@ -549,4 +547,4 @@ def test_is_assignable_if_needed_when_preaching():
     is_assignable = event.is_assignable_if_needed(role=role, person=person)
 
     # Assert
-    assert is_assignable == False
+    assert is_assignable is False
