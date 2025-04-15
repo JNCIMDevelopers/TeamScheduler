@@ -80,8 +80,7 @@ class Schedule:
                 RoleTimeWindowRule(),
                 ConsecutiveAssignmentLimitRule(),
                 ConsecutiveRoleAssignmentLimitRule(
-                    assignment_limit=self.default_role_assignment_limit,
-                    time_window=timedelta(weeks=self.default_role_assignment_limit)
+                    assignment_limit=self.default_role_assignment_limit
                 ),
                 WorshipLeaderTeachingRule(),
                 WorshipLeaderPreachingConflictRule()

@@ -33,9 +33,9 @@ class ConsecutiveAssignmentLimitRule(EligibilityRule):
         return not person.assigned_too_many_times_recently(reference_date=event_date)
 
 class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
-    def __init__(self, assignment_limit: int, time_window: timedelta):
+    def __init__(self, assignment_limit: int):
         self.assignment_limit = assignment_limit
-        self.time_window = time_window
+        self.time_window = timedelta(weeks=assignment_limit) 
 
     def is_eligible(self, person: Person, role: Role, event_date: date, preacher=None) -> bool:
         # Get all assigned dates for the person within the time window
