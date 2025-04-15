@@ -26,7 +26,22 @@ class PreachingDateRule(EligibilityRule):
 
 class RoleTimeWindowRule(EligibilityRule):
     def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:
-        return person.was_not_assigned_too_recently_to_role(role=role, date=event_date)
+        time_window = None
+        if role == Role.WORSHIPLEADER:
+            time_window = timedelta(weeks=4)
+        elif role == Role.SUNDAYSCHOOLTEACHER:
+            time_window = timedelta(weeks=4)
+        elif role == Role.EMCEE:
+            time_window = timedelta(weeks=2)
+        else:
+            return True
+
+        last_assigned_date = person.last_assigned_dates[role]
+
+        return (
+            last_assigned_date is None
+            or event_date - last_assigned_date > time_window
+        )
 
 class ConsecutiveAssignmentLimitRule(EligibilityRule):
     def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:

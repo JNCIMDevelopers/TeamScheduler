@@ -21,9 +21,6 @@ class Person:
         last_assigned_dates (dict): A dictionary mapping each role to the last date the person was assigned to that role.
 
     Class-Level Constants:
-        WORSHIP_LEADER_ROLE_TIME_WINDOW (timedelta): Time window for assigning a worship leader role (default: 4 weeks).
-        SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW (timedelta): Time window for assigning a Sunday school teacher role (default: 4 weeks).
-        EMCEE_ROLE_TIME_WINDOW (timedelta): Time window for assigning an emcee role (default: 2 weeks).
         PREACHING_TIME_WINDOW (timedelta): Time window for assigning a preaching role (default: 1 week).
         CONSECUTIVE_ASSIGNMENTS_LIMIT (int): Limit for consecutive assigned event dates (default: 3).
 
@@ -34,9 +31,6 @@ class Person:
         is_unavailable_due_to_preaching(reference_date): Checks if the person is unavailable due to an upcoming preaching date.
         assigned_too_many_times_recently(reference_date): Checks if the person has been assigned too many times recently.
     """
-    WORSHIP_LEADER_ROLE_TIME_WINDOW = timedelta(weeks=4)
-    SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW = timedelta(weeks=4)
-    EMCEE_ROLE_TIME_WINDOW = timedelta(weeks=2)
     PREACHING_TIME_WINDOW = timedelta(weeks=1)
     CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
 
@@ -96,33 +90,6 @@ class Person:
 
         future_dates = [d for d in self.preaching_dates if d >= reference_date]
         return min(future_dates, default=None)
-
-    def was_not_assigned_too_recently_to_role(self, role: Role, date: date) -> bool:
-        """
-        Checks if the person was not assigned to a role too recently.
-
-        Args:
-            role (Role): The role to check.
-            date (date): The date of the event.
-
-        Returns:
-            bool: True if the person was not assigned to the role too recently, False otherwise.
-        """
-        time_window = None
-        
-        if role == Role.WORSHIPLEADER:
-            time_window = Person.WORSHIP_LEADER_ROLE_TIME_WINDOW
-        elif role == Role.SUNDAYSCHOOLTEACHER:
-            time_window = Person.SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW
-        elif role == Role.EMCEE:
-            time_window = Person.EMCEE_ROLE_TIME_WINDOW
-        else:
-            return True
-
-        return (
-            self.last_assigned_dates[role] is None
-            or date - self.last_assigned_dates[role] > time_window
-        )
 
     def is_unavailable_due_to_preaching(self, reference_date: date) -> bool:
         """
