@@ -24,7 +24,7 @@ def person():
 
 @pytest.fixture
 def event_date():
-    return date(2024, 7, 7)
+    return date(2025, 4, 6)
 
 @pytest.fixture
 def preacher():
