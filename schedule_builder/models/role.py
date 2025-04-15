@@ -20,6 +20,7 @@ class Role(StrEnum):
 
     Note: The roles are listed in descending order of priority.
     """
+
     WORSHIPLEADER = "WORSHIP LEADER"
     EMCEE = "EMCEE"
     ACOUSTIC = "ACOUSTIC GUITAR"
@@ -44,14 +45,14 @@ class Role(StrEnum):
         """
         return [
             Role.EMCEE,
-            Role.WORSHIPLEADER, 
-            Role.ACOUSTIC, 
-            Role.KEYS, 
-            Role.DRUMS, 
-            Role.BASS, 
-            Role.AUDIO, 
-            Role.LIVE, 
-            Role.LYRICS, 
+            Role.WORSHIPLEADER,
+            Role.ACOUSTIC,
+            Role.KEYS,
+            Role.DRUMS,
+            Role.BASS,
+            Role.AUDIO,
+            Role.LIVE,
+            Role.LYRICS,
             Role.BACKUP,
-            Role.SUNDAYSCHOOLTEACHER
+            Role.SUNDAYSCHOOLTEACHER,
         ]

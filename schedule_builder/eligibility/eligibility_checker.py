@@ -14,10 +14,13 @@ class EligibilityChecker:
     """
     Checks if a person is eligible for a role based on a set of rules.
     """
+
     def __init__(self, rules: List[EligibilityRule]):
         self.rules = rules
 
-    def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:
+    def is_eligible(
+        self, person: Person, role: Role, event_date: date, preacher: Preacher = None
+    ) -> bool:
         """
         Evaluates rules to determine if a person is eligible for a role.
 

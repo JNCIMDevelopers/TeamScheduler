@@ -29,7 +29,9 @@ class Event:
         get_assigned_preacher_and_graphics_support(): Returns the assigned preacher and graphics support for the event date.
     """
 
-    def __init__(self, date: date, team: List[Person] = [], preachers: List[Preacher] = []):
+    def __init__(
+        self, date: date, team: List[Person] = [], preachers: List[Preacher] = []
+    ):
         """
         Initializes the Event with a date, team, and optionally preachers.
 
@@ -71,7 +73,9 @@ class Event:
         Returns:
             List[Role]: A list of assigned roles.
         """
-        return [role for role in Role.get_schedule_order() if self.roles[role] is not None]
+        return [
+            role for role in Role.get_schedule_order() if self.roles[role] is not None
+        ]
 
     def get_unassigned_roles(self) -> List[Role]:
         """
@@ -90,7 +94,9 @@ class Event:
             List[str]: A list of unassigned person names.
         """
         assigned_names = {assigned_name for assigned_name in self.roles.values()}
-        return [person.name for person in self.team if person.name not in assigned_names]
+        return [
+            person.name for person in self.team if person.name not in assigned_names
+        ]
 
     def get_person_by_name(self, name: str) -> Person:
         """
@@ -123,7 +129,9 @@ class Event:
             return "ASSIGNED"
         elif date in person.preaching_dates:
             return "PREACHING"
-        elif not ConsecutiveAssignmentLimitRule().is_eligible(person=person, role=None, event_date=date):
+        elif not ConsecutiveAssignmentLimitRule().is_eligible(
+            person=person, role=None, event_date=date
+        ):
             return "BREAK"
         elif Role.WORSHIPLEADER in person.roles and date in person.teaching_dates:
             return "TEACHING"
@@ -137,12 +145,15 @@ class Event:
         Returns:
             Preacher: The assigned preacher, or None if not assigned.
         """
-        return next((preacher for preacher in self.preachers if self.date in preacher.dates), None)
-    
+        return next(
+            (preacher for preacher in self.preachers if self.date in preacher.dates),
+            None,
+        )
+
     def is_assignable_if_needed(self, role: Role, person: Person) -> bool:
         """
         Checks if a person is assignable to a role. Used specifically for unassigned roles.
-        
+
         Args:
             role (Role): The specific role to assign.
             person (Person): The person to check if assignable.
@@ -151,7 +162,7 @@ class Event:
             bool: True if the person is assignable. False otherwise.
         """
         return (
-            not person.on_leave 
+            not person.on_leave
             and role.value in person.roles
             and self.date not in person.blockout_dates
             and self.date not in person.preaching_dates
@@ -169,12 +180,23 @@ class Event:
         unassigned_roles = self.get_unassigned_roles()
         unassigned_names = self.get_unassigned_names()
 
-        preacher_and_graphics_str = (f"PREACHER: {preacher.name}\nGRAPHICS: {preacher.graphics_support}")
-        assigned_roles_str = "\n".join(f"{role.value}: {self.roles[role]}" for role in assigned_roles)
+        preacher_and_graphics_str = (
+            f"PREACHER: {preacher.name}\nGRAPHICS: {preacher.graphics_support}"
+        )
+        assigned_roles_str = "\n".join(
+            f"{role.value}: {self.roles[role]}" for role in assigned_roles
+        )
         unassigned_roles_str = "\n".join(
-            f"{role.value} &rarr; Can be assigned to: {", ".join(
-                [member.name for member in self.team if self.is_assignable_if_needed(role=role, person=member)]
-            ) or "None"}"
+            f"{role.value} &rarr; Can be assigned to: {
+                ', '.join(
+                    [
+                        member.name
+                        for member in self.team
+                        if self.is_assignable_if_needed(role=role, person=member)
+                    ]
+                )
+                or 'None'
+            }"
             for role in unassigned_roles
         )
         unassigned_names_str = "\n".join(
@@ -182,7 +204,7 @@ class Event:
             for name in unassigned_names
         )
 
-        return f"""Event on {self.date.strftime('%B-%d-%Y')}
+        return f"""Event on {self.date.strftime("%B-%d-%Y")}
         Preaching
         {preacher_and_graphics_str}
         Assigned Roles

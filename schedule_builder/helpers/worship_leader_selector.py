@@ -5,6 +5,7 @@ from typing import List
 # Local Imports
 from ..models.person import Person
 
+
 class WorshipLeaderSelector:
     """
     A class to select a worship leader.
@@ -15,7 +16,7 @@ class WorshipLeaderSelector:
         Initializes the WorshipLeaderSelector with a rotation of worship leaders and an index.
         """
         self.rotation = rotation
-        self.index = index # Default to the first worship leader in the rotation
+        self.index = index  # Default to the first worship leader in the rotation
 
     def get_next(self, eligible_persons: List[Person]) -> Person:
         """
@@ -37,12 +38,14 @@ class WorshipLeaderSelector:
 
         # Start checking from the current index
         next_index = self.index
-        
+
         # Iterate through the list to find the next eligible worship leader
         for _ in range(len(self.rotation)):
             worship_leader_name = self.rotation[next_index]
-            worship_leader = next((p for p in eligible_persons if p.name == worship_leader_name), None)
-            
+            worship_leader = next(
+                (p for p in eligible_persons if p.name == worship_leader_name), None
+            )
+
             if worship_leader:
                 # Update the index only if a valid worship leader is found
                 self.index = (next_index + 1) % len(self.rotation)

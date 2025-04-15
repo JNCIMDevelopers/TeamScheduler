@@ -12,18 +12,14 @@ from tkcalendar import DateEntry
 from tkinter import messagebox
 
 # Local Imports
-from paths import (
-    LOG_FILE_PATH,
-    SCHEDULE_CSV_FILE_PATH,
-    SCHEDULE_DETAILS_HTML_FILE_PATH
-)
+from paths import LOG_FILE_PATH, SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
 from schedule_builder.builders.schedule import Schedule
 from schedule_builder.builders.file_builder import (
     generate_team_schedule_html,
     create_html,
     get_schedule_data_for_csv,
     format_data_for_csv,
-    create_csv
+    create_csv,
 )
 from schedule_builder.util.date_generator import get_all_sundays
 from schedule_builder.models.person import Person
@@ -44,7 +40,9 @@ class App(customtkinter.CTk):
     the generated schedules.
     """
 
-    def __init__(self, team: List[Person], preachers: List[Preacher], rotation: List[str]):
+    def __init__(
+        self, team: List[Person], preachers: List[Preacher], rotation: List[str]
+    ):
         """
         Initializes the application with a list of team members and preachers.
 
@@ -81,7 +79,7 @@ class App(customtkinter.CTk):
         screen_height = self.winfo_screenheight()
         x = (screen_width // 2) - (window_width // 2)
         y = (screen_height // 2) - (window_height // 2)
-        self.geometry(f'{window_width}x{window_height}+{x}+{y}')
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
         # Create frame to hold all widgets
         self.frame = customtkinter.CTkFrame(master=self)
@@ -95,9 +93,7 @@ class App(customtkinter.CTk):
 
         # Start date label and entry
         self.start_date_label = customtkinter.CTkLabel(
-            master=self.frame,
-            text="START DATE",
-            font=(self.STANDARD_FONT, 14)
+            master=self.frame, text="START DATE", font=(self.STANDARD_FONT, 14)
         )
         self.start_date_label.pack()
         self.start_date_entry = DateEntry(
@@ -111,9 +107,7 @@ class App(customtkinter.CTk):
 
         # End date label and entry
         self.end_date_label = customtkinter.CTkLabel(
-            master=self.frame,
-            text="END DATE",
-            font=(self.STANDARD_FONT, 14)
+            master=self.frame, text="END DATE", font=(self.STANDARD_FONT, 14)
         )
         self.end_date_label.pack()
         self.end_date_entry = DateEntry(
@@ -139,7 +133,7 @@ class App(customtkinter.CTk):
             master=self.frame,
             text="",
             font=(self.STANDARD_FONT, self.CONFIRMATION_LABEL_FONT_SIZE),
-            wraplength=350
+            wraplength=350,
         )
         self.confirmation_label.pack(pady=5)
 
@@ -150,11 +144,13 @@ class App(customtkinter.CTk):
             font=(self.STANDARD_FONT, self.CONFIRMATION_LABEL_FONT_SIZE, "underline"),
             text_color="#4682B4",
             cursor="hand2",
-            wraplength=350
+            wraplength=350,
         )
         self.output_link_label.pack(pady=5)
 
-    def handle_open_schedule_file(self, event, label: customtkinter.CTkLabel, filepath: str) -> None:
+    def handle_open_schedule_file(
+        self, event, label: customtkinter.CTkLabel, filepath: str
+    ) -> None:
         """
         Opens the schedule file located at the specified filepath using the default application
         and updates the link color to indicate it has been clicked.
@@ -204,9 +200,11 @@ class App(customtkinter.CTk):
             )
             return
 
-        if (not self.is_within_date_range(start_date)
+        if (
+            not self.is_within_date_range(start_date)
             and not self.is_within_date_range(end_date)
-            and not self.is_preaching_schedule_within_date_range(start_date, end_date)):
+            and not self.is_preaching_schedule_within_date_range(start_date, end_date)
+        ):
             self.reset_output_labels()
             self.confirmation_label.configure(
                 text="No preaching schedule available within specified dates!",
@@ -216,7 +214,9 @@ class App(customtkinter.CTk):
             )
             return
 
-        start_date, end_date, is_adjusted = self.adjust_dates_within_range(start_date=start_date, end_date=end_date)
+        start_date, end_date, is_adjusted = self.adjust_dates_within_range(
+            start_date=start_date, end_date=end_date
+        )
         if is_adjusted:
             message = f"Preaching schedule is only available from {str(start_date)} to {str(end_date)}."
             messagebox.showinfo("Alert", message)
@@ -226,21 +226,38 @@ class App(customtkinter.CTk):
             self.create_schedule(start_date=start_date, end_date=end_date)
 
             self.reset_output_labels()
-            self.confirmation_label.bind("<Button-1>", lambda e: self.handle_open_schedule_file(e, label=self.confirmation_label, filepath=SCHEDULE_CSV_FILE_PATH))
+            self.confirmation_label.bind(
+                "<Button-1>",
+                lambda e: self.handle_open_schedule_file(
+                    e, label=self.confirmation_label, filepath=SCHEDULE_CSV_FILE_PATH
+                ),
+            )
             self.confirmation_label.configure(
                 text="View Schedule",
-                font=(self.STANDARD_FONT, self.CONFIRMATION_LABEL_FONT_SIZE, "underline"),
+                font=(
+                    self.STANDARD_FONT,
+                    self.CONFIRMATION_LABEL_FONT_SIZE,
+                    "underline",
+                ),
                 text_color="#4682B4",
                 cursor="hand2",
             )
 
-            self.output_link_label.bind("<Button-1>", lambda e: self.handle_open_schedule_file(e, self.output_link_label, SCHEDULE_DETAILS_HTML_FILE_PATH))
+            self.output_link_label.bind(
+                "<Button-1>",
+                lambda e: self.handle_open_schedule_file(
+                    e, self.output_link_label, SCHEDULE_DETAILS_HTML_FILE_PATH
+                ),
+            )
             self.output_link_label.configure(text="View Schedule Details")
         except PermissionError:
-            self.handle_schedule_creation_exception(message="Please close any open\noutput files and try again.")
+            self.handle_schedule_creation_exception(
+                message="Please close any open\noutput files and try again."
+            )
         except Exception:
-            self.handle_schedule_creation_exception(message="An unexpected error occurred.")
-            
+            self.handle_schedule_creation_exception(
+                message="An unexpected error occurred."
+            )
 
     def reset_output_labels(self) -> None:
         """
@@ -248,14 +265,11 @@ class App(customtkinter.CTk):
         """
         self.confirmation_label.unbind("<Button-1>")
         self.output_link_label.unbind("<Button-1>")
-        self.output_link_label.configure(
-            text="",
-            text_color="#4682B4"
-        )
+        self.output_link_label.configure(text="", text_color="#4682B4")
 
     def handle_schedule_creation_exception(self, message):
         """
-        Handles exceptions that occur during schedule creation by logging the error, 
+        Handles exceptions that occur during schedule creation by logging the error,
         resetting output labels, and updating the output labels with an error message.
 
         Args:
@@ -269,12 +283,16 @@ class App(customtkinter.CTk):
             text_color="red",
             cursor="arrow",
         )
-        self.output_link_label.bind("<Button-1>", lambda e: self.handle_open_schedule_file(e, self.output_link_label, LOG_FILE_PATH))
+        self.output_link_label.bind(
+            "<Button-1>",
+            lambda e: self.handle_open_schedule_file(
+                e, self.output_link_label, LOG_FILE_PATH
+            ),
+        )
         self.output_link_label.configure(
             text="Click to view logs.",
-            font=(self.STANDARD_FONT, self.CONFIRMATION_LABEL_FONT_SIZE, "underline")
+            font=(self.STANDARD_FONT, self.CONFIRMATION_LABEL_FONT_SIZE, "underline"),
         )
-
 
     def calculate_preaching_date_range(self) -> Tuple[date, date]:
         """
@@ -309,8 +327,10 @@ class App(customtkinter.CTk):
             False otherwise.
         """
         return self.earliest_date <= reference_date <= self.latest_date
-    
-    def is_preaching_schedule_within_date_range(self, start_date: date, end_date: date) -> bool:
+
+    def is_preaching_schedule_within_date_range(
+        self, start_date: date, end_date: date
+    ) -> bool:
         """
         Checks if the preaching schedule dates are within the specified
         start and end dates.
@@ -325,7 +345,9 @@ class App(customtkinter.CTk):
         """
         return start_date <= self.earliest_date <= self.latest_date <= end_date
 
-    def adjust_dates_within_range(self, start_date: date, end_date: date) -> Tuple[date, date, bool]:
+    def adjust_dates_within_range(
+        self, start_date: date, end_date: date
+    ) -> Tuple[date, date, bool]:
         """
         Adjusts the provided start_date and end_date to ensure they fall within the
         permissible date range defined by self.earliest_date and self.latest_date.
@@ -373,15 +395,12 @@ class App(customtkinter.CTk):
             team=team_copy,
             preachers=self.preachers,
             rotation=self.rotation,
-            event_dates=dates_to_assign
+            event_dates=dates_to_assign,
         ).build()
 
         # Generate schedule details in HTML string format
         html_content = generate_team_schedule_html(
-            start_date,
-            end_date,
-            events,
-            updated_team_details
+            start_date, end_date, events, updated_team_details
         )
         self.logger.debug(f"Schedule Details HTML Data:\n{html_content}\n")
 

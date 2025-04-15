@@ -7,11 +7,7 @@ from datetime import date
 from typing import List
 
 # Local Imports
-from paths import (
-    TEAM_DATA_FILE_PATH,
-    PREACHING_DATA_FILE_PATH,
-    ROTATION_DATA_FILE_PATH
-)
+from paths import TEAM_DATA_FILE_PATH, PREACHING_DATA_FILE_PATH, ROTATION_DATA_FILE_PATH
 from schedule_builder.builders.file_builder import resource_path
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher
@@ -67,9 +63,9 @@ class TeamInitializer:
             ]
             teaching_dates = [
                 self.parse_date(d) for d in person_data.get("teaching_dates", [])
-            ]   
+            ]
             roles = [getattr(Role, role) for role in person_data["roles"]]
-            
+
             person = Person(
                 name=person_data["name"],
                 roles=roles,
@@ -129,4 +125,8 @@ class TeamInitializer:
         Returns:
             tuple: A tuple containing a list of Person objects, Preacher objects and rotation names.
         """
-        return (self.initialize_persons(), self.initialize_preachers(), self.initialize_rotation())
+        return (
+            self.initialize_persons(),
+            self.initialize_preachers(),
+            self.initialize_rotation(),
+        )

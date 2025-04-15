@@ -5,7 +5,7 @@ from typing import List
 class HTMLBuilder:
     """
     A class to build HTML documents dynamically.
-    
+
     Attributes:
         title (str): The title of the HTML document.
         head_content (str): The content to be included in the <head> section.
@@ -15,7 +15,7 @@ class HTMLBuilder:
     def __init__(self, title: str) -> None:
         """
         Initializes the HTMLBuilder with a title.
-        
+
         Args:
             title (str): The title of the HTML document.
         """
@@ -26,7 +26,7 @@ class HTMLBuilder:
     def add_css(self, css: str) -> None:
         """
         Adds CSS styling to the <head> section of the HTML document.
-        
+
         Args:
             css (str): The CSS styles to add.
         """
@@ -35,7 +35,7 @@ class HTMLBuilder:
     def add_section(self, section_title: str, content: str, id: str) -> None:
         """
         Adds a section to the <body> of the HTML document.
-        
+
         Args:
             section_title (str): The title of the section.
             content (str): The content of the section.
@@ -46,11 +46,11 @@ class HTMLBuilder:
     def add_list(self, items: List[str], class_name: str) -> str:
         """
         Creates an unordered list in HTML format.
-        
+
         Args:
             items (List[str]): The list items to include.
             class_name (str): The class name for the <ul> element.
-        
+
         Returns:
             str: The HTML string for the unordered list.
         """
@@ -63,7 +63,7 @@ class HTMLBuilder:
     def build_html(self) -> str:
         """
         Builds the complete HTML document.
-        
+
         Returns:
             str: The HTML document as a string.
         """

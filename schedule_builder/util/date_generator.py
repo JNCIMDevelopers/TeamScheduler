@@ -3,7 +3,9 @@ from dateutil.rrule import rrule, DAILY, SU
 from typing import List, Optional
 
 
-def get_all_sundays(start_date: Optional[date] = None, end_date: Optional[date] = None) -> List[date]:
+def get_all_sundays(
+    start_date: Optional[date] = None, end_date: Optional[date] = None
+) -> List[date]:
     """
     Get all Sundays between the specified start and end dates.
 

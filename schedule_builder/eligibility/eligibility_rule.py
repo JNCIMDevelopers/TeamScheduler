@@ -13,8 +13,11 @@ class EligibilityRule(ABC):
     Abstract base class for eligibility rules.
     Each rule must implement the `is_eligible` method.
     """
+
     @abstractmethod
-    def is_eligible(self, person: Person, role: Role, event_date: date, preacher: Preacher = None) -> bool:
+    def is_eligible(
+        self, person: Person, role: Role, event_date: date, preacher: Preacher = None
+    ) -> bool:
         """
         Determines if a person is eligible for a role on a specific date.
 

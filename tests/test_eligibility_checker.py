@@ -10,6 +10,7 @@ from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
 from schedule_builder.models.preacher import Preacher
 
+
 # Fixtures for reusable setup
 @pytest.fixture
 def person():
@@ -19,16 +20,21 @@ def person():
         blockout_dates=[],
         preaching_dates=[],
         teaching_dates=[],
-        on_leave=False
+        on_leave=False,
     )
+
 
 @pytest.fixture
 def event_date():
     return date(2025, 4, 6)
 
+
 @pytest.fixture
 def preacher():
-    return Preacher(name="TestPreacher", graphics_support="Test", dates=[date(2025, 4, 6)])
+    return Preacher(
+        name="TestPreacher", graphics_support="Test", dates=[date(2025, 4, 6)]
+    )
+
 
 def test_is_eligible_with_no_rules(person, event_date):
     # Arrange
@@ -39,6 +45,7 @@ def test_is_eligible_with_no_rules(person, event_date):
 
     # Assert
     assert is_eligible
+
 
 def test_is_eligible_with_single_passing_rule(person, event_date):
     # Arrange
@@ -53,6 +60,7 @@ def test_is_eligible_with_single_passing_rule(person, event_date):
     assert is_eligible
     mock_rule.is_eligible.assert_called_once()
 
+
 def test_is_eligible_with_single_failing_rule(person, event_date):
     # Arrange
     mock_rule = MagicMock(spec=EligibilityRule)
@@ -65,6 +73,7 @@ def test_is_eligible_with_single_failing_rule(person, event_date):
     # Assert
     assert not is_eligible
     mock_rule.is_eligible.assert_called_once()
+
 
 def test_is_eligible_with_multiple_passing_rules(person, event_date):
     # Arrange
@@ -81,6 +90,7 @@ def test_is_eligible_with_multiple_passing_rules(person, event_date):
     assert is_eligible
     mock_rule1.is_eligible.assert_called_once()
     mock_rule2.is_eligible.assert_called_once()
+
 
 def test_if_returns_early_when_rule_fails(person, event_date):
     # Arrange

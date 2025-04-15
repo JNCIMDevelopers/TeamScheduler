@@ -14,14 +14,37 @@ from schedule_builder.models.role import Role
 def team():
     role = Role.WORSHIPLEADER
     return [
-        Person(name="Test1", roles=[role], blockout_dates=[], preaching_dates=[], teaching_dates=[], on_leave=False),
-        Person(name="Test2", roles=[role], blockout_dates=[], preaching_dates=[], teaching_dates=[], on_leave=False),
-        Person(name="Test3", roles=[role], blockout_dates=[], preaching_dates=[], teaching_dates=[], on_leave=False),
+        Person(
+            name="Test1",
+            roles=[role],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        ),
+        Person(
+            name="Test2",
+            roles=[role],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        ),
+        Person(
+            name="Test3",
+            roles=[role],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        ),
     ]
+
 
 @pytest.fixture
 def rotation():
     return ["Test2", "Test3", "Test1"]
+
 
 def test_get_next_worship_leader_order(team, rotation):
     # Arrange
@@ -37,6 +60,7 @@ def test_get_next_worship_leader_order(team, rotation):
     assert next_worship_leader == team[2]
     assert next_next_worship_leader == team[0]
 
+
 def test_get_next_worship_leader_when_rotation_does_not_match_any_persons(team):
     # Arrange
     rotation = ["TestX", "TestY", "TestZ"]
@@ -47,6 +71,7 @@ def test_get_next_worship_leader_when_rotation_does_not_match_any_persons(team):
 
     # Assert
     assert worship_leader == None
+
 
 def test_get_next_worship_leader_when_team_is_empty():
     # Arrange
@@ -59,6 +84,7 @@ def test_get_next_worship_leader_when_team_is_empty():
 
     # Assert
     assert worship_leader == None
+
 
 def test_get_next_worship_leader_when_rotation_is_empty(team):
     # Arrange

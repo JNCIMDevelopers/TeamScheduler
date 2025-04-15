@@ -83,7 +83,7 @@ class Schedule:
                     assignment_limit=self.default_role_assignment_limit
                 ),
                 WorshipLeaderTeachingRule(),
-                WorshipLeaderPreachingConflictRule()
+                WorshipLeaderPreachingConflictRule(),
             ]
         )
 
@@ -110,7 +110,9 @@ class Schedule:
 
             for role in Role:
                 # Get eligible person
-                eligible_person = self.get_eligible_person(role=role, team=team_copy, date=event_date, preacher=preacher)
+                eligible_person = self.get_eligible_person(
+                    role=role, team=team_copy, date=event_date, preacher=preacher
+                )
 
                 if eligible_person:
                     # Assign role to person
@@ -124,7 +126,9 @@ class Schedule:
 
         return (self.events, self.team)
 
-    def get_eligible_person(self, role: Role, team: List[Person], date: date, preacher: Preacher = None) -> Person:
+    def get_eligible_person(
+        self, role: Role, team: List[Person], date: date, preacher: Preacher = None
+    ) -> Person:
         """
         Finds and returns an eligible person for a given role on a specific date.
 
@@ -143,17 +147,22 @@ class Schedule:
 
         # Get eligible persons from the team using the EligibilityChecker
         eligible_persons = [
-            person for person in team
+            person
+            for person in team
             if self.eligibility_checker.is_eligible(person, role, date, preacher)
         ]
 
         # Return random eligible team member
         if eligible_persons:
-            logging.info(f"Eligible Persons for {role} on {date}: {[p.name for p in eligible_persons]}")
+            logging.info(
+                f"Eligible Persons for {role} on {date}: {[p.name for p in eligible_persons]}"
+            )
 
             # If the role is WORSHIPLEADER, get the next worship leader from the rotation
             if role == Role.WORSHIPLEADER:
-                next_worship_leader = self.worship_leader_selector.get_next(eligible_persons=eligible_persons)
+                next_worship_leader = self.worship_leader_selector.get_next(
+                    eligible_persons=eligible_persons
+                )
                 if next_worship_leader:
                     return next_worship_leader
 
