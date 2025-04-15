@@ -1,9 +1,6 @@
 # Third-Party Imports
 import pytest
 
-# Standard Library Imports
-from datetime import date
-
 # Local Imports
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.person import Person

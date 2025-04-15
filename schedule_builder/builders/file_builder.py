@@ -157,7 +157,7 @@ def generate_team_schedule_html(
     )
 
     # Adding scroll back to the top link
-    scroll_back_to_top_link = f"<a href='#' class='back-to-top'>&uarr;</a>"
+    scroll_back_to_top_link = "<a href='#' class='back-to-top'>&uarr;</a>"
     builder.body_content += scroll_back_to_top_link
 
     return builder.build_html()

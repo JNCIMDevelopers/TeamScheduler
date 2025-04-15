@@ -1,6 +1,6 @@
 # Standard Library Imports
 from datetime import date
-from typing import List, Tuple
+from typing import List
 
 # Local Imports
 from ..eligibility.rules import ConsecutiveAssignmentLimitRule

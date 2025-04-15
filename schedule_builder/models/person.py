@@ -1,5 +1,5 @@
 # Standard Library Imports
-from datetime import date, timedelta
+from datetime import date
 from typing import List
 
 # Local Imports
