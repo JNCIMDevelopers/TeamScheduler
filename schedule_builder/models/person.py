@@ -20,17 +20,10 @@ class Person:
         assigned_dates (List[date]): The dates when the person has been assigned to an event.
         last_assigned_dates (dict): A dictionary mapping each role to the last date the person was assigned to that role.
 
-    Class-Level Constants:
-        PREACHING_TIME_WINDOW (timedelta): Time window for assigning a preaching role (default: 1 week).
-        CONSECUTIVE_ASSIGNMENTS_LIMIT (int): Limit for consecutive assigned event dates (default: 3).
-
     Methods:
         assign_event(date): Assigns the person to an event on the given date.
         get_next_preaching_date(reference_date): Returns the next preaching date after the given reference date.
-        is_unavailable_due_to_preaching(reference_date): Checks if the person is unavailable due to an upcoming preaching date.
     """
-    PREACHING_TIME_WINDOW = timedelta(weeks=1)
-    CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
 
     def __init__(
         self,
@@ -88,19 +81,6 @@ class Person:
 
         future_dates = [d for d in self.preaching_dates if d >= reference_date]
         return min(future_dates, default=None)
-
-    def is_unavailable_due_to_preaching(self, reference_date: date) -> bool:
-        """
-        Checks if the person is unavailable due to an upcoming preaching date.
-
-        Args:
-            reference_date (date): The reference date to check.
-
-        Returns:
-            bool: True if the person is unavailable due to preaching, False otherwise.
-        """
-        next_date = self.get_next_preaching_date(reference_date)
-        return bool(next_date and next_date - reference_date <= Person.PREACHING_TIME_WINDOW)
 
     def __str__(self) -> str:
         """
