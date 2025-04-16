@@ -1,6 +1,7 @@
 # Standard Library Imports
-from datetime import date
-from typing import List
+# Alias datetime.date to DateType to avoid conflict with the Event.date attribute
+from datetime import date as DateType
+from typing import List, Optional
 
 # Local Imports
 from ..eligibility.rules import ConsecutiveAssignmentLimitRule
@@ -30,7 +31,7 @@ class Event:
     """
 
     def __init__(
-        self, date: date, team: List[Person] = [], preachers: List[Preacher] = []
+        self, date: DateType, team: List[Person] = [], preachers: List[Preacher] = []
     ):
         """
         Initializes the Event with a date, team, and optionally preachers.
@@ -40,9 +41,9 @@ class Event:
             team (List[Person], optional): The team assigned to the event. Defaults to an empty list.
             preachers (List[Preacher], optional): The preachers for the event. Defaults to an empty list.
         """
-        self.date: date = date
+        self.date: DateType = date
         self.team: List[Person] = team
-        self.roles: List[Role] = {role: None for role in Role}
+        self.roles: dict[Role, Optional[str]] = {role: None for role in Role}
         self.preachers: List[Preacher] = preachers
 
     def assign_role(self, role: Role, person: Person) -> None:
@@ -98,7 +99,7 @@ class Event:
             person.name for person in self.team if person.name not in assigned_names
         ]
 
-    def get_person_by_name(self, name: str) -> Person:
+    def get_person_by_name(self, name: str) -> Optional[Person]:
         """
         Returns a person object by their name.
 
@@ -110,7 +111,7 @@ class Event:
         """
         return next((person for person in self.team if person.name == name), None)
 
-    def get_person_status_on_date(self, person: Person, date: date) -> str:
+    def get_person_status_on_date(self, person: Person, date: DateType) -> str:
         """
         Returns the status of a person on a given date.
 
@@ -130,7 +131,7 @@ class Event:
         elif date in person.preaching_dates:
             return "PREACHING"
         elif not ConsecutiveAssignmentLimitRule().is_eligible(
-            person=person, role=None, event_date=date
+            person=person, role=Role.LYRICS, event_date=date
         ):
             return "BREAK"
         elif Role.WORSHIPLEADER in person.roles and date in person.teaching_dates:
@@ -138,7 +139,7 @@ class Event:
         else:
             return "UNASSIGNED"
 
-    def get_assigned_preacher(self) -> Preacher:
+    def get_assigned_preacher(self) -> Optional[Preacher]:
         """
         Returns the assigned preacher for the event date.
 
@@ -181,7 +182,7 @@ class Event:
         unassigned_names = self.get_unassigned_names()
 
         preacher_and_graphics_str = (
-            f"PREACHER: {preacher.name}\nGRAPHICS: {preacher.graphics_support}"
+            f"PREACHER: {preacher.name if preacher else ''}\nGRAPHICS: {preacher.graphics_support if preacher else ''}"
         )
         assigned_roles_str = "\n".join(
             f"{role.value}: {self.roles[role]}" for role in assigned_roles
@@ -200,8 +201,9 @@ class Event:
             for role in unassigned_roles
         )
         unassigned_names_str = "\n".join(
-            f"{name} ({self.get_person_status_on_date(person=self.get_person_by_name(name=name), date=self.date)})"
+            f"{name} ({self.get_person_status_on_date(person=person, date=self.date) if person else "UNKNOWN"})"
             for name in unassigned_names
+            if (person := self.get_person_by_name(name=name)) is not None
         )
 
         return f"""Event on {self.date.strftime("%B-%d-%Y")}

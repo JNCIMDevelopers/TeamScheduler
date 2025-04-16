@@ -3,7 +3,7 @@ import copy
 from datetime import date
 import logging
 import random
-from typing import Tuple, List
+from typing import List, Optional, Tuple
 
 # Local Imports
 from ..eligibility.eligibility_checker import EligibilityChecker
@@ -127,8 +127,8 @@ class Schedule:
         return (self.events, self.team)
 
     def get_eligible_person(
-        self, role: Role, team: List[Person], date: date, preacher: Preacher = None
-    ) -> Person:
+        self, role: Role, team: List[Person], date: date, preacher: Optional[Preacher] = None
+    ) -> Optional[Person]:
         """
         Finds and returns an eligible person for a given role on a specific date.
 

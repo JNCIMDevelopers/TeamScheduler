@@ -1,6 +1,6 @@
 # Standard Library Imports
-from typing import List
 from datetime import date
+from typing import List, Optional
 import logging
 
 # Local Imports
@@ -19,7 +19,7 @@ class EligibilityChecker:
         self.rules = rules
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Preacher = None
+        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
     ) -> bool:
         """
         Evaluates rules to determine if a person is eligible for a role.
