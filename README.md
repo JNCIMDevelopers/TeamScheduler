@@ -7,6 +7,9 @@ A program that builds a schedule for the JNCIM worship and sunday school ministr
 * [Assignment Eligibility Criteria](#assignment-eligibility-criteria)
 * [Roles Priority](#roles-priority)
 * [Special Considerations](#special-considerations)
+* [Setup Instructions](#setup-instructions)
+* [Execution Instructions](#execution-instructions)
+* [Output](#output)
 
 --
 
