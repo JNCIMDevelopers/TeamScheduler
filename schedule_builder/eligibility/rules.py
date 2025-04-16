@@ -11,28 +11,44 @@ from ..models.role import Role
 
 class RoleCapabilityRule(EligibilityRule):
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         return role in person.roles
 
 
 class OnLeaveRule(EligibilityRule):
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         return not person.on_leave
 
 
 class BlockoutDateRule(EligibilityRule):
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         return event_date not in person.blockout_dates
 
 
 class PreachingDateRule(EligibilityRule):
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         return event_date not in person.preaching_dates
 
@@ -43,7 +59,11 @@ class RoleTimeWindowRule(EligibilityRule):
     EMCEE_ROLE_TIME_WINDOW = timedelta(weeks=2)
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         time_window = None
         if role == Role.WORSHIPLEADER:
@@ -66,7 +86,11 @@ class ConsecutiveAssignmentLimitRule(EligibilityRule):
     CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         # Calculate the start date of the time window
         time_window = timedelta(weeks=self.CONSECUTIVE_ASSIGNMENTS_LIMIT)
@@ -87,7 +111,11 @@ class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
         self.time_window = timedelta(weeks=assignment_limit)
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         # Get all assigned dates for the person within the time window
         past_assigned_dates = [
@@ -101,7 +129,11 @@ class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
 
 class WorshipLeaderTeachingRule(EligibilityRule):
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         if role == Role.WORSHIPLEADER:
             return event_date not in person.teaching_dates
@@ -112,7 +144,11 @@ class WorshipLeaderPreachingConflictRule(EligibilityRule):
     PREACHING_TIME_WINDOW = timedelta(weeks=1)
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         if role == Role.WORSHIPLEADER:
             next_date = person.get_next_preaching_date(event_date)
@@ -130,7 +166,11 @@ class LuluEmceeRule(EligibilityRule):
     """
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         if person.name == "Lulu" and role == Role.EMCEE:
             return preacher is not None and preacher.name == "Edmund"
@@ -143,7 +183,11 @@ class GeeWorshipLeaderRule(EligibilityRule):
     """
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         if person.name == "Gee" and role == Role.WORSHIPLEADER:
             return preacher is None or preacher.name != "Kris"

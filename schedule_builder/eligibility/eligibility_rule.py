@@ -17,7 +17,11 @@ class EligibilityRule(ABC):
 
     @abstractmethod
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         """
         Determines if a person is eligible for a role on a specific date.

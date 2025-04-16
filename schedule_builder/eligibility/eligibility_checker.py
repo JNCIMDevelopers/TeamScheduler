@@ -19,7 +19,11 @@ class EligibilityChecker:
         self.rules = rules
 
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Optional[Preacher] = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         """
         Evaluates rules to determine if a person is eligible for a role.

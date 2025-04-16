@@ -119,7 +119,11 @@ class Schedule:
         return (self.events, self.team)
 
     def get_eligible_person(
-        self, role: Role, team: List[Person], date: date, preacher: Optional[Preacher] = None
+        self,
+        role: Role,
+        team: List[Person],
+        date: date,
+        preacher: Optional[Preacher] = None,
     ) -> Optional[Person]:
         """
         Finds and returns an eligible person for a given role on a specific date.

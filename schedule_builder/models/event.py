@@ -181,9 +181,7 @@ class Event:
         unassigned_roles = self.get_unassigned_roles()
         unassigned_names = self.get_unassigned_names()
 
-        preacher_and_graphics_str = (
-            f"PREACHER: {preacher.name if preacher else ''}\nGRAPHICS: {preacher.graphics_support if preacher else ''}"
-        )
+        preacher_and_graphics_str = f"PREACHER: {preacher.name if preacher else ''}\nGRAPHICS: {preacher.graphics_support if preacher else ''}"
         assigned_roles_str = "\n".join(
             f"{role.value}: {self.roles[role]}" for role in assigned_roles
         )
@@ -201,7 +199,7 @@ class Event:
             for role in unassigned_roles
         )
         unassigned_names_str = "\n".join(
-            f"{name} ({self.get_person_status_on_date(person=person, date=self.date) if person else "UNKNOWN"})"
+            f"{name} ({self.get_person_status_on_date(person=person, date=self.date) if person else 'UNKNOWN'})"
             for name in unassigned_names
             if (person := self.get_person_by_name(name=name)) is not None
         )
