@@ -52,8 +52,8 @@ class Person:
         self.teaching_dates: List[date] = teaching_dates
         self.on_leave = on_leave
         self.assigned_dates: List[date] = []
-        self.last_assigned_dates: dict = {role: None for role in roles}
-        self.role_assigned_dates: dict = {role: [] for role in roles}
+        self.last_assigned_dates: dict[Role, Optional[date]] = {role: None for role in roles}
+        self.role_assigned_dates: dict[Role, List[date]] = {role: [] for role in roles}
 
     def assign_event(self, date: date, role: Role) -> None:
         """

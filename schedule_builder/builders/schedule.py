@@ -59,12 +59,6 @@ class Schedule:
         self.event_dates: List[date] = event_dates
         self.events: List[Event] = []
         self.preachers: List[Preacher] = preachers
-
-        self.default_role_assignment_limit = 2
-
-        self.worship_leader_name_rotation = rotation
-        self.worship_leader_index = 0
-
         self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
 
         # Initialize the EligibilityChecker with all rules
@@ -79,9 +73,7 @@ class Schedule:
                 PreachingDateRule(),
                 RoleTimeWindowRule(),
                 ConsecutiveAssignmentLimitRule(),
-                ConsecutiveRoleAssignmentLimitRule(
-                    assignment_limit=self.default_role_assignment_limit
-                ),
+                ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
                 WorshipLeaderTeachingRule(),
                 WorshipLeaderPreachingConflictRule(),
             ]

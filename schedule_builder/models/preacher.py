@@ -21,11 +21,11 @@ class Preacher:
             graphics_support (str): The graphics support person or team associated with the preacher.
             dates (List[date], optional): A list of dates when the preacher is scheduled to preach. Defaults to an empty list.
         """
-        self.name = name
-        self.graphics_support = graphics_support
-        self.dates = dates
+        self.name: str = name
+        self.graphics_support: str = graphics_support
+        self.dates: List[date] = dates
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Returns a string representation of the Preacher, including their name, graphics support, and preaching dates.
 

@@ -267,7 +267,7 @@ class App(customtkinter.CTk):
         self.output_link_label.unbind("<Button-1>")
         self.output_link_label.configure(text="", text_color="#4682B4")
 
-    def handle_schedule_creation_exception(self, message):
+    def handle_schedule_creation_exception(self, message: str) -> None:
         """
         Handles exceptions that occur during schedule creation by logging the error,
         resetting output labels, and updating the output labels with an error message.

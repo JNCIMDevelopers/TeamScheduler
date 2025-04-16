@@ -17,7 +17,7 @@ class Event:
     Attributes:
         date (date): The date of the event.
         team (List[Person]): The team assigned to the event.
-        roles (List[Role]): A dictionary mapping each role to the assigned person's name.
+        roles (dict[Role, Optional[str]]): A dictionary mapping each role to the assigned person's name.
         preachers (List[Preacher]): The preachers for the event.
 
     Methods:
@@ -43,8 +43,8 @@ class Event:
         """
         self.date: DateType = date
         self.team: List[Person] = team
-        self.roles: dict[Role, Optional[str]] = {role: None for role in Role}
         self.preachers: List[Preacher] = preachers
+        self.roles: dict[Role, Optional[str]] = {role: None for role in Role}
 
     def assign_role(self, role: Role, person: Person) -> None:
         """

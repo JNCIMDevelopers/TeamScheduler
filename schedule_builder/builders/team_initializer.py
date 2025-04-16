@@ -2,7 +2,7 @@
 import json
 import logging
 from datetime import date
-from typing import List
+from typing import List, Tuple
 
 # Local Imports
 from paths import TEAM_DATA_FILE_PATH, PREACHING_DATA_FILE_PATH, ROTATION_DATA_FILE_PATH
@@ -116,7 +116,7 @@ class TeamInitializer:
 
         return names
 
-    def initialize_team(self):
+    def initialize_team(self) -> Tuple[List[Person], List[Preacher], List[str]]:
         """
         Initializes and returns person, preachers, and rotation.
 
