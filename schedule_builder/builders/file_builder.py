@@ -32,7 +32,9 @@ def resource_path(relative_path: str) -> str:
     return os.path.join(base_path, relative_path)
 
 
-def generate_team_schedule_html(start_date: date, end_date: date, events: List[Event], team: List[Person]) -> str:
+def generate_team_schedule_html(
+    start_date: date, end_date: date, events: List[Event], team: List[Person]
+) -> str:
     """
     Generates an HTML document for a team schedule.
 
@@ -94,16 +96,24 @@ def generate_team_schedule_html(start_date: date, end_date: date, events: List[E
         <a class="link" href="#{events_id}">{events_section_title}</a>
     </nav>
     """
-    builder.add_section(section_title="Jump to Section", content=page_links, id="nav-links")
+    builder.add_section(
+        section_title="Jump to Section", content=page_links, id="nav-links"
+    )
 
     # Adding team members by role
     role_content = ""
     for role in Role.get_schedule_order():
         members = [member.name for member in team if role in member.roles]
         role_content += f"<h3>Role: {role}</h3>"
-        capable_members_content = builder.add_list(items=members, class_name="members-by-role")
+        capable_members_content = builder.add_list(
+            items=members, class_name="members-by-role"
+        )
         role_content += capable_members_content
-    builder.add_section(section_title=team_members_by_role_section_title, content=role_content, id=team_members_by_role_id)
+    builder.add_section(
+        section_title=team_members_by_role_section_title,
+        content=role_content,
+        id=team_members_by_role_id,
+    )
 
     # Adding team member details
     team_content = ""
@@ -111,28 +121,43 @@ def generate_team_schedule_html(start_date: date, end_date: date, events: List[E
         member_name = f"<h3>{member.name}</h3>"
         member_details = str(member).split("\n")[1:]
         member_content = member_name
-        member_content += builder.add_list(items=member_details, class_name="member-details")
+        member_content += builder.add_list(
+            items=member_details, class_name="member-details"
+        )
         team_content += member_content
     builder.add_section(
         section_title=schedule_section_title,
         content=team_content,
-        id=team_member_details_id)
+        id=team_member_details_id,
+    )
 
     # Adding events
     events_content = ""
-    event_headers = ["Preaching", "Assigned Roles", "Unassigned Roles", "Unassigned People"]
+    event_headers = [
+        "Preaching",
+        "Assigned Roles",
+        "Unassigned Roles",
+        "Unassigned People",
+    ]
     for event in events:
         event_details = str(event).split("\n")
         event_title = f"<h3>{event_details[0]}</h3>"
         event_details_elements = [element.strip() for element in event_details[1:]]
-        event_details_html = [f"<h4>{detail}</h4>" if detail in event_headers else detail for detail in event_details_elements]
-        event_section = builder.add_list(items=event_details_html, class_name="event-details")
+        event_details_html = [
+            f"<h4>{detail}</h4>" if detail in event_headers else detail
+            for detail in event_details_elements
+        ]
+        event_section = builder.add_list(
+            items=event_details_html, class_name="event-details"
+        )
         events_content += event_title
         events_content += event_section
-    builder.add_section(section_title=events_section_title, content=events_content, id=events_id)
+    builder.add_section(
+        section_title=events_section_title, content=events_content, id=events_id
+    )
 
     # Adding scroll back to the top link
-    scroll_back_to_top_link = f"<a href='#' class='back-to-top'>&uarr;</a>"
+    scroll_back_to_top_link = "<a href='#' class='back-to-top'>&uarr;</a>"
     builder.body_content += scroll_back_to_top_link
 
     return builder.build_html()
@@ -174,7 +199,9 @@ def get_schedule_data_for_csv(events: List[Event]) -> List[List[str]]:
     for event in events:
         preacher = event.get_assigned_preacher()
         preacher_row.append(preacher.name if preacher and preacher.name else "")
-        graphics_row.append(preacher.graphics_support if preacher and preacher.graphics_support else "")
+        graphics_row.append(
+            preacher.graphics_support if preacher and preacher.graphics_support else ""
+        )
     data.append(preacher_row)
     data.append(graphics_row)
 
