@@ -2,3 +2,6 @@ customtkinter
 pytest
 python-dateutil
 tkcalendar
+types-python-dateutil
+ruff
+mypy

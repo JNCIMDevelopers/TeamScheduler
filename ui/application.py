@@ -2,6 +2,8 @@
 import copy
 import logging
 import os
+import sys
+import subprocess
 import traceback
 from datetime import date
 from typing import List, Tuple
@@ -160,7 +162,13 @@ class App(customtkinter.CTk):
             label (customtkinter.CTkLabel): The CTkLabel that was clicked.
             filepath (str): The path to the file to open.
         """
-        os.startfile(os.path.join(".", filepath), "open")
+        full_path = os.path.abspath(filepath)
+        if sys.platform == "win32":
+            os.startfile(full_path)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, full_path])
+
         label.configure(text_color="#9b30ff")
 
     def handle_create_button_click(self) -> None:
@@ -267,7 +275,7 @@ class App(customtkinter.CTk):
         self.output_link_label.unbind("<Button-1>")
         self.output_link_label.configure(text="", text_color="#4682B4")
 
-    def handle_schedule_creation_exception(self, message):
+    def handle_schedule_creation_exception(self, message: str) -> None:
         """
         Handles exceptions that occur during schedule creation by logging the error,
         resetting output labels, and updating the output labels with an error message.

@@ -3,7 +3,7 @@ import copy
 from datetime import date
 import logging
 import random
-from typing import Tuple, List
+from typing import List, Optional, Tuple
 
 # Local Imports
 from ..eligibility.eligibility_checker import EligibilityChecker
@@ -59,12 +59,6 @@ class Schedule:
         self.event_dates: List[date] = event_dates
         self.events: List[Event] = []
         self.preachers: List[Preacher] = preachers
-
-        self.default_role_assignment_limit = 2
-
-        self.worship_leader_name_rotation = rotation
-        self.worship_leader_index = 0
-
         self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
 
         # Initialize the EligibilityChecker with all rules
@@ -79,9 +73,7 @@ class Schedule:
                 PreachingDateRule(),
                 RoleTimeWindowRule(),
                 ConsecutiveAssignmentLimitRule(),
-                ConsecutiveRoleAssignmentLimitRule(
-                    assignment_limit=self.default_role_assignment_limit
-                ),
+                ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
                 WorshipLeaderTeachingRule(),
                 WorshipLeaderPreachingConflictRule(),
             ]
@@ -127,8 +119,12 @@ class Schedule:
         return (self.events, self.team)
 
     def get_eligible_person(
-        self, role: Role, team: List[Person], date: date, preacher: Preacher = None
-    ) -> Person:
+        self,
+        role: Role,
+        team: List[Person],
+        date: date,
+        preacher: Optional[Preacher] = None,
+    ) -> Optional[Person]:
         """
         Finds and returns an eligible person for a given role on a specific date.
 

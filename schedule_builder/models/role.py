@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import List
 
 
 class Role(StrEnum):
@@ -34,7 +35,7 @@ class Role(StrEnum):
     BACKUP = "BACKUP"
 
     @staticmethod
-    def get_schedule_order():
+    def get_schedule_order() -> List["Role"]:
         """
         Returns the default schedule order for roles in an event.
 

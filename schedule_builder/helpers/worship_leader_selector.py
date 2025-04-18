@@ -1,6 +1,6 @@
 # Standard Library Imports
 import logging
-from typing import List
+from typing import List, Optional
 
 # Local Imports
 from ..models.person import Person
@@ -18,7 +18,7 @@ class WorshipLeaderSelector:
         self.rotation = rotation
         self.index = index  # Default to the first worship leader in the rotation
 
-    def get_next(self, eligible_persons: List[Person]) -> Person:
+    def get_next(self, eligible_persons: List[Person]) -> Optional[Person]:
         """
         Finds and returns the next eligible worship leader from the rotation list.
 

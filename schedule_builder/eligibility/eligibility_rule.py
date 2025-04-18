@@ -1,6 +1,7 @@
 # Standard Library Imports
 from abc import ABC, abstractmethod
 from datetime import date
+from typing import Optional
 
 # Local Imports
 from ..models.person import Person
@@ -16,7 +17,11 @@ class EligibilityRule(ABC):
 
     @abstractmethod
     def is_eligible(
-        self, person: Person, role: Role, event_date: date, preacher: Preacher = None
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
     ) -> bool:
         """
         Determines if a person is eligible for a role on a specific date.

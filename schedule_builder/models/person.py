@@ -1,6 +1,6 @@
 # Standard Library Imports
 from datetime import date
-from typing import List
+from typing import List, Optional
 
 # Local Imports
 from ..models.role import Role
@@ -52,8 +52,10 @@ class Person:
         self.teaching_dates: List[date] = teaching_dates
         self.on_leave = on_leave
         self.assigned_dates: List[date] = []
-        self.last_assigned_dates = {role: None for role in roles}
-        self.role_assigned_dates = {role: [] for role in roles}
+        self.last_assigned_dates: dict[Role, Optional[date]] = {
+            role: None for role in roles
+        }
+        self.role_assigned_dates: dict[Role, List[date]] = {role: [] for role in roles}
 
     def assign_event(self, date: date, role: Role) -> None:
         """
@@ -66,7 +68,7 @@ class Person:
         self.last_assigned_dates[role] = date
         self.role_assigned_dates[role].append(date)
 
-    def get_next_preaching_date(self, reference_date: date) -> date:
+    def get_next_preaching_date(self, reference_date: date) -> Optional[date]:
         """
         Returns the next preaching date on or after the given reference date.
 
