@@ -19,7 +19,7 @@ def set_logging() -> None:
         filename=LOG_FILE_PATH,
         filemode="w",
         format="%(asctime)s - %(levelname)s - %(message)s",
-        level=logging.DEBUG,
+        level=logging.INFO,
     )
 
 

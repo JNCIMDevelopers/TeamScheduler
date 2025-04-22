@@ -41,10 +41,11 @@ def test_build_schedule():
     assert team_output == team_input
 
 
-def test_build_schedule_with_no_team():
+@pytest.mark.parametrize("team_data", [None, []])
+def test_build_schedule_with_no_team(team_data):
     # Arrange
     event_dates = [date(2024, 6, 30), date(2024, 7, 7)]
-    schedule = Schedule(team=None, event_dates=event_dates)
+    schedule = Schedule(team=team_data, event_dates=event_dates)
 
     # Act
     events, team = schedule.build()
