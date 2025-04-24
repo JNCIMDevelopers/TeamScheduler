@@ -43,9 +43,12 @@ def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
 
         print(f"Testing on sys platform: '{sys.platform}'")
         print(f"Testing on test platform: '{platform}'")
+        print(f"Check sys frozen: '{getattr(sys, 'frozen', 'Not frozen')}'")
         # Conditionally patch os.startfile for win32 platform
         if platform == "win32" and hasattr(os, "startfile"):
             with patch("os.startfile") as mock_startfile:
+                print(f"Check sys platform within win32 block: '{sys.platform}'")
+                print(f"Check sys frozen within win32 block: '{getattr(sys, 'frozen', 'Not frozen')}'")
                 # Act
                 ui_manager.handle_open_schedule_file(None, mock_label, filepath)
 
