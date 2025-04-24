@@ -1,4 +1,5 @@
 # Standard Library Imports
+import os
 import pytest
 from datetime import date
 from unittest.mock import MagicMock, patch
@@ -25,9 +26,7 @@ def mock_data():
 @pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 @patch("os.path.abspath")
 @patch("subprocess.call")
-def test_handle_open_schedule_file(
-    mock_subprocess, mock_abspath, platform
-):
+def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
     with patch("sys.platform", platform):
         # Arrange
         mock_app = MagicMock(customtkinter.CTk)
@@ -41,12 +40,13 @@ def test_handle_open_schedule_file(
         filepath = "test_schedule.csv"
         mock_abspath.return_value = "/absolute/path/to/test_schedule.csv"
 
-        if platform == "win32":
+        # Conditionally patch os.startfile for win32 platform
+        if platform == "win32" and hasattr(os, "startfile"):
             with patch("os.startfile") as mock_startfile:
                 # Act
                 ui_manager.handle_open_schedule_file(None, mock_label, filepath)
 
-                #Assert
+                # Assert
                 mock_startfile.assert_called_once_with(mock_abspath.return_value)
                 mock_subprocess.assert_not_called()
         elif platform == "darwin":
