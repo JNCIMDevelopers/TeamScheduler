@@ -40,6 +40,8 @@ def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
         filepath = "test_schedule.csv"
         mock_abspath.return_value = "/absolute/path/to/test_schedule.csv"
 
+        print(f"Testing on platform: '{sys.platform}'")
+
         # Conditionally patch os.startfile for win32 platform
         if platform == "win32" and hasattr(os, "startfile"):
             with patch("os.startfile") as mock_startfile:
