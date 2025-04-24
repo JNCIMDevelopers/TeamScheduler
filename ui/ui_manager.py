@@ -258,6 +258,7 @@ class UIManager:
             label (customtkinter.CTkLabel): The label that was clicked.
             filepath (str): The path to the file to open.
         """
+        print(f"Executing on platform: '{sys.platform}'")
         full_path = os.path.abspath(filepath)
         if sys.platform == "win32":
             os.startfile(full_path)
