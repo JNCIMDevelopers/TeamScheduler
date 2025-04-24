@@ -20,24 +20,35 @@ def mock_schedule_handler_data():
         )
     ]
     mock_rotation = ["TestPerson"]
-    return mock_team, mock_preachers, mock_rotation
+    mock_file_exporter = MagicMock()
+    return mock_team, mock_preachers, mock_rotation, mock_file_exporter
 
 
 @pytest.fixture
 def mock_schedule_handler(mock_schedule_handler_data):
-    mock_team, mock_preachers, mock_rotation = mock_schedule_handler_data
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
     return UIScheduleHandler(
-        team=mock_team, preachers=mock_preachers, rotation=mock_rotation
+        team=mock_team,
+        preachers=mock_preachers,
+        rotation=mock_rotation,
+        file_exporter=mock_file_exporter,
     )
 
 
 def test_schedule_handler_initialization(mock_schedule_handler_data):
     # Arrange
-    mock_team, mock_preachers, mock_rotation = mock_schedule_handler_data
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
 
     # Act
     schedule_handler = UIScheduleHandler(
-        team=mock_team, preachers=mock_preachers, rotation=mock_rotation
+        team=mock_team,
+        preachers=mock_preachers,
+        rotation=mock_rotation,
+        file_exporter=mock_file_exporter,
     )
 
     # Assert
@@ -66,13 +77,18 @@ def test_schedule_handler_initialization_with_invalid_preacher_data(
     mock_schedule_handler_data, preacher_data
 ):
     # Arrange
-    mock_team, mock_preachers, mock_rotation = mock_schedule_handler_data
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
     mock_preachers = preacher_data
 
     # Act and Assert
     with pytest.raises(ValueError):
         UIScheduleHandler(
-            team=mock_team, preachers=mock_preachers, rotation=mock_rotation
+            team=mock_team,
+            preachers=mock_preachers,
+            rotation=mock_rotation,
+            file_exporter=mock_file_exporter,
         )
 
 
@@ -99,7 +115,9 @@ def test_calculate_preaching_date_range(
     expected_latest_date,
 ):
     # Arrange
-    mock_team, mock_preachers, mock_rotation = mock_schedule_handler_data
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
     mock_preachers = [
         Preacher(
             name="TestPreacher",
@@ -108,7 +126,10 @@ def test_calculate_preaching_date_range(
         )
     ]
     schedule_handler = UIScheduleHandler(
-        team=mock_team, preachers=mock_preachers, rotation=mock_rotation
+        team=mock_team,
+        preachers=mock_preachers,
+        rotation=mock_rotation,
+        file_exporter=mock_file_exporter,
     )
 
     # Act
@@ -137,9 +158,14 @@ def test_calculate_preaching_date_range_with_invalid_preacher_data(
     mock_schedule_handler_data, preacher_data
 ):
     # Arrange
-    mock_team, mock_preachers, mock_rotation = mock_schedule_handler_data
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
     schedule_handler = UIScheduleHandler(
-        team=mock_team, preachers=mock_preachers, rotation=mock_rotation
+        team=mock_team,
+        preachers=mock_preachers,
+        rotation=mock_rotation,
+        file_exporter=mock_file_exporter,
     )
     schedule_handler.preachers = preacher_data
 
@@ -316,3 +342,44 @@ def test_build_schedule(
         event_dates=mock_sundays,
     )
     mock_schedule_instance.build.assert_called_once()
+
+
+@patch("ui.ui_schedule_handler.UIScheduleHandler.build_schedule")
+def test_create_schedule(mock_build_schedule, mock_schedule_handler_data):
+    # Arrange
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
+    schedule_handler = UIScheduleHandler(
+        team=mock_team,
+        preachers=mock_preachers,
+        rotation=mock_rotation,
+        file_exporter=mock_file_exporter,
+    )
+
+    mock_events = ["event1", "event2"]
+    mock_team = ["team_member_1", "team_member_2"]
+    mock_build_schedule.return_value = (mock_events, mock_team)
+
+    start_date = date(2025, 4, 6)
+    end_date = date(2025, 4, 20)
+
+    # Act
+    schedule_handler.create_schedule(start_date=start_date, end_date=end_date)
+
+    # Assert
+    mock_build_schedule.assert_called_once_with(
+        start_date=start_date, end_date=end_date
+    )
+
+    mock_file_exporter.export_html.assert_called_once_with(
+        filepath=ANY,
+        start_date=start_date,
+        end_date=end_date,
+        events=mock_events,
+        team=mock_team,
+    )
+
+    mock_file_exporter.export_csv.assert_called_once_with(
+        filepath=ANY, events=mock_events
+    )

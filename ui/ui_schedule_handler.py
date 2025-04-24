@@ -5,6 +5,7 @@ from datetime import date
 from typing import List, Tuple
 
 # Local Imports
+from paths import SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
 from schedule_builder.builders.schedule import Schedule
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
@@ -19,7 +20,7 @@ class UIScheduleHandler:
     for the specified date range.
     """
 
-    def __init__(self, team, preachers, rotation):
+    def __init__(self, team, preachers, rotation, file_exporter):
         """
         Initializes the schedule handler with team, preachers, and rotation data.
 
@@ -27,11 +28,13 @@ class UIScheduleHandler:
             team: The list of team members.
             preachers: The list of preachers.
             rotation: The priority order of worship leaders.
+            file_exporter: The file exporter for generating schedule files.
         """
         self.logger = logging.getLogger(__name__)
         self.team = team
         self.preachers = preachers
         self.rotation = rotation
+        self.file_exporter = file_exporter
         self.earliest_date, self.latest_date = self.calculate_preaching_date_range()
         self.logger.debug(f"Earliest Preaching Date: {str(self.earliest_date)}")
         self.logger.debug(f"Latest Preaching Date: {str(self.latest_date)}")
@@ -146,3 +149,33 @@ class UIScheduleHandler:
         ).build()
 
         return events, updated_team
+
+    def create_schedule(self, start_date: date, end_date: date) -> None:
+        """
+        Creates a schedule for the specified date range.
+
+        This method generates a schedule, exports the details to an HTML file, and exports it to a CSV file.
+
+        Args:
+            start_date (date): The start date of the schedule.
+            end_date (date): The end date of the schedule.
+        """
+        # Build Schedule
+        events, updated_team = self.build_schedule(
+            start_date=start_date, end_date=end_date
+        )
+
+        # Generate HTML document
+        self.file_exporter.export_html(
+            filepath=SCHEDULE_DETAILS_HTML_FILE_PATH,
+            start_date=start_date,
+            end_date=end_date,
+            events=events,
+            team=updated_team,
+        )
+
+        # Generate CSV document
+        self.file_exporter.export_csv(
+            filepath=SCHEDULE_CSV_FILE_PATH,
+            events=events,
+        )
