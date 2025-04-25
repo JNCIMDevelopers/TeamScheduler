@@ -4,7 +4,7 @@ from datetime import date as DateType
 from typing import List, Optional
 
 # Local Imports
-from ..eligibility.rules import ConsecutiveAssignmentLimitRule
+from ..helpers.person_status_checker import PersonStatusChecker
 from ..models.person import Person
 from ..models.preacher import Preacher
 from ..models.role import Role
@@ -111,34 +111,6 @@ class Event:
         """
         return next((person for person in self.team if person.name == name), None)
 
-    def get_person_status_on_date(self, person: Person, date: DateType) -> str:
-        """
-        Returns the status of a person on a given date.
-
-        Args:
-            person (Person): The person to check the status of.
-            date (date): The date to check the status on.
-
-        Returns:
-            str: The status of the person on the given date.
-        """
-        if person.on_leave:
-            return "ON-LEAVE"
-        elif date in person.blockout_dates:
-            return "BLOCKOUT"
-        elif date in person.assigned_dates:
-            return "ASSIGNED"
-        elif date in person.preaching_dates:
-            return "PREACHING"
-        elif not ConsecutiveAssignmentLimitRule().is_eligible(
-            person=person, role=Role.LYRICS, event_date=date
-        ):
-            return "BREAK"
-        elif Role.WORSHIPLEADER in person.roles and date in person.teaching_dates:
-            return "TEACHING"
-        else:
-            return "UNASSIGNED"
-
     def get_assigned_preacher(self) -> Optional[Preacher]:
         """
         Returns the assigned preacher for the event date.
@@ -199,7 +171,7 @@ class Event:
             for role in unassigned_roles
         )
         unassigned_names_str = "\n".join(
-            f"{name} ({self.get_person_status_on_date(person=person, date=self.date) if person else 'UNKNOWN'})"
+            f"{name} ({PersonStatusChecker.get_status(person=person, check_date=self.date) if person else 'UNKNOWN'})"
             for name in unassigned_names
             if (person := self.get_person_by_name(name=name)) is not None
         )
