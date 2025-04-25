@@ -177,7 +177,7 @@ def create_html(content: str, filepath: str) -> None:
     with open(filepath, "w", newline="") as htmlfile:
         htmlfile.write(content)
 
-    logging.info(f"HTML file '{filepath}' has been created.\n")
+    logging.info(f"HTML file '{filepath}' has been created.")
 
 
 def get_schedule_data_for_csv(events: List[Event]) -> List[List[str]]:
@@ -251,4 +251,4 @@ def create_csv(data: List[List[str]], filepath: str) -> None:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerows(data)
 
-    logging.info(f"CSV file '{filepath}' has been created.\n")
+    logging.info(f"CSV file '{filepath}' has been created.")

@@ -40,8 +40,8 @@ class EligibilityChecker:
         for rule in self.rules:
             result = rule.is_eligible(person, role, event_date, preacher)
             logging.debug(
-                f"Rule: {rule.__class__.__name__}, "
-                f"Person: {person.name}, Role: {role}, Date: {event_date}, "
+                f"Role: {role}, Date: {event_date}, "
+                f"Person: {person.name}, Rule: {rule.__class__.__name__}, "
                 f"Preacher: {preacher.name if preacher else 'None'}, Result: {result}"
             )
             if not result:
