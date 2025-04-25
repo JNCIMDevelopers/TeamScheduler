@@ -1,7 +1,6 @@
 # Standard Library Imports
 import os
 import pytest
-import sys
 from datetime import date
 from unittest.mock import MagicMock, patch
 
@@ -41,14 +40,13 @@ def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
         filepath = "test_schedule.csv"
         mock_abspath.return_value = "/absolute/path/to/test_schedule.csv"
 
-        print(f"Testing on sys platform: '{sys.platform}'")
-        print(f"Testing on test platform: '{platform}'")
-        print(f"Check sys frozen: '{getattr(sys, 'frozen', 'Not frozen')}'")
         # Conditionally patch os.startfile for win32 platform
-        if platform == "win32" and hasattr(os, "startfile"):
+        if platform == "win32":
+            if not hasattr(os, "startfile"):
+                pytest.skip(
+                    "Skipping test as the test is for Windows but running on a non-Windows system."
+                )
             with patch("os.startfile") as mock_startfile:
-                print(f"Check sys platform within win32 block: '{sys.platform}'")
-                print(f"Check sys frozen within win32 block: '{getattr(sys, 'frozen', 'Not frozen')}'")
                 # Act
                 ui_manager.handle_open_schedule_file(None, mock_label, filepath)
 
