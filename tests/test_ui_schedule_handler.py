@@ -55,6 +55,7 @@ def test_schedule_handler_initialization(mock_schedule_handler_data):
     assert schedule_handler.team == mock_team
     assert schedule_handler.preachers == mock_preachers
     assert schedule_handler.rotation == mock_rotation
+    assert schedule_handler.file_exporter == mock_file_exporter
     assert schedule_handler.earliest_date == date(2025, 4, 6)
     assert schedule_handler.latest_date == date(2025, 4, 20)
 
