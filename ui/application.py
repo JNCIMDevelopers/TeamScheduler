@@ -15,24 +15,27 @@ from ui.ui_schedule_handler import UIScheduleHandler
 
 class App(customtkinter.CTk):
     """
-    A GUI application for scheduling using customtkinter and tkcalendar.
+    A GUI application for scheduling team members and preachers.
 
-    This class initializes and configures the user interface, allowing users to input
-    a date range for scheduling. It handles the creation of schedules based on team
-    and preacher data, validates date inputs, and provides options to view and manage
-    the generated schedules.
+    Provides functionality for generating schedules, managing team assignments,
+    and exporting files.
+
+    Attributes:
+        file_exporter (FileExporter): Handles file export operations.
+        ui_schedule_handler (UIScheduleHandler): Manages scheduling logic.
+        ui_manager (UIManager): Manages the user interface and interactions.
     """
 
     def __init__(
         self, team: List[Person], preachers: List[Preacher], rotation: List[str]
     ):
         """
-        Initializes the application with a list of team members, preachers, and a rotation.
+        Initializes the application with a team of members, preachers, and a worship leader rotation.
 
         Args:
-            team (List[Person]): A list of Person objects representing the team members.
-            preachers (List[Preacher]): A list of Preacher objects representing the preachers.
-            rotation (List[str]): A list of strings representing the priority order of worship leaders.
+            team (List[Person]): A list of team members who can be assigned to roles in the schedule.
+            preachers (List[Preacher]): A list of preachers who can be scheduled for preaching duties.
+            rotation (List[str]): A list of worship leader names in priority order for scheduling.
         """
         super().__init__()
         self.logger = logging.getLogger(__name__)

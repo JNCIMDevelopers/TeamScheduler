@@ -8,30 +8,32 @@ from ..models.person import Person
 
 class WorshipLeaderSelector:
     """
-    A class to select a worship leader.
+    A class to select a worship leader based on a rotation.
     """
 
-    def __init__(self, rotation: List[str] = [], index: int = 0):
+    def __init__(self, rotation: Optional[List[str]] = None, index: int = 0):
         """
-        Initializes the WorshipLeaderSelector with a rotation of worship leaders and an index.
+        Initializes the WorshipLeaderSelector with a rotation and an index.
+
+        Args:
+            rotation (Optional[List[str]]): The rotation list of worship leaders. Defaults to an empty list.
+            index (int): The current index in the rotation list. Defaults to 0.
         """
-        self.rotation = rotation
+        self.rotation = rotation if rotation else []
         self.index = index  # Default to the first worship leader in the rotation
 
     def get_next(self, eligible_persons: List[Person]) -> Optional[Person]:
         """
-        Finds and returns the next eligible worship leader from the rotation list.
+        Returns the next eligible worship leader from the rotation list.
 
-        The method iterates through the list of worship leaders in a round-robin fashion,
-        starting from the current index. It returns the first eligible worship leader found
-        in the `eligible_persons` list. The index is updated only if a valid worship leader
-        is returned, ensuring the next call starts from the correct position in the rotation.
+        The method checks the rotation list starting from the current index and returns
+        the first eligible worship leader found in the provided list of eligible persons.
 
         Args:
-            eligible_persons (List[Person]): A list of persons who are eligible for the role of worship leader.
+            eligible_persons (List[Person]): A list of persons eligible for the worship leader role.
 
         Returns:
-            Person: The next eligible worship leader based on the rotation, or None if no eligible person is found.
+            Person: The next eligible worship leader, or None if no eligible person is found.
         """
         if not eligible_persons or not self.rotation:
             return None

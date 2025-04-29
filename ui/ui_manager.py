@@ -20,10 +20,16 @@ customtkinter.set_default_color_theme("blue")
 
 class UIManager:
     """
-    Manages the user interface for the application.
+    Manages the user interface for the scheduling application.
 
-    This class is responsible for setting up the UI, adding widgets, and
-    delegating event handling to the appropriate handlers.
+    This class handles the setup of the main window, widget creation, and event handling
+    for various UI elements. It is responsible for displaying and updating the schedule-related
+    UI, including date entries, buttons, confirmation messages, and links to schedule outputs.
+
+    Attributes:
+        app (customtkinter.CTk): The main application instance, responsible for managing the app window.
+        schedule_handler (UIScheduleHandler): A handler for managing schedule-related logic and data.
+        title (str): The title of the application window.
     """
 
     def __init__(
@@ -33,12 +39,12 @@ class UIManager:
         title: str,
     ):
         """
-        Initializes the UI manager with the application, schedule handler, and event handler.
+        Initializes the UIManager with the main app instance, schedule handler, and window title.
 
         Args:
             app (customtkinter.CTk): The main application instance.
-            schedule_handler (UIScheduleHandler): The handler for schedule-related logic.
-            title (str): The title of the application window.
+            schedule_handler (UIScheduleHandler): The handler responsible for managing the schedule.
+            title (str): The title for the application window.
         """
         self.app = app
         self.schedule_handler = schedule_handler
@@ -46,9 +52,10 @@ class UIManager:
 
     def setup(self) -> None:
         """
-        Sets up the user interface for the application.
+        Sets up the user interface by configuring the window, layout, and widgets.
 
-        This method configures the main window and adds widgets to the UI.
+        This method centers the window on the screen and adds the necessary UI components such as
+        labels, date entry fields, buttons, and other elements to the window.
         """
         # Setup window
         self.app.title(self.title)
@@ -72,10 +79,7 @@ class UIManager:
 
     def add_widgets(self) -> None:
         """
-        Adds widgets to the application window.
-
-        This method creates and configures labels, buttons, and date entry fields
-        for the user interface.
+        Adds all widgets (labels, buttons, date pickers) to the main window.
         """
         # Title label
         self.app.title_label = customtkinter.CTkLabel(
@@ -150,7 +154,7 @@ class UIManager:
         """
         Resets the confirmation and output labels in the UI.
 
-        This method clears any existing text or bindings on the labels.
+        Clears any existing text or bindings to ensure clean output for new messages or links.
         """
         self.app.confirmation_label.unbind("<Button-1>")
         self.app.output_link_label.unbind("<Button-1>")
@@ -158,20 +162,20 @@ class UIManager:
 
     def configure_alert_message(self, message: str) -> None:
         """
-        Configures the UI to display an alert message.
+        Configures and displays an alert message in the UI.
 
         Args:
-            message (str): The alert message to display.
+            message (str): The message to display in the alert dialog box.
         """
         messagebox.showinfo("Alert", message)
         self.app.logger.warning(message)
 
     def configure_validation_error_message(self, text: str) -> None:
         """
-        Configures the UI to display a validation error message.
+        Displays a validation error message on the confirmation label.
 
         Args:
-            text (str): The error message to display.
+            text (str): The error message to display in red on the UI.
         """
         self.reset_output_labels()
         self.app.confirmation_label.configure(
@@ -183,7 +187,9 @@ class UIManager:
 
     def configure_output_links(self) -> None:
         """
-        Configures the UI to display links to open the schedule and schedule details.
+        Configures the UI to display links to the schedule and schedule details.
+
+        Adds clickable labels that allow the user to open schedule-related files directly.
         """
         self.reset_output_labels()
 
@@ -223,7 +229,7 @@ class UIManager:
         Configures the UI to display an error message with a link to the log file.
 
         Args:
-            message (str): The error message to display.
+            message (str): The error message to display in the UI.
         """
         self.reset_output_labels()
         self.app.confirmation_label.configure(
@@ -251,11 +257,11 @@ class UIManager:
         self, event, label: customtkinter.CTkLabel, filepath: str
     ) -> None:
         """
-        Opens a schedule file based on the operating system and updates the link color.
+        Opens the specified schedule file and updates the link color.
 
         Args:
             event: The event that triggered this handler (if any).
-            label (customtkinter.CTkLabel): The label that was clicked.
+            label (customtkinter.CTkLabel): The label associated with the file link.
             filepath (str): The path to the file to open.
         """
         full_path = os.path.abspath(filepath)
@@ -271,8 +277,8 @@ class UIManager:
         """
         Handles the 'CREATE' button click event.
 
-        This method validates the input dates, adjusts them if necessary, creates
-        a schedule, and updates the UI with the results or error messages.
+        Validates the input dates, adjusts them if necessary, creates the schedule, and
+        updates the UI with results or error messages.
         """
         start_date = self.app.start_date_entry.get_date()
         end_date = self.app.end_date_entry.get_date()

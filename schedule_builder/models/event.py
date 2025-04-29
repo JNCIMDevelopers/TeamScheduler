@@ -12,51 +12,38 @@ from ..models.role import Role
 
 class Event:
     """
-    A class to represent an event, its team, roles, and preachers.
-
-    Attributes:
-        date (date): The date of the event.
-        team (List[Person]): The team assigned to the event.
-        roles (dict[Role, Optional[str]]): A dictionary mapping each role to the assigned person's name.
-        preachers (List[Preacher]): The preachers for the event.
-
-    Methods:
-        assign_role(role, person, date): Assigns a person to a role on the event date.
-        get_assigned_roles(): Returns a list of roles that have been assigned.
-        get_unassigned_roles(): Returns a list of roles that have not been assigned.
-        get_unassigned_names(): Returns a list of names of unassigned persons.
-        get_person_by_name(name): Returns a person object by their name.
-        get_person_status_on_date(person, date): Returns the status of a person on a given date.
-        get_assigned_preacher_and_graphics_support(): Returns the assigned preacher and graphics support for the event date.
+    A class representing an event with its date, team, roles, and preachers.
     """
 
     def __init__(
-        self, date: DateType, team: List[Person] = [], preachers: List[Preacher] = []
+        self,
+        date: DateType,
+        team: Optional[List[Person]] = None,
+        preachers: Optional[List[Preacher]] = None,
     ):
         """
-        Initializes the Event with a date, team, and optionally preachers.
+        Initializes the event with a date, team, and optional preachers.
 
         Args:
             date (date): The date of the event.
-            team (List[Person], optional): The team assigned to the event. Defaults to an empty list.
-            preachers (List[Preacher], optional): The preachers for the event. Defaults to an empty list.
+            team (List[Person], optional): The team for the event.
+            preachers (List[Preacher], optional): The preachers for the event.
         """
         self.date: DateType = date
-        self.team: List[Person] = team
-        self.preachers: List[Preacher] = preachers
+        self.team: List[Person] = team if team else []
+        self.preachers: List[Preacher] = preachers if preachers else []
         self.roles: dict[Role, Optional[str]] = {role: None for role in Role}
 
     def assign_role(self, role: Role, person: Person) -> None:
         """
-        Assigns a person to a role on the event date.
+        Assigns a person to a role for the event.
 
         Args:
             role (Role): The role to assign.
             person (Person): The person to assign to the role.
-            date (date): The date of the event.
 
         Raises:
-            ValueError: If the role is already assigned or not valid.
+            ValueError: If the role is already assigned or invalid.
         """
         if role not in Role:
             raise ValueError(f"{role} is not a valid role.")
@@ -65,11 +52,11 @@ class Event:
             raise ValueError(f"{role.name} already has a person assigned.")
 
         self.roles[role] = person.name
-        person.assign_event(date=self.date, role=role)
+        person.assign_event(event_date=self.date, role=role)
 
     def get_assigned_roles(self) -> List[Role]:
         """
-        Returns a list of roles that have been assigned.
+        Returns the list of roles that have been assigned.
 
         Returns:
             List[Role]: A list of assigned roles.
@@ -80,7 +67,7 @@ class Event:
 
     def get_unassigned_roles(self) -> List[Role]:
         """
-        Returns a list of roles that have not been assigned.
+        Returns the list of roles that are unassigned.
 
         Returns:
             List[Role]: A list of unassigned roles.
@@ -89,12 +76,12 @@ class Event:
 
     def get_unassigned_names(self) -> List[str]:
         """
-        Returns a list of names of unassigned persons.
+        Returns the names of persons who are unassigned.
 
         Returns:
-            List[str]: A list of unassigned person names.
+            List[str]: A list of unassigned names.
         """
-        assigned_names = {assigned_name for assigned_name in self.roles.values()}
+        assigned_names = set(self.roles.values())
         return [
             person.name for person in self.team if person.name not in assigned_names
         ]
@@ -104,7 +91,7 @@ class Event:
         Returns a person object by their name.
 
         Args:
-            name (str): The name of the person.
+            name (str): The person's name.
 
         Returns:
             Person: The person object, or None if not found.
@@ -113,7 +100,7 @@ class Event:
 
     def get_assigned_preacher(self) -> Optional[Preacher]:
         """
-        Returns the assigned preacher for the event date.
+        Returns the preacher assigned to the event date.
 
         Returns:
             Preacher: The assigned preacher, or None if not assigned.
@@ -125,14 +112,14 @@ class Event:
 
     def is_assignable_if_needed(self, role: Role, person: Person) -> bool:
         """
-        Checks if a person is assignable to a role. Used specifically for unassigned roles.
+        Checks if a person can be assigned to a role on the event date when no other persons are available.
 
         Args:
-            role (Role): The specific role to assign.
-            person (Person): The person to check if assignable.
+            role (Role): The role to check.
+            person (Person): The person to check.
 
         Returns:
-            bool: True if the person is assignable. False otherwise.
+            bool: True if the person can be assigned, False otherwise.
         """
         return (
             not person.on_leave
@@ -143,10 +130,10 @@ class Event:
 
     def __str__(self) -> str:
         """
-        Returns a string representation of the Event, including preachers, assigned roles, and unassigned roles and people.
+        Returns a string representation of the event, including preachers, assigned roles, and unassigned roles/people.
 
         Returns:
-            str: A string representation of the Event.
+            str: The string representation of the event.
         """
         preacher = self.get_assigned_preacher()
         assigned_roles = self.get_assigned_roles()

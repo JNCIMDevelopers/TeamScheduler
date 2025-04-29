@@ -14,14 +14,7 @@ from schedule_builder.models.role import Role
 
 class TeamInitializer:
     """
-    A class to initialize team members and preachers.
-
-    Methods:
-        parse_date(date_str): Parses a string in YYYY-MM-DD format into a date object.
-        initialize_persons(): Initializes and returns a list of Person objects.
-        initialize_preachers(): Initializes and returns a list of Preacher objects.
-        initialize_rotation" Initializes and returns a list of names.
-        initialize_team(): Initializes and returns both persons and preachers.
+    Initializes team members, preachers, and rotation data from external files.
     """
 
     def __init__(self):
@@ -30,20 +23,20 @@ class TeamInitializer:
 
     def parse_date(self, date_str: str) -> date:
         """
-        Parses a string in YYYY-MM-DD format into a date object.
+        Converts a string in YYYY-MM-DD format to a date object.
 
         Args:
-            date_str (str): The date string to parse.
+            date_str (str): The date string to convert.
 
         Returns:
-            date: The parsed date object.
+            date: The corresponding date object.
         """
         year, month, day = map(int, date_str.split("-"))
         return date(year, month, day)
 
     def initialize_persons(self) -> List[Person]:
         """
-        Initializes and returns a list of Person objects.
+        Loads and returns a list of Person objects.
 
         Returns:
             List[Person]: A list of initialized Person objects.
@@ -80,7 +73,7 @@ class TeamInitializer:
 
     def initialize_preachers(self) -> List[Preacher]:
         """
-        Initializes and returns a list of Preacher objects.
+        Loads and returns a list of Preacher objects.
 
         Returns:
             List[Preacher]: A list of initialized Preacher objects.
@@ -104,10 +97,10 @@ class TeamInitializer:
 
     def initialize_rotation(self) -> List[str]:
         """
-        Initializes and returns a list of names.
+        Loads and returns a list of rotation names.
 
         Returns:
-            List[str]: A list of names.
+            List[str]: A list of names for the rotation.
         """
         with open(resource_path(ROTATION_DATA_FILE_PATH), "r") as f:
             names = json.load(f)
@@ -118,10 +111,10 @@ class TeamInitializer:
 
     def initialize_team(self) -> Tuple[List[Person], List[Preacher], List[str]]:
         """
-        Initializes and returns person, preachers, and rotation.
+        Loads and returns persons, preachers, and rotation data together.
 
         Returns:
-            tuple: A tuple containing a list of Person objects, Preacher objects and rotation names.
+            tuple: A tuple containing lists of Person objects, Preacher objects, and rotation names.
         """
         return (
             self.initialize_persons(),

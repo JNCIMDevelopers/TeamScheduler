@@ -24,8 +24,8 @@ def test_assign_event():
     )
 
     # Act
-    person.assign_event(date=date_one, role=role_one)
-    person.assign_event(date=date_two, role=role_two)
+    person.assign_event(event_date=date_one, role=role_one)
+    person.assign_event(event_date=date_two, role=role_two)
 
     # Assert
     assert len(person.assigned_dates) == 2

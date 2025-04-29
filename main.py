@@ -12,7 +12,7 @@ def set_logging() -> None:
     """
     Configures logging settings for the application.
 
-    This function sets up logging to write debug and higher-level messages to a specified file.
+    Sets up logging to write messages of level INFO or higher to the specified log file.
     The log file is overwritten each time the application starts.
     """
     logging.basicConfig(
@@ -27,11 +27,13 @@ def main() -> None:
     """
     Main entry point of the application.
 
-    This function performs the following steps:
+    This function performs the following:
     - Creates the output directory if it does not exist.
-    - Configures logging settings.
-    - Initializes team data.
-    - Starts the application GUI.
+    - Configures logging settings for the application.
+    - Initializes team data (team, preachers, rotation).
+    - Starts the application GUI using the initialized data.
+
+    The function runs the main loop of the application once initialization is complete.
     """
     # Setup output directory and logging config
     os.makedirs(OUTPUT_FOLDER_PATH, exist_ok=True)

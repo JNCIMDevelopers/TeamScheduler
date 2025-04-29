@@ -7,16 +7,16 @@ def get_all_sundays(
     start_date: Optional[date] = None, end_date: Optional[date] = None
 ) -> List[date]:
     """
-    Get all Sundays between the specified start and end dates.
+    Returns all Sundays between the specified start and end dates.
 
-    If `start_date` is not provided, defaults to today's date. If `end_date` is not provided, defaults to today's date.
+    If no `start_date` is provided, it defaults to today's date. If no `end_date` is provided, it also defaults to today's date.
 
     Args:
-        start_date (Optional[date]): The starting date to begin the search. Defaults to today's date if not provided.
-        end_date (Optional[date]): The ending date to end the search. Defaults to today's date if not provided.
+        start_date (Optional[date]): The starting date for the search (default is today).
+        end_date (Optional[date]): The ending date for the search (default is today).
 
     Returns:
-        List[date]: A list of `date` objects representing all Sundays between the specified dates.
+        List[date]: A list of Sundays between the specified dates.
 
     Examples:
         >>> get_all_sundays(date(2024, 1, 1), date(2024, 12, 31))

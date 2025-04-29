@@ -38,11 +38,11 @@ class FileExporter:
         Exports the team schedule as an HTML file.
 
         Args:
-            filepath (str): The destination path for the HTML file.
+            filepath (str): The path to save the HTML file.
             start_date (date): The start date of the schedule.
             end_date (date): The end date of the schedule.
             events (List[Event]): A list of scheduled events.
-            team (List[Person]): A list of team members included in the schedule.
+            team (List[Person]): A list of team members.
         """
         html_content = generate_team_schedule_html(start_date, end_date, events, team)
         self.logger.debug(f"HTML Data:\n{html_content}\n")
@@ -54,8 +54,8 @@ class FileExporter:
         Exports the event schedule as a CSV file.
 
         Args:
-            filepath (str): The destination path for the CSV file.
-            events (List[Event]): A list of scheduled events to include in the CSV.
+            filepath (str): The path to save the CSV file.
+            events (List[Event]): A list of scheduled events.
         """
         csv_data = get_schedule_data_for_csv(events=events)
         formatted_csv_data = format_data_for_csv(data=csv_data)
