@@ -97,7 +97,7 @@ class Event:
         Returns:
             List[str]: A list of unassigned person names.
         """
-        assigned_names = {assigned_name for assigned_name in self.roles.values()}
+        assigned_names = set(self.roles.values())
         return [
             person.name for person in self.team if person.name not in assigned_names
         ]
