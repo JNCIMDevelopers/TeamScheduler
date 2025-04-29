@@ -29,9 +29,9 @@ class Person:
         self,
         name: str,
         roles: List[Role],
-        blockout_dates: List[date] = [],
-        preaching_dates: List[date] = [],
-        teaching_dates: List[date] = [],
+        blockout_dates: List[date] = None,
+        preaching_dates: List[date] = None,
+        teaching_dates: List[date] = None,
         on_leave: bool = False,
     ):
         """
@@ -47,9 +47,9 @@ class Person:
         """
         self.name: str = name
         self.roles: List[Role] = roles
-        self.blockout_dates: List[date] = blockout_dates
-        self.preaching_dates: List[date] = preaching_dates
-        self.teaching_dates: List[date] = teaching_dates
+        self.blockout_dates: List[date] = blockout_dates if blockout_dates else []
+        self.preaching_dates: List[date] = preaching_dates if preaching_dates else []
+        self.teaching_dates: List[date] = teaching_dates if teaching_dates else []
         self.on_leave = on_leave
         self.assigned_dates: List[date] = []
         self.last_assigned_dates: dict[Role, Optional[date]] = {

@@ -31,7 +31,10 @@ class Event:
     """
 
     def __init__(
-        self, date: DateType, team: List[Person] = [], preachers: List[Preacher] = []
+        self,
+        date: DateType,
+        team: List[Person] = None,
+        preachers: List[Preacher] = None,
     ):
         """
         Initializes the Event with a date, team, and optionally preachers.
@@ -42,8 +45,8 @@ class Event:
             preachers (List[Preacher], optional): The preachers for the event. Defaults to an empty list.
         """
         self.date: DateType = date
-        self.team: List[Person] = team
-        self.preachers: List[Preacher] = preachers
+        self.team: List[Person] = team if team else []
+        self.preachers: List[Preacher] = preachers if preachers else []
         self.roles: dict[Role, Optional[str]] = {role: None for role in Role}
 
     def assign_role(self, role: Role, person: Person) -> None:

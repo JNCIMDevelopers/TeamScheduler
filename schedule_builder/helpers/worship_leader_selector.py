@@ -11,11 +11,11 @@ class WorshipLeaderSelector:
     A class to select a worship leader.
     """
 
-    def __init__(self, rotation: List[str] = [], index: int = 0):
+    def __init__(self, rotation: List[str] = None, index: int = 0):
         """
         Initializes the WorshipLeaderSelector with a rotation of worship leaders and an index.
         """
-        self.rotation = rotation
+        self.rotation = rotation if rotation else []
         self.index = index  # Default to the first worship leader in the rotation
 
     def get_next(self, eligible_persons: List[Person]) -> Optional[Person]:

@@ -12,7 +12,7 @@ class Preacher:
         dates (List[date]): A list of dates when the preacher is scheduled to preach.
     """
 
-    def __init__(self, name: str, graphics_support: str, dates: List[date] = []):
+    def __init__(self, name: str, graphics_support: str, dates: List[date] = None):
         """
         Initializes the Preacher with a name, graphics support, and optionally a list of preaching dates.
 
@@ -23,7 +23,7 @@ class Preacher:
         """
         self.name: str = name
         self.graphics_support: str = graphics_support
-        self.dates: List[date] = dates
+        self.dates: List[date] = dates if dates else []
 
     def __str__(self) -> str:
         """

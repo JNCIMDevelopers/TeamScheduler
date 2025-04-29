@@ -44,8 +44,8 @@ class Schedule:
         self,
         team: List[Person],
         event_dates: List[date],
-        preachers: List[Preacher] = [],
-        rotation: List[str] = [],
+        preachers: List[Preacher] = None,
+        rotation: List[str] = None,
     ):
         """
         Initializes the Schedule with a team, event dates, and optionally a list of preachers.
@@ -58,7 +58,7 @@ class Schedule:
         self.team: List[Person] = team
         self.event_dates: List[date] = event_dates
         self.events: List[Event] = []
-        self.preachers: List[Preacher] = preachers
+        self.preachers: List[Preacher] = preachers if preachers else []
         self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
 
         # Initialize the EligibilityChecker with all rules
