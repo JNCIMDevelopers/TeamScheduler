@@ -104,7 +104,7 @@ class Schedule:
             for role in Role:
                 # Get eligible person
                 eligible_person = self.get_eligible_person(
-                    role=role, team=team_copy, date=event_date, preacher=preacher
+                    role=role, team=team_copy, event_date=event_date, preacher=preacher
                 )
 
                 if eligible_person:
@@ -126,7 +126,7 @@ class Schedule:
         self,
         role: Role,
         team: List[Person],
-        date: date,
+        event_date: date,
         preacher: Optional[Preacher] = None,
     ) -> Optional[Person]:
         """
@@ -135,7 +135,7 @@ class Schedule:
         Args:
             role (Role): The role to be assigned.
             team (List[Person]): List of team members available for assignment.
-            date (date): The date of the event.
+            event_date (date): The date of the event.
             preacher (Preacher, optional): The assigned preacher. Defaults to None.
 
         Returns:
@@ -149,13 +149,13 @@ class Schedule:
         eligible_persons = [
             person
             for person in team
-            if self.eligibility_checker.is_eligible(person, role, date, preacher)
+            if self.eligibility_checker.is_eligible(person, role, event_date, preacher)
         ]
 
         # Return random eligible team member
         if eligible_persons:
             logging.info(
-                f"Eligible Persons for {role} on {date}: {[p.name for p in eligible_persons]}"
+                f"Eligible Persons for {role} on {event_date}: {[p.name for p in eligible_persons]}"
             )
 
             # If the role is WORSHIPLEADER, get the next worship leader from the rotation
@@ -168,5 +168,5 @@ class Schedule:
 
             return random.choice(eligible_persons)
 
-        logging.warning(f"No eligible person for {role} on {date}.")
+        logging.warning(f"No eligible person for {role} on {event_date}.")
         return None

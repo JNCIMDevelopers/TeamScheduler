@@ -80,7 +80,7 @@ def test_get_eligible_person_when_eligible():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -97,7 +97,7 @@ def test_get_eligible_person_with_no_team(team):
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -129,7 +129,7 @@ def test_get_eligible_person_with_no_valid_role():
 
     # Act
     eligible_persons = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -154,7 +154,7 @@ def test_get_eligible_person_when_on_leave():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -179,7 +179,7 @@ def test_get_eligible_person_with_blockout():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -204,7 +204,7 @@ def test_get_eligible_person_with_preaching():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -233,7 +233,7 @@ def test_get_eligible_person_with_3_consecutive_assigned_dates():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -268,7 +268,7 @@ def test_get_eligible_person_with_2_consecutive_same_role_assignments():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -304,7 +304,7 @@ def test_get_eligible_person_when_worship_leader_within_4_weeks_ago():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -342,7 +342,7 @@ def test_get_eligible_person_when_worship_leader_over_5_weeks_ago():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -382,7 +382,7 @@ def test_get_eligible_person_for_next_worship_leader_in_rotation():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -408,7 +408,7 @@ def test_get_eligible_person_for_worship_leader_with_preaching_next_week():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -434,7 +434,7 @@ def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -460,7 +460,7 @@ def test_get_eligible_person_for_non_worship_leader_role_with_teaching_on_same_d
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date
+        role=role, team=team, event_date=reference_date
     )
 
     # Assert
@@ -489,7 +489,7 @@ def test_get_eligible_person_for_special_condition_1_pastor_preaching():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date, preacher=preacher
+        role=role, team=team, event_date=reference_date, preacher=preacher
     )
 
     # Assert
@@ -520,7 +520,7 @@ def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date, preacher=preacher
+        role=role, team=team, event_date=reference_date, preacher=preacher
     )
 
     # Assert
@@ -549,7 +549,7 @@ def test_get_eligible_person_for_special_condition_2_pastor_preaching():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date, preacher=preacher
+        role=role, team=team, event_date=reference_date, preacher=preacher
     )
 
     # Assert
@@ -578,7 +578,7 @@ def test_get_eligible_person_for_special_condition_2_other_role():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date, preacher=preacher
+        role=role, team=team, event_date=reference_date, preacher=preacher
     )
 
     # Assert
@@ -609,7 +609,7 @@ def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, date=reference_date, preacher=preacher
+        role=role, team=team, event_date=reference_date, preacher=preacher
     )
 
     # Assert
