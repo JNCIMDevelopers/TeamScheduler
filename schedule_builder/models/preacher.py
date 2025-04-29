@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 
 
 class Preacher:
@@ -12,7 +12,9 @@ class Preacher:
         dates (List[date]): A list of dates when the preacher is scheduled to preach.
     """
 
-    def __init__(self, name: str, graphics_support: str, dates: List[date] = None):
+    def __init__(
+        self, name: str, graphics_support: str, dates: Optional[List[date]] = None
+    ):
         """
         Initializes the Preacher with a name, graphics support, and optionally a list of preaching dates.
 

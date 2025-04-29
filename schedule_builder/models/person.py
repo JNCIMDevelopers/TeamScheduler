@@ -29,9 +29,9 @@ class Person:
         self,
         name: str,
         roles: List[Role],
-        blockout_dates: List[date] = None,
-        preaching_dates: List[date] = None,
-        teaching_dates: List[date] = None,
+        blockout_dates: Optional[List[date]] = None,
+        preaching_dates: Optional[List[date]] = None,
+        teaching_dates: Optional[List[date]] = None,
         on_leave: bool = False,
     ):
         """

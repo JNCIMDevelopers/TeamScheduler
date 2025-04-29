@@ -33,8 +33,8 @@ class Event:
     def __init__(
         self,
         date: DateType,
-        team: List[Person] = None,
-        preachers: List[Preacher] = None,
+        team: Optional[List[Person]] = None,
+        preachers: Optional[List[Preacher]] = None,
     ):
         """
         Initializes the Event with a date, team, and optionally preachers.

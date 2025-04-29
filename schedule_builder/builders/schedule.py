@@ -44,8 +44,8 @@ class Schedule:
         self,
         team: List[Person],
         event_dates: List[date],
-        preachers: List[Preacher] = None,
-        rotation: List[str] = None,
+        preachers: Optional[List[Preacher]] = None,
+        rotation: Optional[List[str]] = None,
     ):
         """
         Initializes the Schedule with a team, event dates, and optionally a list of preachers.
