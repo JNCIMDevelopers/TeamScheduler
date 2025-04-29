@@ -91,7 +91,7 @@ class Person:
         Returns:
             str: A string representation of the Person.
         """
-        roles_str = ", ".join([role for role in self.roles])
+        roles_str = ", ".join(self.roles)
         blockout_dates_str = ", ".join(
             [date.strftime("%B-%d-%Y") for date in self.blockout_dates]
         )
