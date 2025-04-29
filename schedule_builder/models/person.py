@@ -9,20 +9,6 @@ from ..models.role import Role
 class Person:
     """
     A class to represent a person and their associated roles and availability information.
-
-    Attributes:
-        name (str): The name of the person.
-        roles (List[Role]): The roles that the person can perform.
-        blockout_dates (List[date]): The dates when the person is unavailable.
-        preaching_dates (List[date]): The dates when the person is scheduled to preach.
-        teaching_dates (List[date]): The dates when the person is scheduled to teach.
-        on_leave (bool): Indicates if the person is on leave.
-        assigned_dates (List[date]): The dates when the person has been assigned to an event.
-        last_assigned_dates (dict): A dictionary mapping each role to the last date the person was assigned to that role.
-
-    Methods:
-        assign_event(date): Assigns the person to an event on the given date.
-        get_next_preaching_date(reference_date): Returns the next preaching date after the given reference date.
     """
 
     def __init__(
@@ -36,14 +22,6 @@ class Person:
     ):
         """
         Initializes the Person with a name, roles, and optionally blockout dates, preaching dates, teaching dates, and leave status.
-
-        Args:
-            name (str): The name of the person.
-            roles (List[Role]): The roles that the person can perform.
-            blockout_dates (List[date], optional): The dates when the person is unavailable. Defaults to an empty list.
-            preaching_dates (List[date], optional): The dates when the person is scheduled to preach. Defaults to an empty list.
-            teaching_dates (List[date], optional): The dates when the person is scheduled to teach. Defaults to an empty list.
-            on_leave (bool, optional): Indicates if the person is on leave. Defaults to False.
         """
         self.name: str = name
         self.roles: List[Role] = roles
@@ -59,11 +37,11 @@ class Person:
 
     def assign_event(self, event_date: date, role: Role) -> None:
         """
-        Assigns the person to an event on the given date.
+        Assigns the person to an event on the given date for a specified role.
 
         Args:
             event_date (date): The date of the event.
-            role (Role): The role to assign.
+            role (Role): The role to assign to the person.
         """
         self.assigned_dates.append(event_date)
         self.last_assigned_dates[role] = event_date
@@ -77,7 +55,7 @@ class Person:
             reference_date (date): The reference date to find the next preaching date.
 
         Returns:
-            date: The next preaching date, or None if there are no future preaching dates.
+            date: The next preaching date or None if no future preaching dates exist.
         """
         if not self.preaching_dates:
             return None
@@ -87,10 +65,10 @@ class Person:
 
     def __str__(self) -> str:
         """
-        Returns a string representation of the Person, including their roles and availability information.
+        Returns a string representation of the person, including their roles and availability information.
 
         Returns:
-            str: A string representation of the Person.
+            str: A formatted string of the person's details (name, roles, dates, leave status).
         """
         roles_str = ", ".join(self.roles)
         blockout_dates_str = ", ".join(

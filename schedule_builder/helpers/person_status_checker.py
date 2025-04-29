@@ -19,11 +19,11 @@ class PersonStatusChecker:
         Returns the status of a team member on a specific date.
 
         Args:
-            person (Person): The team member to check.
-            check_date (date): The date to check the status for.
+            person (Person): The team member whose status is being checked.
+            check_date (date): The date for which to check the status.
 
         Returns:
-            PersonStatus: The status for the given date.
+            PersonStatus: The status of the team member on the given date.
         """
         if person.on_leave:
             return PersonStatus.ONLEAVE

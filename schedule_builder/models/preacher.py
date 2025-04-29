@@ -5,11 +5,6 @@ from typing import List, Optional
 class Preacher:
     """
     A class to represent a preacher and their associated information.
-
-    Attributes:
-        name (str): The name of the preacher.
-        graphics_support (str): The graphics support person associated with the preacher.
-        dates (List[date]): A list of dates when the preacher is scheduled to preach.
     """
 
     def __init__(
@@ -32,7 +27,7 @@ class Preacher:
         Returns a string representation of the Preacher, including their name, graphics support, and preaching dates.
 
         Returns:
-            str: A string representation of the Preacher.
+            str: A formatted string representing the preacher's details (name, graphics support, and preaching dates).
         """
         preaching_dates_str = ", ".join(
             [date.strftime("%B-%d-%Y") for date in self.dates]

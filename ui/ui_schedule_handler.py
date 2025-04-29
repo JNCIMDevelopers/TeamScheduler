@@ -16,19 +16,28 @@ class UIScheduleHandler:
     """
     Handles schedule-related logic for the user interface.
 
-    This class manages date validation, range adjustments, and schedule creation
-    for the specified date range.
+    This class is responsible for validating date ranges, adjusting dates if needed,
+    and building the schedule for a specified date range. It also ensures that the
+    schedule is within the available preaching date range and generates schedule files.
+
+    Attributes:
+        team (List[Person]): A list of team members involved in the schedule.
+        preachers (List[Preacher]): A list of preachers available for scheduling.
+        rotation (List[str]): The priority order of worship leaders.
+        file_exporter (FileExporter): A file exporter for generating schedule files.
+        earliest_date (date): The earliest preaching date available.
+        latest_date (date): The latest preaching date available.
     """
 
     def __init__(self, team, preachers, rotation, file_exporter):
         """
-        Initializes the schedule handler with team, preachers, and rotation data.
+        Initializes the schedule handler with the necessary data for scheduling.
 
         Args:
-            team: The list of team members.
-            preachers: The list of preachers.
-            rotation: The priority order of worship leaders.
-            file_exporter: The file exporter for generating schedule files.
+            team (List[Person]): List of team members to be scheduled.
+            preachers (List[Preacher]): List of preachers available for the schedule.
+            rotation (List[str]): The priority order for worship leaders.
+            file_exporter (FileExporter): An object to handle file export operations.
         """
         self.logger = logging.getLogger(__name__)
         self.team = team
@@ -41,10 +50,13 @@ class UIScheduleHandler:
 
     def calculate_preaching_date_range(self) -> Tuple[date, date]:
         """
-        Calculates the earliest and latest preaching dates.
+        Calculates the earliest and latest preaching dates from the preachers' schedules.
 
         Returns:
             Tuple[date, date]: A tuple containing the earliest and latest preaching dates.
+
+        Raises:
+            ValueError: If no preachers are available or no preaching dates are found.
         """
         if self.preachers is None or not self.preachers:
             raise ValueError("No preachers available to calculate date range.")
@@ -67,13 +79,13 @@ class UIScheduleHandler:
 
     def is_within_date_range(self, reference_date: date) -> bool:
         """
-        Checks if a given date falls within the permissible date range.
+        Checks if a given date falls within the allowable preaching date range.
 
         Args:
             reference_date (date): The date to check.
 
         Returns:
-            bool: True if the date is within range, False otherwise.
+            bool: True if the date is within the allowable range, False otherwise.
         """
         return self.earliest_date <= reference_date <= self.latest_date
 
@@ -88,7 +100,7 @@ class UIScheduleHandler:
             end_date (date): The end date of the range.
 
         Returns:
-            bool: True if the schedule is within range, False otherwise.
+            bool: True if the preaching schedule is within the range, False otherwise.
         """
         return start_date <= self.earliest_date <= self.latest_date <= end_date
 
@@ -96,15 +108,14 @@ class UIScheduleHandler:
         self, start_date: date, end_date: date
     ) -> Tuple[date, date, bool]:
         """
-        Adjusts the start and end dates to ensure they fall within the permissible range.
+        Adjusts the start and end dates to ensure they are within the available preaching date range.
 
         Args:
             start_date (date): The initial start date.
             end_date (date): The initial end date.
 
         Returns:
-            Tuple[date, date, bool]: Adjusted start and end dates, and a flag indicating
-            whether adjustments were made.
+            Tuple[date, date, bool]: Adjusted start and end dates, and a flag indicating if any adjustments were made.
         """
         is_adjusted = False
 
@@ -122,7 +133,7 @@ class UIScheduleHandler:
         self, start_date: date, end_date: date
     ) -> Tuple[List[Event], List[Person]]:
         """
-        Creates a schedule for the specified date range.
+        Builds a schedule for the specified date range.
 
         Args:
             start_date (date): The start date of the schedule.
@@ -152,9 +163,7 @@ class UIScheduleHandler:
 
     def create_schedule(self, start_date: date, end_date: date) -> None:
         """
-        Creates a schedule for the specified date range.
-
-        This method generates a schedule, exports the details to an HTML file, and exports it to a CSV file.
+        Creates a schedule and exports it to both HTML and CSV formats.
 
         Args:
             start_date (date): The start date of the schedule.

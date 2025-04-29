@@ -10,6 +10,10 @@ from ..models.role import Role
 
 
 class RoleCapabilityRule(EligibilityRule):
+    """
+    Rule to check if a person is capable of fulfilling the role based on their assigned roles.
+    """
+
     def is_eligible(
         self,
         person: Person,
@@ -21,6 +25,10 @@ class RoleCapabilityRule(EligibilityRule):
 
 
 class OnLeaveRule(EligibilityRule):
+    """
+    Rule to check if a person is on leave.
+    """
+
     def is_eligible(
         self,
         person: Person,
@@ -32,6 +40,10 @@ class OnLeaveRule(EligibilityRule):
 
 
 class BlockoutDateRule(EligibilityRule):
+    """
+    Rule to check if a person has blocked out the event date.
+    """
+
     def is_eligible(
         self,
         person: Person,
@@ -43,6 +55,10 @@ class BlockoutDateRule(EligibilityRule):
 
 
 class PreachingDateRule(EligibilityRule):
+    """
+    Rule to check if a person is scheduled to preach on the event date.
+    """
+
     def is_eligible(
         self,
         person: Person,
@@ -54,6 +70,10 @@ class PreachingDateRule(EligibilityRule):
 
 
 class RoleTimeWindowRule(EligibilityRule):
+    """
+    Rule to enforce time windows between consecutive role assignments.
+    """
+
     WORSHIP_LEADER_ROLE_TIME_WINDOW = timedelta(weeks=4)
     SUNDAY_SCHOOL_TEACHER_ROLE_TIME_WINDOW = timedelta(weeks=4)
     EMCEE_ROLE_TIME_WINDOW = timedelta(weeks=2)
@@ -83,6 +103,10 @@ class RoleTimeWindowRule(EligibilityRule):
 
 
 class ConsecutiveAssignmentLimitRule(EligibilityRule):
+    """
+    Rule to limit consecutive assignments for a person.
+    """
+
     CONSECUTIVE_ASSIGNMENTS_LIMIT = 3
 
     def is_eligible(
@@ -106,6 +130,10 @@ class ConsecutiveAssignmentLimitRule(EligibilityRule):
 
 
 class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
+    """
+    Rule to limit consecutive assignments of the same person for a specific role.
+    """
+
     def __init__(self, assignment_limit: int):
         self.assignment_limit = assignment_limit
         self.time_window = timedelta(weeks=assignment_limit)
@@ -128,6 +156,10 @@ class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
 
 
 class WorshipLeaderTeachingRule(EligibilityRule):
+    """
+    Rule to prevent a worship leader from teaching on the same date.
+    """
+
     def is_eligible(
         self,
         person: Person,
@@ -141,6 +173,10 @@ class WorshipLeaderTeachingRule(EligibilityRule):
 
 
 class WorshipLeaderPreachingConflictRule(EligibilityRule):
+    """
+    Rule to prevent a worship leader from being assigned when they are scheduled to preach within a specific time window.
+    """
+
     PREACHING_TIME_WINDOW = timedelta(weeks=1)
 
     def is_eligible(
@@ -162,7 +198,7 @@ class WorshipLeaderPreachingConflictRule(EligibilityRule):
 
 class LuluEmceeRule(EligibilityRule):
     """
-    Special Rule: Assign Lulu for Emcee only when Pastor Edmund is preaching.
+    Special rule: Assign Lulu for the EMCEE role only when Pastor Edmund is preaching.
     """
 
     def is_eligible(
@@ -179,7 +215,7 @@ class LuluEmceeRule(EligibilityRule):
 
 class GeeWorshipLeaderRule(EligibilityRule):
     """
-    Special Rule: Do not assign Gee for worship leading when Kris is preaching.
+    Special rule: Prevent Gee from being assigned as worship leader when Kris is preaching.
     """
 
     def is_eligible(
