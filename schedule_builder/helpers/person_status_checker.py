@@ -27,17 +27,22 @@ class PersonStatusChecker:
         """
         if person.on_leave:
             return PersonStatus.ONLEAVE
-        elif check_date in person.blockout_dates:
+
+        if check_date in person.blockout_dates:
             return PersonStatus.BLOCKEDOUT
-        elif check_date in person.assigned_dates:
+
+        if check_date in person.assigned_dates:
             return PersonStatus.ASSIGNED
-        elif check_date in person.preaching_dates:
+
+        if check_date in person.preaching_dates:
             return PersonStatus.PREACHING
-        elif not ConsecutiveAssignmentLimitRule().is_eligible(
+
+        if not ConsecutiveAssignmentLimitRule().is_eligible(
             person=person, role=Role.LYRICS, event_date=check_date
         ):
             return PersonStatus.BREAK
-        elif Role.WORSHIPLEADER in person.roles and check_date in person.teaching_dates:
+
+        if Role.WORSHIPLEADER in person.roles and check_date in person.teaching_dates:
             return PersonStatus.TEACHING
-        else:
-            return PersonStatus.UNASSIGNED
+
+        return PersonStatus.UNASSIGNED
