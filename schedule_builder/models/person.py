@@ -57,16 +57,17 @@ class Person:
         }
         self.role_assigned_dates: dict[Role, List[date]] = {role: [] for role in roles}
 
-    def assign_event(self, date: date, role: Role) -> None:
+    def assign_event(self, event_date: date, role: Role) -> None:
         """
         Assigns the person to an event on the given date.
 
         Args:
-            date (date): The date of the event.
+            event_date (date): The date of the event.
+            role (Role): The role to assign.
         """
-        self.assigned_dates.append(date)
-        self.last_assigned_dates[role] = date
-        self.role_assigned_dates[role].append(date)
+        self.assigned_dates.append(event_date)
+        self.last_assigned_dates[role] = event_date
+        self.role_assigned_dates[role].append(event_date)
 
     def get_next_preaching_date(self, reference_date: date) -> Optional[date]:
         """

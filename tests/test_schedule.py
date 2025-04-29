@@ -226,7 +226,7 @@ def test_get_eligible_person_with_3_consecutive_assigned_dates():
     )
 
     for assigned_date in assigned_dates:
-        person.assign_event(date=assigned_date, role=Role.ACOUSTIC)
+        person.assign_event(event_date=assigned_date, role=Role.ACOUSTIC)
 
     team = [person]
     schedule = Schedule(team=team, event_dates=event_dates)

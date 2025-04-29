@@ -68,7 +68,7 @@ class Event:
             raise ValueError(f"{role.name} already has a person assigned.")
 
         self.roles[role] = person.name
-        person.assign_event(date=self.date, role=role)
+        person.assign_event(event_date=self.date, role=role)
 
     def get_assigned_roles(self) -> List[Role]:
         """
