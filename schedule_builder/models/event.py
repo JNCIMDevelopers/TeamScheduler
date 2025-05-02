@@ -86,7 +86,7 @@ class Event:
             person.name for person in self.team if person.name not in assigned_names
         ]
 
-    def get_person_by_name(self, name: str) -> Optional[Person]:
+    def get_person_by_name(self, name: Optional[str]) -> Optional[Person]:
         """
         Returns a person object by their name.
 

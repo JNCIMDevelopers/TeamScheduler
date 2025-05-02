@@ -15,6 +15,7 @@ from schedule_builder.eligibility.rules import (
     WorshipLeaderPreachingConflictRule,
     LuluEmceeRule,
     GeeWorshipLeaderRule,
+    KrisAcousticRule,
 )
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
@@ -432,6 +433,48 @@ class TestGeeWorshipLeaderRule:
 
         # Act
         is_eligible = rule.is_eligible(person, role, event_date, preacher)
+
+        # Assert
+        assert is_eligible == expected
+
+
+class TestKrisAcousticRule:
+    @pytest.mark.parametrize(
+        "role, person_name, worship_leader_name, expected",
+        [
+            (Role.ACOUSTIC, "Kris", "Gee", True),
+            (Role.ACOUSTIC, "Kris", "TestLeader", True),  # Not Expected Worship Leader
+            (Role.ACOUSTIC, "TestName", "Gee", False),  # Not Expected Assignee
+            (Role.ACOUSTIC, "Kris", None, True),  # No Worship Leader
+            (Role.KEYS, "Kris", "Gee", True),  # Not Expected Role
+        ],
+    )
+    def test_kris_acoustic_rule(self, role, person_name, worship_leader_name, expected):
+        # Arrange
+        rule = KrisAcousticRule()
+        person.name = person_name
+        person.roles = [role]
+        event_date = date(2025, 4, 6)
+        preacher = Preacher(
+            name="TestPreacher", graphics_support="Test", dates=[event_date]
+        )
+        worship_leader = (
+            Person(
+                name=worship_leader_name,
+                roles=[Role.WORSHIPLEADER],
+                blockout_dates=[],
+                preaching_dates=[],
+                teaching_dates=[],
+                on_leave=False,
+            )
+            if worship_leader_name
+            else None
+        )
+
+        # Act
+        is_eligible = rule.is_eligible(
+            person, role, event_date, preacher, worship_leader
+        )
 
         # Assert
         assert is_eligible == expected
