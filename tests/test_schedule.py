@@ -76,12 +76,11 @@ def test_get_eligible_person_when_eligible():
     )
 
     team = [person1, person2]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person1
@@ -93,12 +92,11 @@ def test_get_eligible_person_with_no_team(team):
     role = Role.ACOUSTIC
     reference_date = date(2024, 7, 7)
     event_dates = [reference_date]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -125,12 +123,11 @@ def test_get_eligible_person_with_no_valid_role():
     )
 
     team = [person1, person2]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_persons = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_persons = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_persons is None
@@ -150,12 +147,11 @@ def test_get_eligible_person_when_on_leave():
     )
 
     team = [person]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -175,12 +171,11 @@ def test_get_eligible_person_with_blockout():
     )
 
     team = [person]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -200,12 +195,11 @@ def test_get_eligible_person_with_preaching():
     )
 
     team = [person]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -229,12 +223,11 @@ def test_get_eligible_person_with_3_consecutive_assigned_dates():
         person.assign_event(event_date=assigned_date, role=Role.ACOUSTIC)
 
     team = [person]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -263,13 +256,13 @@ def test_get_eligible_person_with_2_consecutive_same_role_assignments():
     event2 = Event(date=event2_date, team=team)
     event2.assign_role(role=role, person=person)
 
+    event3 = Event(date=reference_date, team=team)
+
     schedule = Schedule(team=team, event_dates=event_dates)
     schedule.events = [event1, event2]
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event3)
 
     # Assert
     assert eligible_person is None
@@ -303,9 +296,7 @@ def test_get_eligible_person_when_worship_leader_within_4_weeks_ago():
     schedule.events = [event]
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -337,12 +328,14 @@ def test_get_eligible_person_when_worship_leader_over_5_weeks_ago():
     event = Event(date=assigned_date, team=team)
     event.assign_role(role=role, person=person)
 
+    next_event = Event(date=reference_date, team=team)
+
     schedule = Schedule(team=team, event_dates=event_dates)
     schedule.events = [event]
 
     # Act
     eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
+        role=role, team=team, event=next_event
     )
 
     # Assert
@@ -378,12 +371,11 @@ def test_get_eligible_person_for_next_worship_leader_in_rotation():
 
     team = [person1, person2, person3]
     rotation = [person2.name, person3.name, person1.name]
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates, rotation=rotation)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person3
@@ -403,13 +395,11 @@ def test_get_eligible_person_for_worship_leader_with_preaching_next_week():
         on_leave=False,
     )
     team = [person]
-
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -429,13 +419,11 @@ def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date():
         on_leave=False,
     )
     team = [person]
-
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -455,13 +443,11 @@ def test_get_eligible_person_for_non_worship_leader_role_with_teaching_on_same_d
         on_leave=False,
     )
     team = [person]
-
+    event = Event(date=reference_date, team=team)
     schedule = Schedule(team=team, event_dates=event_dates)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person
@@ -484,13 +470,11 @@ def test_get_eligible_person_for_special_condition_1_pastor_preaching():
 
     team = [person]
     preachers = [preacher]
-
+    event = Event(date=reference_date, team=team, preachers=preachers)
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date, preacher=preacher
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person
@@ -515,13 +499,11 @@ def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
 
     team = [person]
     preachers = [preacher]
-
+    event = Event(date=reference_date, team=team, preachers=preachers)
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date, preacher=preacher
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -544,13 +526,11 @@ def test_get_eligible_person_for_special_condition_2_pastor_preaching():
 
     team = [person]
     preachers = [preacher]
-
+    event = Event(date=reference_date, team=team, preachers=preachers)
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date, preacher=preacher
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
@@ -573,13 +553,11 @@ def test_get_eligible_person_for_special_condition_2_other_role():
 
     team = [person]
     preachers = [preacher]
-
+    event = Event(date=reference_date, team=team, preachers=preachers)
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date, preacher=preacher
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person
@@ -604,13 +582,111 @@ def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
 
     team = [person]
     preachers = [preacher]
-
+    event = Event(date=reference_date, team=team, preachers=preachers)
     schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
 
     # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event_date=reference_date, preacher=preacher
-    )
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person == person
+
+
+def test_get_eligible_person_for_special_condition_3_when_expected_worship_leader():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 6, 30)
+    event_dates = [reference_date]
+    person1 = Person(
+        name="TestName1",
+        roles=[Role.ACOUSTIC],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    person2 = Person(
+        name="Kris",
+        roles=[Role.ACOUSTIC],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    person3 = Person(
+        name="TestName3",
+        roles=[Role.ACOUSTIC],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    preacher = Preacher(
+        name="TestPreacher", graphics_support="Test", dates=[reference_date]
+    )
+    worship_leader = Person(
+        name="Gee",
+        roles=[Role.WORSHIPLEADER],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+
+    team = [person1, person2, person3, worship_leader]
+    preachers = [preacher]
+    event = Event(date=reference_date, team=team, preachers=preachers)
+    event.roles[Role.WORSHIPLEADER] = worship_leader.name
+    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
+
+    # Assert
+    assert eligible_person == person2
+
+
+def test_get_eligible_person_for_special_condition_3_when_not_expected_acoustic_person():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 6, 30)
+    event_dates = [reference_date]
+    person1 = Person(
+        name="TestName1",
+        roles=[Role.ACOUSTIC],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    person2 = Person(
+        name="TestName2",
+        roles=[Role.ACOUSTIC],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    preacher = Preacher(
+        name="TestPreacher", graphics_support="Test", dates=[reference_date]
+    )
+    worship_leader = Person(
+        name="Gee",
+        roles=[Role.WORSHIPLEADER],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+
+    team = [person1, person2, worship_leader]
+    preachers = [preacher]
+    event = Event(date=reference_date, team=team, preachers=preachers)
+    event.roles[Role.WORSHIPLEADER] = worship_leader.name
+    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
+
+    # Assert
+    assert eligible_person is None

@@ -19,6 +19,7 @@ from ..eligibility.rules import (
     WorshipLeaderPreachingConflictRule,
     LuluEmceeRule,
     GeeWorshipLeaderRule,
+    KrisAcousticRule,
 )
 from ..helpers.worship_leader_selector import WorshipLeaderSelector
 from ..models.event import Event
@@ -69,6 +70,7 @@ class Schedule:
                 RoleCapabilityRule(),
                 LuluEmceeRule(),
                 GeeWorshipLeaderRule(),
+                KrisAcousticRule(),
                 OnLeaveRule(),
                 BlockoutDateRule(),
                 PreachingDateRule(),
@@ -87,7 +89,7 @@ class Schedule:
         Returns:
             Tuple[List[Event], List[Person]]: List of scheduled events and team members.
         """
-        if self.team is None or not self.team:
+        if not self.team:
             logging.warning("No team available for schedule.")
             return ([], [])
 
@@ -100,12 +102,11 @@ class Schedule:
 
             # Initialize event
             event = Event(date=event_date, team=self.team, preachers=self.preachers)
-            preacher = event.get_assigned_preacher()
 
             for role in Role:
                 # Get eligible person
                 eligible_person = self.get_eligible_person(
-                    role=role, team=team_copy, event_date=event_date, preacher=preacher
+                    role=role, team=team_copy, event=event
                 )
 
                 if eligible_person:
@@ -124,11 +125,7 @@ class Schedule:
         return (self.events, self.team)
 
     def get_eligible_person(
-        self,
-        role: Role,
-        team: List[Person],
-        event_date: date,
-        preacher: Optional[Preacher] = None,
+        self, role: Role, team: List[Person], event: Event
     ) -> Optional[Person]:
         """
         Finds an eligible person from the team for a specific role on a given event date.
@@ -136,27 +133,36 @@ class Schedule:
         Args:
             role (Role): The role to be assigned.
             team (List[Person]): List of available team members.
-            event_date (date): The date of the event.
-            preacher (Optional[Preacher]): Assigned preacher (default is None).
+            event (Event): The event object.
 
         Returns:
             Person: The eligible person for the role, or None if no one is eligible.
         """
-        if team is None or not team:
+        if not team:
             logging.warning("No team available for getting eligible person.")
             return None
+
+        # Retrieve preacher and worship leader during current event
+        preacher = event.get_assigned_preacher()
+        worship_leader = event.get_person_by_name(name=event.roles[Role.WORSHIPLEADER])
 
         # Get eligible persons from the team using the EligibilityChecker
         eligible_persons = [
             person
             for person in team
-            if self.eligibility_checker.is_eligible(person, role, event_date, preacher)
+            if self.eligibility_checker.is_eligible(
+                person=person,
+                role=role,
+                event_date=event.date,
+                preacher=preacher,
+                worship_leader=worship_leader,
+            )
         ]
 
         # Return random eligible team member
         if eligible_persons:
             logging.info(
-                f"Eligible Persons for {role} on {event_date}: {[p.name for p in eligible_persons]}"
+                f"Eligible Persons for {role} on {event.date}: {[p.name for p in eligible_persons]}"
             )
 
             # If the role is WORSHIPLEADER, get the next worship leader from the rotation
@@ -169,5 +175,5 @@ class Schedule:
 
             return random.choice(eligible_persons)
 
-        logging.warning(f"No eligible person for {role} on {event_date}.")
+        logging.warning(f"No eligible person for {role} on {event.date}.")
         return None

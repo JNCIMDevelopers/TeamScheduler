@@ -20,6 +20,7 @@ class RoleCapabilityRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         return role in person.roles
 
@@ -35,6 +36,7 @@ class OnLeaveRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         return not person.on_leave
 
@@ -50,6 +52,7 @@ class BlockoutDateRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         return event_date not in person.blockout_dates
 
@@ -65,6 +68,7 @@ class PreachingDateRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         return event_date not in person.preaching_dates
 
@@ -84,6 +88,7 @@ class RoleTimeWindowRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         time_window = None
         if role == Role.WORSHIPLEADER:
@@ -115,6 +120,7 @@ class ConsecutiveAssignmentLimitRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         # Calculate the start date of the time window
         time_window = timedelta(weeks=self.CONSECUTIVE_ASSIGNMENTS_LIMIT)
@@ -144,6 +150,7 @@ class ConsecutiveRoleAssignmentLimitRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         # Get all assigned dates for the person within the time window
         past_assigned_dates = [
@@ -166,6 +173,7 @@ class WorshipLeaderTeachingRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         if role == Role.WORSHIPLEADER:
             return event_date not in person.teaching_dates
@@ -185,6 +193,7 @@ class WorshipLeaderPreachingConflictRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         if role == Role.WORSHIPLEADER:
             next_date = person.get_next_preaching_date(event_date)
@@ -198,7 +207,7 @@ class WorshipLeaderPreachingConflictRule(EligibilityRule):
 
 class LuluEmceeRule(EligibilityRule):
     """
-    Special rule: Assign Lulu for the EMCEE role only when Pastor Edmund is preaching.
+    Special Rule 1: Assign Lulu for the EMCEE role only when Pastor Edmund is preaching.
     """
 
     def is_eligible(
@@ -207,6 +216,7 @@ class LuluEmceeRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         if person.name == "Lulu" and role == Role.EMCEE:
             return preacher is not None and preacher.name == "Edmund"
@@ -215,7 +225,7 @@ class LuluEmceeRule(EligibilityRule):
 
 class GeeWorshipLeaderRule(EligibilityRule):
     """
-    Special rule: Prevent Gee from being assigned as worship leader when Kris is preaching.
+    Special Rule 2: Prevent Gee from being assigned as worship leader when Kris is preaching.
     """
 
     def is_eligible(
@@ -224,7 +234,30 @@ class GeeWorshipLeaderRule(EligibilityRule):
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         if person.name == "Gee" and role == Role.WORSHIPLEADER:
             return preacher is None or preacher.name != "Kris"
+        return True
+
+
+class KrisAcousticRule(EligibilityRule):
+    """
+    Special Rule 3: Assign Kris to ACOUSTIC role when Gee is assigned to worship lead.
+    """
+
+    def is_eligible(
+        self,
+        person: Person,
+        role: Role,
+        event_date: date,
+        preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
+    ) -> bool:
+        if (
+            role == Role.ACOUSTIC
+            and worship_leader is not None
+            and worship_leader.name == "Gee"
+        ):
+            return person.name == "Kris"
         return True

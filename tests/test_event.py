@@ -189,7 +189,8 @@ def test_get_person_by_name():
     assert person == person2
 
 
-def test_get_person_by_name_with_invalid_name():
+@pytest.mark.parametrize("name", ["UnknownName", None])
+def test_get_person_by_name_with_invalid_name(name):
     # Arrange
     reference_date = date(2024, 7, 7)
     person1 = Person(

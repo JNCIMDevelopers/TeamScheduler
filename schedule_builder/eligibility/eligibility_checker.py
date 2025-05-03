@@ -32,6 +32,7 @@ class EligibilityChecker:
         role: Role,
         event_date: date,
         preacher: Optional[Preacher] = None,
+        worship_leader: Optional[Person] = None,
     ) -> bool:
         """
         Evaluates all rules to determine if a person is eligible for a given role on a specific event date.
@@ -41,16 +42,21 @@ class EligibilityChecker:
             role (Role): The role being assigned.
             event_date (date): The date of the event.
             preacher (Preacher, optional): The assigned preacher for the event, if applicable.
+            worship_leader (Person, optional): The assigned worship leader for the event, if applicable.
 
         Returns:
             bool: True if the person passes all eligibility rules, False otherwise.
         """
         for rule in self.rules:
-            result = rule.is_eligible(person, role, event_date, preacher)
+            result = rule.is_eligible(
+                person, role, event_date, preacher, worship_leader
+            )
             logging.debug(
                 f"Role: {role}, Date: {event_date}, "
                 f"Person: {person.name}, Rule: {rule.__class__.__name__}, "
-                f"Preacher: {preacher.name if preacher else 'None'}, Result: {result}"
+                f"Preacher: {preacher.name if preacher else 'None'}, "
+                f"Worship Leader: {worship_leader.name if worship_leader else 'None'}, "
+                f"Result: {result}"
             )
             if not result:
                 return False
