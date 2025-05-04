@@ -68,18 +68,19 @@ class Schedule:
         # The order of rules determine the sequence they are evaluated
         self.eligibility_checker = EligibilityChecker(
             rules=[
-                RoleCapabilityRule(),
-                LuluEmceeRule(),
-                GeeWorshipLeaderRule(),
-                KrisAcousticRule(),
                 OnLeaveRule(),
                 BlockoutDateRule(),
                 PreachingDateRule(),
-                RoleTimeWindowRule(),
+                RoleCapabilityRule(),
+                WorshipLeaderTeachingRule(),
                 ConsecutiveAssignmentLimitRule(),
                 ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
-                WorshipLeaderTeachingRule(),
+                RoleTimeWindowRule(),
                 WorshipLeaderPreachingConflictRule(),
+                LuluEmceeRule(),
+                GeeWorshipLeaderRule(),
+                KrisAcousticRule(),
+                JeffMarielAssignmentRule(),
             ]
         )
 
