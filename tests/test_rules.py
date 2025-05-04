@@ -16,6 +16,7 @@ from schedule_builder.eligibility.rules import (
     LuluEmceeRule,
     GeeWorshipLeaderRule,
     KrisAcousticRule,
+    JeffMarielAssignmentRule,
 )
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
@@ -508,6 +509,57 @@ class TestKrisAcousticRule:
 
         # Act
         is_eligible = rule.is_eligible(person, role, event)
+
+        # Assert
+        assert is_eligible == expected
+
+
+class TestJeffMarielAssignmentRule:
+    @pytest.mark.parametrize(
+        "person_to_assign_name, assigned_person_name, expected",
+        [
+            ("Jeff", "Mariel", False),
+            ("Mariel", "Jeff", False),
+            ("Jeff", "TestName", True),
+            ("Mariel", "TestName", True),
+            ("TestName", "Jeff", True),
+        ],
+    )
+    def test_jeff_mariel_assignment_rule(
+        self,
+        person_to_assign_name,
+        assigned_person_name,
+        expected,
+        event_date,
+        preacher,
+    ):
+        # Arrange
+        person_to_assign = Person(
+            name=person_to_assign_name,
+            roles=[Role.ACOUSTIC],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        )
+        assigned_person = Person(
+            name=assigned_person_name,
+            roles=[Role.LYRICS],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        )
+        event = Event(
+            date=event_date,
+            team=[person_to_assign, assigned_person],
+            preachers=[preacher],
+        )
+        event.assign_role(role=Role.LYRICS, person=assigned_person)
+        rule = JeffMarielAssignmentRule()
+
+        # Act
+        is_eligible = rule.is_eligible(person_to_assign, Role.ACOUSTIC, event)
 
         # Assert
         assert is_eligible == expected

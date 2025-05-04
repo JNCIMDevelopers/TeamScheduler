@@ -20,6 +20,7 @@ from ..eligibility.rules import (
     LuluEmceeRule,
     GeeWorshipLeaderRule,
     KrisAcousticRule,
+    JeffMarielAssignmentRule,
 )
 from ..helpers.worship_leader_selector import WorshipLeaderSelector
 from ..models.event import Event

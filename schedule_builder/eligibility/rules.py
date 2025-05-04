@@ -184,3 +184,16 @@ class KrisAcousticRule(EligibilityRule):
             return person.name == "Kris"
 
         return True
+
+
+class JeffMarielAssignmentRule(EligibilityRule):
+    """
+    Special Rule 4: Do not assign both Jeff and Mariel during the same event.
+    """
+
+    def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
+        if person.name not in ["Jeff", "Mariel"]:
+            return True
+
+        other_person = "Mariel" if person.name == "Jeff" else "Jeff"
+        return other_person not in event.roles.values()
