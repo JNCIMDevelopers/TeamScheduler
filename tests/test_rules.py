@@ -17,6 +17,7 @@ from schedule_builder.eligibility.rules import (
     GeeWorshipLeaderRule,
     KrisAcousticRule,
 )
+from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
 from schedule_builder.models.preacher import Preacher
@@ -46,48 +47,52 @@ def preacher():
 
 
 class TestRoleCapabilityRule:
-    def test_person_with_role_is_eligible(self, person, event_date):
+    def test_person_with_role_is_eligible(self, person, event_date, preacher):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = RoleCapabilityRule()
         person.roles = [Role.WORSHIPLEADER]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event_date)
+        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event)
 
         # Assert
         assert is_eligible
 
-    def test_person_without_role_is_ineligible(self, person, event_date):
+    def test_person_without_role_is_ineligible(self, person, event_date, preacher):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = RoleCapabilityRule()
         person.roles = [Role.EMCEE]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.LYRICS, event_date)
+        is_eligible = rule.is_eligible(person, Role.LYRICS, event)
 
         # Assert
         assert not is_eligible
 
 
 class TestOnLeaveRule:
-    def test_person_on_leave_is_ineligible(self, person, event_date):
+    def test_person_on_leave_is_ineligible(self, person, event_date, preacher):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = OnLeaveRule()
         person.on_leave = True
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event_date)
+        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event)
 
         # Assert
         assert not is_eligible
 
-    def test_person_not_on_leave_is_eligible(self, person, event_date):
+    def test_person_not_on_leave_is_eligible(self, person, event_date, preacher):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = OnLeaveRule()
         person.on_leave = False
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event_date)
+        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event)
 
         # Assert
         assert is_eligible
@@ -110,13 +115,16 @@ class TestBlockoutDateRule:
             ([], date(2025, 4, 6), True),  # No blockout dates
         ],
     )
-    def test_blockout_date_rule(self, blockout_dates, event_date, expected, person):
+    def test_blockout_date_rule(
+        self, blockout_dates, event_date, expected, person, preacher
+    ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = BlockoutDateRule()
         person.blockout_dates = blockout_dates
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event_date)
+        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event)
 
         # Assert
         assert is_eligible == expected
@@ -139,13 +147,16 @@ class TestPreachingDateRule:
             ([], date(2025, 4, 6), True),  # No preaching dates
         ],
     )
-    def test_preaching_date_rule(self, preaching_dates, event_date, expected, person):
+    def test_preaching_date_rule(
+        self, preaching_dates, event_date, expected, person, preacher
+    ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = PreachingDateRule()
         person.preaching_dates = preaching_dates
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event_date)
+        is_eligible = rule.is_eligible(person, Role.WORSHIPLEADER, event)
 
         # Assert
         assert is_eligible == expected
@@ -202,23 +213,27 @@ class TestRoleTimeWindowRule:
         ],
     )
     def test_role_time_window_rule(
-        self, role, last_assigned_date, event_date, expected, person
+        self, role, last_assigned_date, event_date, expected, person, preacher
     ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = RoleTimeWindowRule()
         person.roles = [role]
         person.last_assigned_dates[role] = last_assigned_date
 
         # Act
-        is_eligible = rule.is_eligible(person, role, event_date)
+        is_eligible = rule.is_eligible(person, role, event)
 
         # Assert
         assert is_eligible == expected
 
 
 class TestConsecutiveAssignmentLimitRule:
-    def test_person_not_assigned_too_many_times_is_eligible(self, person, event_date):
+    def test_person_not_assigned_too_many_times_is_eligible(
+        self, person, event_date, preacher
+    ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = ConsecutiveAssignmentLimitRule()
         person.assigned_dates = [
             event_date - timedelta(weeks=1),
@@ -226,24 +241,28 @@ class TestConsecutiveAssignmentLimitRule:
         ]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event_date)
+        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event)
 
         # Assert
         assert is_eligible
 
-    def test_person_with_no_assignments_is_eligible(self, person, event_date):
+    def test_person_with_no_assignments_is_eligible(self, person, event_date, preacher):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = ConsecutiveAssignmentLimitRule()
         person.assigned_dates = []
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event_date)
+        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event)
 
         # Assert
         assert is_eligible
 
-    def test_person_assigned_too_many_times_is_ineligible(self, person, event_date):
+    def test_person_assigned_too_many_times_is_ineligible(
+        self, person, event_date, preacher
+    ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = ConsecutiveAssignmentLimitRule()
         person.assigned_dates = [
             event_date - timedelta(weeks=1),
@@ -252,15 +271,18 @@ class TestConsecutiveAssignmentLimitRule:
         ]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event_date)
+        is_eligible = rule.is_eligible(person, Role.ACOUSTIC, event)
 
         # Assert
         assert not is_eligible
 
 
 class TestConsecutiveRoleAssignmentLimitRule:
-    def test_person_within_role_assignment_limit_is_eligible(self, person, event_date):
+    def test_person_within_role_assignment_limit_is_eligible(
+        self, person, event_date, preacher
+    ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = ConsecutiveRoleAssignmentLimitRule(assignment_limit=3)
         person.role_assigned_dates[Role.LYRICS] = [
             event_date - timedelta(weeks=1),
@@ -268,15 +290,16 @@ class TestConsecutiveRoleAssignmentLimitRule:
         ]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.LYRICS, event_date)
+        is_eligible = rule.is_eligible(person, Role.LYRICS, event)
 
         # Assert
         assert is_eligible
 
     def test_person_exceeding_role_assignment_limit_is_ineligible(
-        self, person, event_date
+        self, person, event_date, preacher
     ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = ConsecutiveRoleAssignmentLimitRule(assignment_limit=3)
         person.role_assigned_dates[Role.LYRICS] = [
             event_date - timedelta(weeks=1),
@@ -285,7 +308,7 @@ class TestConsecutiveRoleAssignmentLimitRule:
         ]
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.LYRICS, event_date)
+        is_eligible = rule.is_eligible(person, Role.LYRICS, event)
 
         # Assert
         assert not is_eligible
@@ -317,15 +340,16 @@ class TestWorshipLeaderTeachingRule:
         ],
     )
     def test_worship_leader_with_no_teaching_conflict(
-        self, role, teaching_dates, event_date, expected, person
+        self, role, teaching_dates, event_date, expected, person, preacher
     ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = WorshipLeaderTeachingRule()
         person.roles = [role]
         person.teaching_dates = teaching_dates
 
         # Act
-        is_eligible = rule.is_eligible(person, role, event_date)
+        is_eligible = rule.is_eligible(person, role, event)
 
         # Assert
         assert is_eligible == expected
@@ -369,15 +393,16 @@ class TestWorshipLeaderPreachingConflictRule:
         ],
     )
     def test_worship_leader_with_no_preaching_conflict(
-        self, role, preaching_dates, event_date, expected, person
+        self, role, preaching_dates, event_date, expected, person, preacher
     ):
         # Arrange
+        event = Event(date=event_date, team=[person], preachers=[preacher])
         rule = WorshipLeaderPreachingConflictRule()
         person.roles = [role]
         person.preaching_dates = preaching_dates
 
         # Act
-        is_eligible = rule.is_eligible(person, role, event_date)
+        is_eligible = rule.is_eligible(person, role, event)
 
         # Assert
         assert is_eligible == expected
@@ -392,7 +417,7 @@ class TestLuluEmceeRule:
             ("OtherEmcee", "Edmund", True),
         ],
     )
-    def test_lulu_emcee_rule(self, person_name, preacher_name, expected):
+    def test_lulu_emcee_rule(self, person_name, preacher_name, expected, person):
         # Arrange
         rule = LuluEmceeRule()
         person.name = person_name
@@ -401,9 +426,10 @@ class TestLuluEmceeRule:
         preacher = Preacher(
             name=preacher_name, graphics_support="Test", dates=[event_date]
         )
+        event = Event(date=event_date, team=[person], preachers=[preacher])
 
         # Act
-        is_eligible = rule.is_eligible(person, Role.EMCEE, event_date, preacher)
+        is_eligible = rule.is_eligible(person, Role.EMCEE, event)
 
         # Assert
         assert is_eligible == expected
@@ -420,7 +446,7 @@ class TestGeeWorshipLeaderRule:
         ],
     )
     def test_gee_is_eligible_when_kris_is_preaching(
-        self, role, person_name, preacher_name, expected
+        self, role, person_name, preacher_name, expected, person
     ):
         # Arrange
         rule = GeeWorshipLeaderRule()
@@ -430,9 +456,10 @@ class TestGeeWorshipLeaderRule:
         preacher = Preacher(
             name=preacher_name, graphics_support="Test", dates=[event_date]
         )
+        event = Event(date=event_date, team=[person], preachers=[preacher])
 
         # Act
-        is_eligible = rule.is_eligible(person, role, event_date, preacher)
+        is_eligible = rule.is_eligible(person, role, event)
 
         # Assert
         assert is_eligible == expected
@@ -449,7 +476,9 @@ class TestKrisAcousticRule:
             (Role.KEYS, "Kris", "Gee", True),  # Not Expected Role
         ],
     )
-    def test_kris_acoustic_rule(self, role, person_name, worship_leader_name, expected):
+    def test_kris_acoustic_rule(
+        self, role, person_name, worship_leader_name, expected, person
+    ):
         # Arrange
         rule = KrisAcousticRule()
         person.name = person_name
@@ -471,10 +500,14 @@ class TestKrisAcousticRule:
             else None
         )
 
+        team = [person] + ([worship_leader] if worship_leader else [])
+        event = Event(date=event_date, team=team, preachers=[preacher])
+
+        if worship_leader:
+            event.assign_role(role=Role.WORSHIPLEADER, person=worship_leader)
+
         # Act
-        is_eligible = rule.is_eligible(
-            person, role, event_date, preacher, worship_leader
-        )
+        is_eligible = rule.is_eligible(person, role, event)
 
         # Assert
         assert is_eligible == expected

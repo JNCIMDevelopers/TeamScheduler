@@ -1,6 +1,7 @@
 # Standard Library Imports
 # Alias datetime.date to DateType to avoid conflict with the Event.date attribute
 from datetime import date as DateType
+from functools import cached_property
 from typing import List, Optional
 
 # Local Imports
@@ -98,9 +99,10 @@ class Event:
         """
         return next((person for person in self.team if person.name == name), None)
 
+    @cached_property
     def get_assigned_preacher(self) -> Optional[Preacher]:
         """
-        Returns the preacher assigned to the event date.
+        Cached property that returns the preacher assigned to the event date.
 
         Returns:
             Preacher: The assigned preacher, or None if not assigned.
@@ -135,7 +137,7 @@ class Event:
         Returns:
             str: The string representation of the event.
         """
-        preacher = self.get_assigned_preacher()
+        preacher = self.get_assigned_preacher
         assigned_roles = self.get_assigned_roles()
         unassigned_roles = self.get_unassigned_roles()
         unassigned_names = self.get_unassigned_names()

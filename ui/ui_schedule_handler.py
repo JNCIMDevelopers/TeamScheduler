@@ -5,7 +5,7 @@ from datetime import date
 from typing import List, Tuple
 
 # Local Imports
-from paths import SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
+from config import SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
 from schedule_builder.builders.schedule import Schedule
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person

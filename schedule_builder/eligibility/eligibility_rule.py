@@ -1,11 +1,9 @@
 # Standard Library Imports
 from abc import ABC, abstractmethod
-from datetime import date
-from typing import Optional
 
 # Local Imports
+from ..models.event import Event
 from ..models.person import Person
-from ..models.preacher import Preacher
 from ..models.role import Role
 
 
@@ -22,23 +20,14 @@ class EligibilityRule(ABC):
     """
 
     @abstractmethod
-    def is_eligible(
-        self,
-        person: Person,
-        role: Role,
-        event_date: date,
-        preacher: Optional[Preacher] = None,
-        worship_leader: Optional[Person] = None,
-    ) -> bool:
+    def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
         """
         Abstract method to check if a person is eligible for a role.
 
         Args:
             person (Person): The person being evaluated for eligibility.
             role (Role): The role to be assigned.
-            event_date (date): The date of the event.
-            preacher (Preacher, optional): The preacher assigned to the event, if applicable.
-            worship_leader (Person, optional): The worship leader assigned to the event, if applicable.
+            event (Event): The event object.
 
         Returns:
             bool: True if the person is eligible, False otherwise.

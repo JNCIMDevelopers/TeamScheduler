@@ -142,20 +142,12 @@ class Schedule:
             logging.warning("No team available for getting eligible person.")
             return None
 
-        # Retrieve preacher and worship leader during current event
-        preacher = event.get_assigned_preacher()
-        worship_leader = event.get_person_by_name(name=event.roles[Role.WORSHIPLEADER])
-
         # Get eligible persons from the team using the EligibilityChecker
         eligible_persons = [
             person
             for person in team
             if self.eligibility_checker.is_eligible(
-                person=person,
-                role=role,
-                event_date=event.date,
-                preacher=preacher,
-                worship_leader=worship_leader,
+                person=person, role=role, event=event
             )
         ]
 
