@@ -2,7 +2,7 @@
 import pytest
 
 # Standard Library Imports
-from datetime import datetime, date
+from datetime import date
 
 # Local Imports
 from schedule_builder.util.assignment_checker import (
