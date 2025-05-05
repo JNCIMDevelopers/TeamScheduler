@@ -97,7 +97,7 @@ def test_is_eligible_with_multiple_passing_rules(person, event_date, preacher):
     mock_rule2.is_eligible.assert_called_once()
 
 
-def test_if_returns_early_when_rule_fails(person, event_date, preacher):
+def test_is_eligible_returns_early_when_rule_fails(person, event_date, preacher):
     # Arrange
     event = Event(date=event_date, team=[person], preachers=[preacher])
     mock_rule1 = MagicMock(spec=EligibilityRule)
