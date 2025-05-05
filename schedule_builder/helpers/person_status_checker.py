@@ -2,10 +2,13 @@
 from datetime import date
 
 # Local Imports
+from config import CONSECUTIVE_ASSIGNMENTS_LIMIT
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
 from schedule_builder.models.person_status import PersonStatus
-from schedule_builder.eligibility.rules import ConsecutiveAssignmentLimitRule
+from schedule_builder.util.assignment_checker import (
+    has_exceeded_consecutive_assignments,
+)
 
 
 class PersonStatusChecker:
@@ -37,8 +40,11 @@ class PersonStatusChecker:
         if check_date in person.preaching_dates:
             return PersonStatus.PREACHING
 
-        if not ConsecutiveAssignmentLimitRule().is_eligible(
-            person=person, role=Role.LYRICS, event_date=check_date
+        if has_exceeded_consecutive_assignments(
+            assigned_dates=person.assigned_dates,
+            preaching_dates=person.preaching_dates,
+            reference_date=check_date,
+            limit=CONSECUTIVE_ASSIGNMENTS_LIMIT,
         ):
             return PersonStatus.BREAK
 

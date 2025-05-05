@@ -5,7 +5,11 @@ from datetime import date
 from typing import List, Tuple
 
 # Local Imports
-from paths import TEAM_DATA_FILE_PATH, PREACHING_DATA_FILE_PATH, ROTATION_DATA_FILE_PATH
+from config import (
+    TEAM_DATA_FILE_PATH,
+    PREACHING_DATA_FILE_PATH,
+    ROTATION_DATA_FILE_PATH,
+)
 from schedule_builder.builders.file_builder import resource_path
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher

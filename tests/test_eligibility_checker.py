@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 # Local Imports
 from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
 from schedule_builder.eligibility.eligibility_rule import EligibilityRule
+from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
 from schedule_builder.models.preacher import Preacher
@@ -36,47 +37,51 @@ def preacher():
     )
 
 
-def test_is_eligible_with_no_rules(person, event_date):
+def test_is_eligible_with_no_rules(person, event_date, preacher):
     # Arrange
+    event = Event(date=event_date, team=[person], preachers=[preacher])
     checker = EligibilityChecker(rules=[])
 
     # Act
-    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event_date)
+    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event)
 
     # Assert
     assert is_eligible
 
 
-def test_is_eligible_with_single_passing_rule(person, event_date):
+def test_is_eligible_with_single_passing_rule(person, event_date, preacher):
     # Arrange
+    event = Event(date=event_date, team=[person], preachers=[preacher])
     mock_rule = MagicMock(spec=EligibilityRule)
     mock_rule.is_eligible.return_value = True
     checker = EligibilityChecker(rules=[mock_rule])
 
     # Act
-    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event_date)
+    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event)
 
     # Assert
     assert is_eligible
     mock_rule.is_eligible.assert_called_once()
 
 
-def test_is_eligible_with_single_failing_rule(person, event_date):
+def test_is_eligible_with_single_failing_rule(person, event_date, preacher):
     # Arrange
+    event = Event(date=event_date, team=[person], preachers=[preacher])
     mock_rule = MagicMock(spec=EligibilityRule)
     mock_rule.is_eligible.return_value = False
     checker = EligibilityChecker(rules=[mock_rule])
 
     # Act
-    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event_date)
+    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event)
 
     # Assert
     assert not is_eligible
     mock_rule.is_eligible.assert_called_once()
 
 
-def test_is_eligible_with_multiple_passing_rules(person, event_date):
+def test_is_eligible_with_multiple_passing_rules(person, event_date, preacher):
     # Arrange
+    event = Event(date=event_date, team=[person], preachers=[preacher])
     mock_rule1 = MagicMock(spec=EligibilityRule)
     mock_rule2 = MagicMock(spec=EligibilityRule)
     mock_rule1.is_eligible.return_value = True
@@ -84,7 +89,7 @@ def test_is_eligible_with_multiple_passing_rules(person, event_date):
     checker = EligibilityChecker(rules=[mock_rule1, mock_rule2])
 
     # Act
-    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event_date)
+    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event)
 
     # Assert
     assert is_eligible
@@ -92,8 +97,9 @@ def test_is_eligible_with_multiple_passing_rules(person, event_date):
     mock_rule2.is_eligible.assert_called_once()
 
 
-def test_if_returns_early_when_rule_fails(person, event_date):
+def test_is_eligible_returns_early_when_rule_fails(person, event_date, preacher):
     # Arrange
+    event = Event(date=event_date, team=[person], preachers=[preacher])
     mock_rule1 = MagicMock(spec=EligibilityRule)
     mock_rule2 = MagicMock(spec=EligibilityRule)
     mock_rule3 = MagicMock(spec=EligibilityRule)
@@ -103,7 +109,7 @@ def test_if_returns_early_when_rule_fails(person, event_date):
     checker = EligibilityChecker(rules=[mock_rule1, mock_rule2, mock_rule3])
 
     # Act
-    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event_date)
+    is_eligible = checker.is_eligible(person, Role.WORSHIPLEADER, event)
 
     # Assert
     assert not is_eligible

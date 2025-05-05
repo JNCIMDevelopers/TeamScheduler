@@ -3,7 +3,7 @@ import logging
 import os
 
 # Local Imports
-from paths import OUTPUT_FOLDER_PATH, LOG_FILE_PATH
+from config import OUTPUT_FOLDER_PATH, LOG_FILE_PATH
 from schedule_builder.builders.team_initializer import TeamInitializer
 from ui.application import App
 

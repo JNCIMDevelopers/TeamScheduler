@@ -10,7 +10,11 @@ from tkcalendar import DateEntry
 from tkinter import messagebox
 
 # Local Imports
-from paths import LOG_FILE_PATH, SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
+from config import (
+    LOG_FILE_PATH,
+    SCHEDULE_CSV_FILE_PATH,
+    SCHEDULE_DETAILS_HTML_FILE_PATH,
+)
 from ui.ui_schedule_handler import UIScheduleHandler
 
 # Appearance settings for customtkinter

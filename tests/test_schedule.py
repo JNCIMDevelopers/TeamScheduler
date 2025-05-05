@@ -690,3 +690,59 @@ def test_get_eligible_person_for_special_condition_3_when_not_expected_acoustic_
 
     # Assert
     assert eligible_person is None
+
+
+@pytest.mark.parametrize(
+    "person_to_assign_name, assigned_person_name, is_eligible",
+    [
+        ("Jeff", "Mariel", False),
+        ("Mariel", "Jeff", False),
+        ("Jeff", "TestName", True),
+        ("Mariel", "TestName", True),
+        ("TestName", "Jeff", True),
+    ],
+)
+def test_get_eligible_person_for_special_condition_4(
+    person_to_assign_name, assigned_person_name, is_eligible
+):
+    # Arrange
+    event_date = date(2025, 4, 6)
+    role_to_assign = Role.ACOUSTIC
+    person_to_assign = Person(
+        name=person_to_assign_name,
+        roles=[role_to_assign],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    assigned_role = Role.LYRICS
+    assigned_person = Person(
+        name=assigned_person_name,
+        roles=[assigned_role],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    team = [person_to_assign, assigned_person]
+    preacher = Preacher(
+        name="TestPreacher", graphics_support="Test", dates=[event_date]
+    )
+    preachers = [preacher]
+    event = Event(
+        date=event_date,
+        team=team,
+        preachers=preachers,
+    )
+    event.assign_role(role=assigned_role, person=assigned_person)
+    schedule = Schedule(team=team, event_dates=[event_date], preachers=preachers)
+
+    # Act
+    eligible_person = schedule.get_eligible_person(
+        role=role_to_assign, team=team, event=event
+    )
+
+    # Assert
+    expected_person = person_to_assign if is_eligible else None
+    assert eligible_person == expected_person

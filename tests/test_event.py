@@ -239,10 +239,42 @@ def test_get_assigned_preacher():
     event = Event(date=reference_date, team=[person], preachers=[preacher1, preacher2])
 
     # Act
-    preacher = event.get_assigned_preacher()
+    preacher = event.get_assigned_preacher
 
     # Assert
     assert preacher == preacher1
+
+
+def test_get_assigned_preacher_is_cached():
+    # Arrange
+    reference_date = date(2024, 7, 7)
+    next_date = date(2024, 7, 14)
+    person = Person(
+        name="TestName",
+        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+        blockout_dates=[],
+        preaching_dates=[],
+        on_leave=False,
+    )
+    preacher1 = Preacher(
+        name="TestPreacher1", graphics_support="TestGraphics1", dates=[reference_date]
+    )
+    preacher2 = Preacher(
+        name="TestPreacher2",
+        graphics_support="TestGraphics2",
+        dates=[next_date],
+    )
+
+    event = Event(date=reference_date, team=[person], preachers=[preacher1, preacher2])
+
+    # Act
+    first_preacher = event.get_assigned_preacher
+    event.date = next_date
+    second_preacher = event.get_assigned_preacher
+
+    # Assert
+    assert first_preacher == preacher1
+    assert second_preacher == preacher1
 
 
 def test_get_assigned_preacher_when_no_preacher():
@@ -269,7 +301,7 @@ def test_get_assigned_preacher_when_no_preacher():
     event = Event(date=reference_date, team=[person], preachers=[preacher1, preacher2])
 
     # Act
-    preacher = event.get_assigned_preacher()
+    preacher = event.get_assigned_preacher
 
     # Assert
     assert preacher is None
