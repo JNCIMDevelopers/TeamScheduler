@@ -1,4 +1,5 @@
 # Standard Library Imports
+from dataclasses import dataclass, field
 from datetime import date
 from typing import List, Optional
 
@@ -6,34 +7,32 @@ from typing import List, Optional
 from ..models.role import Role
 
 
+@dataclass
 class Person:
     """
     A class to represent a person and their associated roles and availability information.
     """
 
-    def __init__(
-        self,
-        name: str,
-        roles: List[Role],
-        blockout_dates: Optional[List[date]] = None,
-        preaching_dates: Optional[List[date]] = None,
-        teaching_dates: Optional[List[date]] = None,
-        on_leave: bool = False,
-    ):
+    name: str
+    roles: List[Role]
+    blockout_dates: List[date] = field(default_factory=list)
+    preaching_dates: List[date] = field(default_factory=list)
+    teaching_dates: List[date] = field(default_factory=list)
+    on_leave: bool = False
+
+    assigned_dates: List[date] = field(default_factory=list, init=False)
+    last_assigned_dates: dict = field(default_factory=dict, init=False)
+    role_assigned_dates: dict = field(default_factory=dict, init=False)
+
+    def __post_init__(self):
         """
-        Initializes the Person with a name, roles, and optionally blockout dates, preaching dates, teaching dates, and leave status.
+        Initializes the `last_assigned_dates` and `role_assigned_dates` attributes.
+
+        `last_assigned_dates` is a dictionary mapping roles to `None`, and
+        `role_assigned_dates` is a dictionary mapping roles to empty lists.
         """
-        self.name: str = name
-        self.roles: List[Role] = roles
-        self.blockout_dates: List[date] = blockout_dates if blockout_dates else []
-        self.preaching_dates: List[date] = preaching_dates if preaching_dates else []
-        self.teaching_dates: List[date] = teaching_dates if teaching_dates else []
-        self.on_leave = on_leave
-        self.assigned_dates: List[date] = []
-        self.last_assigned_dates: dict[Role, Optional[date]] = {
-            role: None for role in roles
-        }
-        self.role_assigned_dates: dict[Role, List[date]] = {role: [] for role in roles}
+        self.last_assigned_dates = {role: None for role in self.roles}
+        self.role_assigned_dates = {role: [] for role in self.roles}
 
     def assign_event(self, event_date: date, role: Role) -> None:
         """
