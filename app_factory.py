@@ -23,7 +23,7 @@ def create_app(
         team (List[Person]): A list of team members.
         preachers (List[Preacher]): A list of preachers.
         rotation (List[str]): A list of worship leader names.
-        title (str): The title of the app, defaulting to "Schedule Builder".
+        title (str): The title of the app.
 
     Returns:
         App: A fully initialized App instance.
