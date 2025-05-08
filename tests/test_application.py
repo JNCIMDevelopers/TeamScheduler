@@ -1,59 +1,47 @@
-# Standard Library Imports
-import pytest
-from datetime import date
-from unittest.mock import patch
-
 # Local Imports
-from schedule_builder.helpers.file_exporter import FileExporter
-from schedule_builder.models.person import Person
-from schedule_builder.models.preacher import Preacher
+from unittest.mock import MagicMock, patch
 from ui.application import App
-from ui.ui_schedule_handler import UIScheduleHandler
-from ui.ui_manager import UIManager
 
 
-@pytest.fixture
-def mock_app_data():
-    mock_team = [Person(name="TestPerson", roles=[])]
-    mock_preachers = [
-        Preacher(
-            name="TestPreacher",
-            graphics_support="TestSupport",
-            dates=[date(2025, 4, 6), date(2025, 4, 13), date(2025, 4, 20)],
-        )
-    ]
-    mock_rotation = ["TestPerson"]
-    return mock_team, mock_preachers, mock_rotation
-
-
-@patch("ui.application.UIManager.setup", return_value=None)
 @patch("customtkinter.CTk.__init__", return_value=None)
-def test_app_initialization(mock_ctk_init, mock_setup_ui, mock_app_data):
+def test_app_initialization_sets_dependencies(mock_ctk):
     # Arrange
-    mock_team, mock_preachers, mock_rotation = mock_app_data
+    mock_file_exporter = MagicMock()
+    mock_schedule_handler = MagicMock()
+    mock_ui_manager = MagicMock()
 
     # Act
-    app = App(team=mock_team, preachers=mock_preachers, rotation=mock_rotation)
+    app = App(
+        file_exporter=mock_file_exporter,
+        schedule_handler=mock_schedule_handler,
+        ui_manager=mock_ui_manager,
+    )
 
     # Assert
-    mock_ctk_init.assert_called_once()
-    assert isinstance(app.file_exporter, FileExporter)
-    assert isinstance(app.ui_schedule_handler, UIScheduleHandler)
-    assert isinstance(app.ui_manager, UIManager)
-    mock_setup_ui.assert_called_once()
+    assert app.file_exporter is mock_file_exporter
+    assert app.schedule_handler is mock_schedule_handler
+    assert app.ui_manager is mock_ui_manager
+    assert app.ui_manager.app == app
 
 
+@patch("ui.application.App.mainloop", return_value=None)
 @patch("ui.application.UIManager.setup", return_value=None)
 @patch("customtkinter.CTk.__init__", return_value=None)
-def test_app_initialization_with_empty_inputs(mock_ctk_init, mock_setup_ui):
+def test_app_start_calls_setup_and_mainloop(mock_ctk, mock_setup, mock_mainloop):
     # Arrange
-    mock_team = []
-    mock_preachers = []
-    mock_rotation = []
+    mock_file_exporter = MagicMock()
+    mock_schedule_handler = MagicMock()
+    mock_ui_manager = MagicMock()
 
-    # Act and Assert
-    with pytest.raises(ValueError):
-        App(team=mock_team, preachers=mock_preachers, rotation=mock_rotation)
+    app = App(
+        file_exporter=mock_file_exporter,
+        schedule_handler=mock_schedule_handler,
+        ui_manager=mock_ui_manager,
+    )
 
-    mock_ctk_init.assert_called_once()
-    mock_setup_ui.assert_not_called()
+    # Act
+    app.start()
+
+    # Assert
+    mock_ui_manager.setup.assert_called_once()
+    mock_mainloop.assert_called_once()

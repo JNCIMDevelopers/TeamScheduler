@@ -1,58 +1,52 @@
 # Standard Library Imports
 import logging
-from typing import List
 
 # Third-Party Imports
 import customtkinter
 
 # Local Imports
 from schedule_builder.helpers.file_exporter import FileExporter
-from schedule_builder.models.person import Person
-from schedule_builder.models.preacher import Preacher
 from ui.ui_manager import UIManager
 from ui.ui_schedule_handler import UIScheduleHandler
 
 
 class App(customtkinter.CTk):
     """
-    A GUI application for scheduling team members and preachers.
+    The main GUI application for building and managing a team schedule.
 
-    Provides functionality for generating schedules, managing team assignments,
-    and exporting files.
+    This class acts as the entry point for the graphical interface and coordinates the
+    application's core components, such as scheduling logic, file export, and UI management.
 
     Attributes:
-        file_exporter (FileExporter): Handles file export operations.
-        ui_schedule_handler (UIScheduleHandler): Manages scheduling logic.
-        ui_manager (UIManager): Manages the user interface and interactions.
+        file_exporter (FileExporter): Responsible for handling file export operations.
+        schedule_handler (UIScheduleHandler): Encapsulates the scheduling logic and data.
+        ui_manager (UIManager): Manages the layout and interaction of UI components.
     """
 
     def __init__(
-        self, team: List[Person], preachers: List[Preacher], rotation: List[str]
+        self,
+        file_exporter: FileExporter,
+        schedule_handler: UIScheduleHandler,
+        ui_manager: UIManager,
     ):
         """
-        Initializes the application with a team of members, preachers, and a worship leader rotation.
+        Initializes the App with injected core components.
 
         Args:
-            team (List[Person]): A list of team members who can be assigned to roles in the schedule.
-            preachers (List[Preacher]): A list of preachers who can be scheduled for preaching duties.
-            rotation (List[str]): A list of worship leader names in priority order for scheduling.
+            file_exporter (FileExporter): An instance responsible for exporting schedule data to files.
+            schedule_handler (UIScheduleHandler): The scheduling logic and data handler.
+            ui_manager (UIManager): The user interface manager that sets up and controls UI behavior.
         """
         super().__init__()
         self.logger = logging.getLogger(__name__)
+        self.file_exporter = file_exporter
+        self.schedule_handler = schedule_handler
+        self.ui_manager = ui_manager
+        self.ui_manager.app = self
 
-        # Setup dependencies
-        self.file_exporter = FileExporter()
-        self.ui_schedule_handler = UIScheduleHandler(
-            team=team,
-            preachers=preachers,
-            rotation=rotation,
-            file_exporter=self.file_exporter,
-        )
-        self.ui_manager = UIManager(
-            app=self,
-            schedule_handler=self.ui_schedule_handler,
-            title="Schedule Builder",
-        )
-
-        # Setup UI
+    def start(self):
+        """
+        Starts the application by setting up the UI and entering the main event loop.
+        """
         self.ui_manager.setup()
+        self.mainloop()

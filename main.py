@@ -3,17 +3,14 @@ import logging
 import os
 
 # Local Imports
+from app_factory import create_app
 from config import OUTPUT_FOLDER_PATH, LOG_FILE_PATH
 from schedule_builder.builders.team_initializer import TeamInitializer
-from ui.application import App
 
 
 def set_logging() -> None:
     """
     Configures logging settings for the application.
-
-    Sets up logging to write messages of level INFO or higher to the specified log file.
-    The log file is overwritten each time the application starts.
     """
     logging.basicConfig(
         filename=LOG_FILE_PATH,
@@ -26,14 +23,6 @@ def set_logging() -> None:
 def main() -> None:
     """
     Main entry point of the application.
-
-    This function performs the following:
-    - Creates the output directory if it does not exist.
-    - Configures logging settings for the application.
-    - Initializes team data (team, preachers, rotation).
-    - Starts the application GUI using the initialized data.
-
-    The function runs the main loop of the application once initialization is complete.
     """
     # Setup output directory and logging config
     os.makedirs(OUTPUT_FOLDER_PATH, exist_ok=True)
@@ -44,8 +33,10 @@ def main() -> None:
     team, preachers, rotation = team_initializer.initialize_team()
 
     # Run application
-    app = App(team=team, preachers=preachers, rotation=rotation)
-    app.mainloop()
+    app = create_app(
+        team=team, preachers=preachers, rotation=rotation, title="Schedule Builder"
+    )
+    app.start()
 
 
 if __name__ == "__main__":
