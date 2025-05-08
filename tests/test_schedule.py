@@ -405,9 +405,13 @@ def test_get_eligible_person_for_worship_leader_with_preaching_next_week():
     assert eligible_person is None
 
 
-def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date():
+@pytest.mark.parametrize(
+    "role, is_eligible", [(Role.WORSHIPLEADER, False), (Role.ACOUSTIC, True)]
+)
+def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date(
+    role, is_eligible
+):
     # Arrange
-    role = Role.WORSHIPLEADER
     reference_date = date(2024, 6, 30)
     event_dates = [reference_date]
     person = Person(
@@ -426,61 +430,13 @@ def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date():
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
-    assert eligible_person is None
+    assert eligible_person == (person if is_eligible else None)
 
 
-def test_get_eligible_person_for_non_worship_leader_role_with_teaching_on_same_date():
-    # Arrange
-    role = Role.ACOUSTIC
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[reference_date],
-        on_leave=False,
-    )
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    schedule = Schedule(team=team, event_dates=event_dates)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person == person
-
-
-def test_get_eligible_person_for_special_condition_1_pastor_preaching():
-    # Arrange
-    role = Role.EMCEE
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="Lulu",
-        roles=[role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(name="Edmund", graphics_support="Test", dates=[reference_date])
-
-    team = [person]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person == person
-
-
-def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
+@pytest.mark.parametrize(
+    "preacher_name, is_eligible", [("Edmund", True), ("TestPreacher", False)]
+)
+def test_get_eligible_person_for_special_condition_1(preacher_name, is_eligible):
     # Arrange
     role = Role.EMCEE
     reference_date = date(2024, 6, 30)
@@ -494,7 +450,7 @@ def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
         on_leave=False,
     )
     preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[reference_date]
+        name=preacher_name, graphics_support="Test", dates=[reference_date]
     )
 
     team = [person]
@@ -506,66 +462,20 @@ def test_get_eligible_person_for_special_condition_1_pastor_not_preaching():
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
-    assert eligible_person is None
+
+    assert eligible_person == (person if is_eligible else None)
 
 
-def test_get_eligible_person_for_special_condition_2_pastor_preaching():
+@pytest.mark.parametrize(
+    "role, preacher_name, is_eligible",
+    [
+        (Role.WORSHIPLEADER, "Kris", False),  # Expected Role and Preacher
+        (Role.WORSHIPLEADER, "TestPreacher", True),  # Unexpected Preacher
+        (Role.BACKUP, "Kris", True),  # Unexpected Role
+    ],
+)
+def test_get_eligible_person_for_special_condition_2(role, preacher_name, is_eligible):
     # Arrange
-    role = Role.WORSHIPLEADER
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="Gee",
-        roles=[role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(name="Kris", graphics_support="Test", dates=[reference_date])
-
-    team = [person]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_for_special_condition_2_other_role():
-    # Arrange
-    role = Role.BACKUP
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="Gee",
-        roles=[role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(name="Kris", graphics_support="Test", dates=[reference_date])
-
-    team = [person]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person == person
-
-
-def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
-    # Arrange
-    role = Role.WORSHIPLEADER
     reference_date = date(2024, 6, 30)
     event_dates = [reference_date]
     person = Person(
@@ -577,7 +487,7 @@ def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
         on_leave=False,
     )
     preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[reference_date]
+        name=preacher_name, graphics_support="Test", dates=[reference_date]
     )
 
     team = [person]
@@ -589,10 +499,17 @@ def test_get_eligible_person_for_special_condition_2_pastor_not_preaching():
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
-    assert eligible_person == person
+    assert eligible_person == (person if is_eligible else None)
 
 
-def test_get_eligible_person_for_special_condition_3_when_expected_worship_leader():
+@pytest.mark.parametrize(
+    "person_name, is_eligible",
+    [
+        ("Kris", True),  # Expected Acoustic Person
+        ("TestName", False),  # Unexpected Acoustic Person
+    ],
+)
+def test_get_eligible_person_for_special_condition_3(person_name, is_eligible):
     # Arrange
     role = Role.ACOUSTIC
     reference_date = date(2024, 6, 30)
@@ -606,7 +523,7 @@ def test_get_eligible_person_for_special_condition_3_when_expected_worship_leade
         on_leave=False,
     )
     person2 = Person(
-        name="Kris",
+        name=person_name,
         roles=[Role.ACOUSTIC],
         blockout_dates=[],
         preaching_dates=[],
@@ -643,53 +560,7 @@ def test_get_eligible_person_for_special_condition_3_when_expected_worship_leade
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
-    assert eligible_person == person2
-
-
-def test_get_eligible_person_for_special_condition_3_when_not_expected_acoustic_person():
-    # Arrange
-    role = Role.ACOUSTIC
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person1 = Person(
-        name="TestName1",
-        roles=[Role.ACOUSTIC],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    person2 = Person(
-        name="TestName2",
-        roles=[Role.ACOUSTIC],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[reference_date]
-    )
-    worship_leader = Person(
-        name="Gee",
-        roles=[Role.WORSHIPLEADER],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-
-    team = [person1, person2, worship_leader]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    event.roles[Role.WORSHIPLEADER] = worship_leader.name
-    schedule = Schedule(team=team, event_dates=event_dates, preachers=preachers)
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
+    assert eligible_person == (person2 if is_eligible else None)
 
 
 @pytest.mark.parametrize(
