@@ -37,15 +37,34 @@ def test_assign_event():
     assert date_two in person.role_assigned_dates[role_two]
 
 
-@pytest.mark.parametrize("p_dates", [None, []])
-def test_get_next_preaching_date_with_no_dates(p_dates):
+@pytest.mark.parametrize(
+    "reference_date, preaching_dates, expected",
+    [
+        (date(2024, 7, 7), [], None),  # No dates
+        (
+            date(2024, 7, 7),
+            [date(2024, 6, 30), date(2024, 7, 7), date(2024, 7, 14)],
+            date(2024, 7, 7),
+        ),  # Same Date
+        (
+            date(2024, 7, 21),
+            [date(2024, 6, 30), date(2024, 7, 7), date(2024, 7, 14)],
+            None,
+        ),  # Past Dates Only
+        (
+            date(2024, 7, 7),
+            [date(2024, 6, 30), date(2024, 7, 21), date(2024, 8, 4)],
+            date(2024, 7, 21),
+        ),  # Future Date
+    ],
+)
+def test_get_next_preaching_date(reference_date, preaching_dates, expected):
     # Arrange
-    reference_date = date(2024, 7, 7)
     person = Person(
         name="TestName",
         roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
         blockout_dates=[],
-        preaching_dates=p_dates,
+        preaching_dates=preaching_dates,
         on_leave=False,
     )
 
@@ -53,59 +72,4 @@ def test_get_next_preaching_date_with_no_dates(p_dates):
     next_preaching_date = person.get_next_preaching_date(reference_date=reference_date)
 
     # Assert
-    assert next_preaching_date is None
-
-
-def test_get_next_preaching_date_with_past_dates_only():
-    # Arrange
-    reference_date = date(2024, 7, 21)
-    person = Person(
-        name="TestName",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[date(2024, 6, 30), date(2024, 7, 7), date(2024, 7, 14)],
-        on_leave=False,
-    )
-
-    # Act
-    next_preaching_date = person.get_next_preaching_date(reference_date=reference_date)
-
-    # Assert
-    assert next_preaching_date is None
-
-
-def test_get_next_preaching_date_when_same_date():
-    # Arrange
-    reference_date = date(2024, 7, 7)
-    person = Person(
-        name="TestName",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[date(2024, 6, 30), reference_date, date(2024, 7, 14)],
-        on_leave=False,
-    )
-
-    # Act
-    next_preaching_date = person.get_next_preaching_date(reference_date=reference_date)
-
-    # Assert
-    assert next_preaching_date == reference_date
-
-
-def test_get_next_preaching_date_when_future_date():
-    # Arrange
-    reference_date = date(2024, 7, 7)
-    next_date = date(2024, 7, 21)
-    person = Person(
-        name="TestName",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[date(2024, 6, 30), next_date, date(2024, 8, 4)],
-        on_leave=False,
-    )
-
-    # Act
-    next_preaching_date = person.get_next_preaching_date(reference_date=reference_date)
-
-    # Assert
-    assert next_preaching_date == next_date
+    assert next_preaching_date == expected
