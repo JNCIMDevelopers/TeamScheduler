@@ -56,33 +56,24 @@ class Schedule:
             logging.warning("No team available for schedule.")
             return ([], [])
 
-        # Create event on each date
         for event_date in self.event_dates:
             logging.debug(f"Schedule Event Date: {str(event_date)}.")
 
             # Create a shallow copy of persons to maintain original team list for other events
             team_copy = copy.copy(self.team)
-
-            # Initialize event
             event = Event(date=event_date, team=self.team, preachers=self.preachers)
 
             for role in Role:
-                # Get eligible person
                 eligible_person = self.get_eligible_person(
                     role=role, team=team_copy, event=event
                 )
-
                 if eligible_person:
-                    # Assign role to person
                     event.assign_role(role=role, person=eligible_person)
                     logging.info(
                         f"{eligible_person.name} assigned as {role} on {str(event_date)}."
                     )
-
-                    # Remove person from shallow copy of team to avoid assigning twice in the same event
                     team_copy.remove(eligible_person)
 
-            # Add event once all persons and/or roles have been assigned
             self.events.append(event)
 
         return (self.events, self.team)
@@ -105,7 +96,7 @@ class Schedule:
             logging.warning("No team available for getting eligible person.")
             return None
 
-        # Get eligible persons from the team using the EligibilityChecker
+        # Filter team members based on eligibility criteria
         eligible_persons = [
             person
             for person in team
@@ -114,21 +105,20 @@ class Schedule:
             )
         ]
 
-        # Return random eligible team member
-        if eligible_persons:
-            logging.info(
-                f"Eligible Persons for {role} on {event.date}: {[p.name for p in eligible_persons]}"
+        if not eligible_persons:
+            logging.warning(f"No eligible person for {role} on {event.date}.")
+            return None
+
+        logging.info(
+            f"Eligible Persons for {role} on {event.date}: {[p.name for p in eligible_persons]}"
+        )
+
+        # Get the next worship leader in the rotation for the WORSHIPLEADER role
+        if role == Role.WORSHIPLEADER:
+            next_worship_leader = self.worship_leader_selector.get_next(
+                eligible_persons=eligible_persons
             )
+            if next_worship_leader:
+                return next_worship_leader
 
-            # If the role is WORSHIPLEADER, get the next worship leader from the rotation
-            if role == Role.WORSHIPLEADER:
-                next_worship_leader = self.worship_leader_selector.get_next(
-                    eligible_persons=eligible_persons
-                )
-                if next_worship_leader:
-                    return next_worship_leader
-
-            return random.choice(eligible_persons)
-
-        logging.warning(f"No eligible person for {role} on {event.date}.")
-        return None
+        return random.choice(eligible_persons)
