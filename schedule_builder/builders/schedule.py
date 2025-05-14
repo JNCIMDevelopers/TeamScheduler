@@ -7,21 +7,6 @@ from typing import List, Optional, Tuple
 
 # Local Imports
 from ..eligibility.eligibility_checker import EligibilityChecker
-from ..eligibility.rules import (
-    RoleCapabilityRule,
-    OnLeaveRule,
-    BlockoutDateRule,
-    PreachingDateRule,
-    RoleTimeWindowRule,
-    ConsecutiveAssignmentLimitRule,
-    ConsecutiveRoleAssignmentLimitRule,
-    WorshipLeaderTeachingRule,
-    WorshipLeaderPreachingConflictRule,
-    LuluEmceeRule,
-    GeeWorshipLeaderRule,
-    KrisAcousticRule,
-    JeffMarielAssignmentRule,
-)
 from ..helpers.worship_leader_selector import WorshipLeaderSelector
 from ..models.event import Event
 from ..models.person import Person
@@ -31,58 +16,34 @@ from ..models.role import Role
 
 class Schedule:
     """
-    A class to create a schedule of events, assigning team members to various roles.
-
-    Attributes:
-        team (List[Person]): List of available team members.
-        event_dates (List[date]): List of event dates.
-        events (List[Event]): List of scheduled events.
-        preachers (List[Preacher]): List of available preachers.
-        rotation (List[str]): Rotation order for worship leaders.
-        eligibility_checker (EligibilityChecker): Eligibility checker to verify role eligibility.
+    A class to build a schedule for team members based on their roles and availability.
     """
 
     def __init__(
         self,
         team: List[Person],
         event_dates: List[date],
+        worship_leader_selector: WorshipLeaderSelector,
+        eligibility_checker: EligibilityChecker,
         preachers: Optional[List[Preacher]] = None,
-        rotation: Optional[List[str]] = None,
     ):
         """
-        Initializes the schedule with team, event dates, and preachers.
+        Initializes an instance of Schedule.
+
 
         Args:
             team (List[Person]): List of available team members.
             event_dates (List[date]): List of event dates.
-            preachers (Optional[List[Preacher]]): List of available preachers (default is an empty list).
-            rotation (Optional[List[str]]): List of worship leader rotation (default is None).
+            worship_leader_selector (WorshipLeaderSelector): Selector for worship leaders.
+            eligibility_checker (EligibilityChecker): Eligibility checker for scheduling.
+            preachers (Optional[List[Preacher]]): List of available preachers. Defaults to None.
         """
         self.team: List[Person] = team
+        self.preachers: List[Preacher] = preachers if preachers else []
         self.event_dates: List[date] = event_dates
         self.events: List[Event] = []
-        self.preachers: List[Preacher] = preachers if preachers else []
-        self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
-
-        # Initialize the EligibilityChecker with all rules
-        # The order of rules determine the sequence they are evaluated
-        self.eligibility_checker = EligibilityChecker(
-            rules=[
-                OnLeaveRule(),
-                BlockoutDateRule(),
-                PreachingDateRule(),
-                RoleCapabilityRule(),
-                WorshipLeaderTeachingRule(),
-                ConsecutiveAssignmentLimitRule(),
-                ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
-                RoleTimeWindowRule(),
-                WorshipLeaderPreachingConflictRule(),
-                LuluEmceeRule(),
-                GeeWorshipLeaderRule(),
-                KrisAcousticRule(),
-                JeffMarielAssignmentRule(),
-            ]
-        )
+        self.worship_leader_selector = worship_leader_selector
+        self.eligibility_checker = eligibility_checker
 
     def build(self) -> Tuple[List[Event], List[Person]]:
         """

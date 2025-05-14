@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from schedule_builder.builders.schedule import Schedule
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher
 from app_factory import create_app
@@ -19,7 +20,8 @@ def test_create_app_wires_dependencies_correctly(
     # Arrange
     team = [MagicMock(spec=Person)]
     preachers = [MagicMock(spec=Preacher)]
-    rotation = ["TestName"]
+    worship_leader_selector = MagicMock()
+    eligibility_checker = MagicMock()
     title = "Test"
 
     mock_file_exporter = MagicMock()
@@ -35,15 +37,23 @@ def test_create_app_wires_dependencies_correctly(
     mock_app_class.return_value = mock_app_instance
 
     # Act
-    app = create_app(team=team, preachers=preachers, rotation=rotation, title=title)
+    app = create_app(
+        title=title,
+        team=team,
+        preachers=preachers,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
+    )
 
     # Assert
     mock_file_exporter_class.assert_called_once()
     mock_schedule_handler_class.assert_called_once_with(
         team=team,
         preachers=preachers,
-        rotation=rotation,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
         file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
     )
     mock_ui_manager_class.assert_called_once_with(
         app=None,
