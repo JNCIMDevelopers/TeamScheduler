@@ -54,7 +54,6 @@ def create_app(
 
     # Create App
     app = App(
-        file_exporter=file_exporter,
         schedule_handler=schedule_handler,
         ui_manager=ui_manager,
     )

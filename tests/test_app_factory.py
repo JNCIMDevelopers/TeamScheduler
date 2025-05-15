@@ -61,7 +61,6 @@ def test_create_app_wires_dependencies_correctly(
         title=title,
     )
     mock_app_class.assert_called_once_with(
-        file_exporter=mock_file_exporter,
         schedule_handler=mock_schedule_handler,
         ui_manager=mock_ui_manager,
     )

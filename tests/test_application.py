@@ -6,19 +6,16 @@ from ui.application import App
 @patch("customtkinter.CTk.__init__", return_value=None)
 def test_app_initialization_sets_dependencies(mock_ctk):
     # Arrange
-    mock_file_exporter = MagicMock()
     mock_schedule_handler = MagicMock()
     mock_ui_manager = MagicMock()
 
     # Act
     app = App(
-        file_exporter=mock_file_exporter,
         schedule_handler=mock_schedule_handler,
         ui_manager=mock_ui_manager,
     )
 
     # Assert
-    assert app.file_exporter is mock_file_exporter
     assert app.schedule_handler is mock_schedule_handler
     assert app.ui_manager is mock_ui_manager
     assert app.ui_manager.app == app
@@ -29,12 +26,10 @@ def test_app_initialization_sets_dependencies(mock_ctk):
 @patch("customtkinter.CTk.__init__", return_value=None)
 def test_app_start_calls_setup_and_mainloop(mock_ctk, mock_setup, mock_mainloop):
     # Arrange
-    mock_file_exporter = MagicMock()
     mock_schedule_handler = MagicMock()
     mock_ui_manager = MagicMock()
 
     app = App(
-        file_exporter=mock_file_exporter,
         schedule_handler=mock_schedule_handler,
         ui_manager=mock_ui_manager,
     )
