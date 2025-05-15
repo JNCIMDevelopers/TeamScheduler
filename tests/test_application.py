@@ -18,7 +18,6 @@ def test_app_initialization_sets_dependencies(mock_ctk):
     # Assert
     assert app.schedule_handler is mock_schedule_handler
     assert app.ui_manager is mock_ui_manager
-    assert app.ui_manager.app == app
 
 
 @patch("ui.application.App.mainloop", return_value=None)

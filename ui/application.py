@@ -30,7 +30,6 @@ class App(customtkinter.CTk):
         self.logger = logging.getLogger(__name__)
         self.schedule_handler = schedule_handler
         self.ui_manager = ui_manager
-        self.ui_manager.app = self
 
     def start(self):
         """
