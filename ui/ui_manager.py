@@ -29,11 +29,6 @@ class UIManager:
     This class handles the setup of the main window, widget creation, and event handling
     for various UI elements. It is responsible for displaying and updating the schedule-related
     UI, including date entries, buttons, confirmation messages, and links to schedule outputs.
-
-    Attributes:
-        app (customtkinter.CTk): The main application instance, responsible for managing the app window.
-        schedule_handler (UIScheduleHandler): A handler for managing schedule-related logic and data.
-        title (str): The title of the application window.
     """
 
     def __init__(
@@ -43,7 +38,7 @@ class UIManager:
         title: str,
     ):
         """
-        Initializes the UIManager with the main app instance, schedule handler, and window title.
+        Initializes an instance of the UIManager class.
 
         Args:
             app (customtkinter.CTk): The main application instance.
