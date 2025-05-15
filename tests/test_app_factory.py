@@ -60,10 +60,7 @@ def test_create_app_wires_dependencies_correctly(
         schedule_handler=mock_schedule_handler,
         title=title,
     )
-    mock_app_class.assert_called_once_with(
-        schedule_handler=mock_schedule_handler,
-        ui_manager=mock_ui_manager,
-    )
+    mock_app_class.assert_called_once_with(mock_ui_manager)
 
     assert mock_ui_manager.app == mock_app_instance
     assert app == mock_app_instance

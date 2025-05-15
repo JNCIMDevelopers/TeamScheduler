@@ -53,10 +53,7 @@ def create_app(
     )
 
     # Create App
-    app = App(
-        schedule_handler=schedule_handler,
-        ui_manager=ui_manager,
-    )
+    app = App(ui_manager)
 
     # Inject the App reference into UIManager
     ui_manager.app = app
