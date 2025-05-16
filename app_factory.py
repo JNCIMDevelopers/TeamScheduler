@@ -2,7 +2,10 @@
 from typing import List
 
 # Local Imports
+from schedule_builder.builders.schedule import Schedule
+from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
 from schedule_builder.helpers.file_exporter import FileExporter
+from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher
 from ui.application import App
@@ -11,29 +14,35 @@ from ui.ui_schedule_handler import UIScheduleHandler
 
 
 def create_app(
+    title: str,
     team: List[Person],
     preachers: List[Preacher],
-    rotation: List[str],
-    title: str,
+    worship_leader_selector: WorshipLeaderSelector,
+    eligibility_checker: EligibilityChecker,
 ) -> App:
     """
-    Factory method to create and configure the app instance with the necessary dependencies.
+    Factory function to create the application instance with all dependencies wired up.
+
 
     Args:
-        team (List[Person]): A list of team members.
-        preachers (List[Preacher]): A list of preachers.
-        rotation (List[str]): A list of worship leader names.
-        title (str): The title of the app.
+        title (str): The title of the application.
+        team (List[Person]): List of team members to be scheduled.
+        preachers (List[Preacher]): List of preachers available for the schedule.
+        worship_leader_selector (WorshipLeaderSelector): Selector for worship leaders.
+        eligibility_checker (EligibilityChecker): Eligibility checker for scheduling.
 
-    Returns:
-        App: A fully initialized App instance.
     """
+    # Create file exporter
     file_exporter = FileExporter()
+
+    # Create schedule handler
     schedule_handler = UIScheduleHandler(
         team=team,
         preachers=preachers,
-        rotation=rotation,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
         file_exporter=file_exporter,
+        schedule_class=Schedule,
     )
 
     # Create UIManager without app reference initially
@@ -44,11 +53,7 @@ def create_app(
     )
 
     # Create App
-    app = App(
-        file_exporter=file_exporter,
-        schedule_handler=schedule_handler,
-        ui_manager=ui_manager,
-    )
+    app = App(ui_manager)
 
     # Inject the App reference into UIManager
     ui_manager.app = app

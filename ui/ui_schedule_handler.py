@@ -2,48 +2,52 @@
 import copy
 import logging
 from datetime import date
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 # Local Imports
 from config import SCHEDULE_CSV_FILE_PATH, SCHEDULE_DETAILS_HTML_FILE_PATH
 from schedule_builder.builders.schedule import Schedule
+from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
+from schedule_builder.helpers.file_exporter import FileExporter
+from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
+from schedule_builder.models.preacher import Preacher
 from schedule_builder.util.date_generator import get_all_sundays
 
 
 class UIScheduleHandler:
     """
-    Handles schedule-related logic for the user interface.
-
-    This class is responsible for validating date ranges, adjusting dates if needed,
-    and building the schedule for a specified date range. It also ensures that the
-    schedule is within the available preaching date range and generates schedule files.
-
-    Attributes:
-        team (List[Person]): A list of team members involved in the schedule.
-        preachers (List[Preacher]): A list of preachers available for scheduling.
-        rotation (List[str]): The priority order of worship leaders.
-        file_exporter (FileExporter): A file exporter for generating schedule files.
-        earliest_date (date): The earliest preaching date available.
-        latest_date (date): The latest preaching date available.
+    A class to handle the schedule-related logic for the user interface.
     """
 
-    def __init__(self, team, preachers, rotation, file_exporter):
+    def __init__(
+        self,
+        team: List[Person],
+        preachers: List[Preacher],
+        worship_leader_selector: WorshipLeaderSelector,
+        eligibility_checker: EligibilityChecker,
+        file_exporter: FileExporter,
+        schedule_class: Type[Schedule],
+    ):
         """
-        Initializes the schedule handler with the necessary data for scheduling.
+        Initializes an instance of UIScheduleHandler.
 
         Args:
             team (List[Person]): List of team members to be scheduled.
             preachers (List[Preacher]): List of preachers available for the schedule.
-            rotation (List[str]): The priority order for worship leaders.
+            worship_leader_selector (WorshipLeaderSelector): Selector for worship leaders.
+            eligibility_checker (EligibilityChecker): Eligibility checker for scheduling.
             file_exporter (FileExporter): An object to handle file export operations.
+            schedule_class (Type[Schedule]): The class used to build the schedule.
         """
         self.logger = logging.getLogger(__name__)
         self.team = team
         self.preachers = preachers
-        self.rotation = rotation
+        self.worship_leader_selector = worship_leader_selector
+        self.eligibility_checker = eligibility_checker
         self.file_exporter = file_exporter
+        self.schedule_class = schedule_class
         self.earliest_date, self.latest_date = self.calculate_preaching_date_range()
         self.logger.debug(f"Earliest Preaching Date: {str(self.earliest_date)}")
         self.logger.debug(f"Latest Preaching Date: {str(self.latest_date)}")
@@ -152,11 +156,12 @@ class UIScheduleHandler:
         team_copy = copy.deepcopy(self.team)
 
         # Build Schedule
-        events, updated_team = Schedule(
+        events, updated_team = self.schedule_class(
             team=team_copy,
-            preachers=self.preachers,
-            rotation=self.rotation,
             event_dates=dates_to_assign,
+            preachers=self.preachers,
+            worship_leader_selector=self.worship_leader_selector,
+            eligibility_checker=self.eligibility_checker,
         ).build()
 
         return events, updated_team

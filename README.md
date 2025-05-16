@@ -11,6 +11,7 @@ A program that builds a schedule for the JNCIM worship and sunday school ministr
 * [GitHub Workflows](#github-workflows)
 * [Execution Instructions](#execution-instructions)
 * [Output](#output)
+* [Architecture Overview](#architecture-overview)
 
 --
 
@@ -20,17 +21,17 @@ Each role is assigned randomly while considering only from the eligible persons 
 ## Assignment Eligibility Criteria
 - No more than 1 person assigned to each role
 - No more than 1 role assigned to each person
-- A person can't be assigned to a role not specified in their list of eligible roles
+- A person cannot be assigned to a role not specified in their list of eligible roles
 - A person on-leave cannot be assigned
-- A person can't be assigned more than 3 sundays in a row
-- A person can't be assigned on a blockout date
-- A person can't be assigned on a preaching date
-- A person can't be assigned the same role 3 consecutive weeks to allow for rotation among team
-- A person can't be assigned to a Worship Leader role if:
+- A person cannot be assigned more than 3 sundays in a row
+- A person cannot be assigned on a blockout date
+- A person cannot be assigned on a preaching date
+- A person cannot be assigned the same role 3 consecutive weeks to allow for rotation among team
+- A person cannot be assigned to a Worship Leader role if:
     - They are preaching within the next 2 Sundays
     - They were assigned to that role within the last 4 weeks
     - They are teaching the youth the same week
-- To allow for better rotation among the team, a person can't be assigned a certain role if they've been assigned to it recently:
+- To allow for better rotation among the team, a person cannot be assigned a certain role if they've been assigned to it recently:
     - Sunday School Teacher - within the last 4 weeks
     - Emcee - within the last 2 weeks
 
@@ -89,13 +90,11 @@ Make sure you have the following files in the root directory:
 
 ## GitHub Workflows
 
-This project uses GitHub Actions to automate quality checks during code pushes and merges. The following tasks are performed as part of the workflow:
+This project uses GitHub Actions to automate quality checks during code pushes and merges:
 
 - **Pytest**: Runs the test suite to validate that the application functions correctly.
 - **Ruff**: Performs linting to identify code style issues and potential errors.
 - **Mypy**: Performs static type checking to ensure that the types in the code match the defined type annotations, helping to prevent type-related bugs.
-
-These checks are automatically triggered on every push and pull request ensuring that the code remains clean, functional, and properly typed.
 
 ## Execution Instructions
 To run the program:
@@ -111,3 +110,7 @@ python -m pytest
 - **schedule.csv** - The schedule
 - **schedule_details.html** - An overview of the team, roles, and individual Sunday events
 - **app_log.log** - The log file
+
+## Architecture Overview
+
+![Architecture Diagram](docs/architecture.png)

@@ -7,21 +7,6 @@ from typing import List, Optional, Tuple
 
 # Local Imports
 from ..eligibility.eligibility_checker import EligibilityChecker
-from ..eligibility.rules import (
-    RoleCapabilityRule,
-    OnLeaveRule,
-    BlockoutDateRule,
-    PreachingDateRule,
-    RoleTimeWindowRule,
-    ConsecutiveAssignmentLimitRule,
-    ConsecutiveRoleAssignmentLimitRule,
-    WorshipLeaderTeachingRule,
-    WorshipLeaderPreachingConflictRule,
-    LuluEmceeRule,
-    GeeWorshipLeaderRule,
-    KrisAcousticRule,
-    JeffMarielAssignmentRule,
-)
 from ..helpers.worship_leader_selector import WorshipLeaderSelector
 from ..models.event import Event
 from ..models.person import Person
@@ -31,58 +16,34 @@ from ..models.role import Role
 
 class Schedule:
     """
-    A class to create a schedule of events, assigning team members to various roles.
-
-    Attributes:
-        team (List[Person]): List of available team members.
-        event_dates (List[date]): List of event dates.
-        events (List[Event]): List of scheduled events.
-        preachers (List[Preacher]): List of available preachers.
-        rotation (List[str]): Rotation order for worship leaders.
-        eligibility_checker (EligibilityChecker): Eligibility checker to verify role eligibility.
+    A class to build a schedule for team members based on their roles and availability.
     """
 
     def __init__(
         self,
         team: List[Person],
         event_dates: List[date],
+        worship_leader_selector: WorshipLeaderSelector,
+        eligibility_checker: EligibilityChecker,
         preachers: Optional[List[Preacher]] = None,
-        rotation: Optional[List[str]] = None,
     ):
         """
-        Initializes the schedule with team, event dates, and preachers.
+        Initializes an instance of Schedule.
+
 
         Args:
             team (List[Person]): List of available team members.
             event_dates (List[date]): List of event dates.
-            preachers (Optional[List[Preacher]]): List of available preachers (default is an empty list).
-            rotation (Optional[List[str]]): List of worship leader rotation (default is None).
+            worship_leader_selector (WorshipLeaderSelector): Selector for worship leaders.
+            eligibility_checker (EligibilityChecker): Eligibility checker for scheduling.
+            preachers (Optional[List[Preacher]]): List of available preachers. Defaults to None.
         """
         self.team: List[Person] = team
+        self.preachers: List[Preacher] = preachers if preachers else []
         self.event_dates: List[date] = event_dates
         self.events: List[Event] = []
-        self.preachers: List[Preacher] = preachers if preachers else []
-        self.worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
-
-        # Initialize the EligibilityChecker with all rules
-        # The order of rules determine the sequence they are evaluated
-        self.eligibility_checker = EligibilityChecker(
-            rules=[
-                OnLeaveRule(),
-                BlockoutDateRule(),
-                PreachingDateRule(),
-                RoleCapabilityRule(),
-                WorshipLeaderTeachingRule(),
-                ConsecutiveAssignmentLimitRule(),
-                ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
-                RoleTimeWindowRule(),
-                WorshipLeaderPreachingConflictRule(),
-                LuluEmceeRule(),
-                GeeWorshipLeaderRule(),
-                KrisAcousticRule(),
-                JeffMarielAssignmentRule(),
-            ]
-        )
+        self.worship_leader_selector = worship_leader_selector
+        self.eligibility_checker = eligibility_checker
 
     def build(self) -> Tuple[List[Event], List[Person]]:
         """
@@ -95,33 +56,24 @@ class Schedule:
             logging.warning("No team available for schedule.")
             return ([], [])
 
-        # Create event on each date
         for event_date in self.event_dates:
             logging.debug(f"Schedule Event Date: {str(event_date)}.")
 
             # Create a shallow copy of persons to maintain original team list for other events
             team_copy = copy.copy(self.team)
-
-            # Initialize event
             event = Event(date=event_date, team=self.team, preachers=self.preachers)
 
             for role in Role:
-                # Get eligible person
                 eligible_person = self.get_eligible_person(
                     role=role, team=team_copy, event=event
                 )
-
                 if eligible_person:
-                    # Assign role to person
                     event.assign_role(role=role, person=eligible_person)
                     logging.info(
                         f"{eligible_person.name} assigned as {role} on {str(event_date)}."
                     )
-
-                    # Remove person from shallow copy of team to avoid assigning twice in the same event
                     team_copy.remove(eligible_person)
 
-            # Add event once all persons and/or roles have been assigned
             self.events.append(event)
 
         return (self.events, self.team)
@@ -144,7 +96,7 @@ class Schedule:
             logging.warning("No team available for getting eligible person.")
             return None
 
-        # Get eligible persons from the team using the EligibilityChecker
+        # Filter team members based on eligibility criteria
         eligible_persons = [
             person
             for person in team
@@ -153,21 +105,20 @@ class Schedule:
             )
         ]
 
-        # Return random eligible team member
-        if eligible_persons:
-            logging.info(
-                f"Eligible Persons for {role} on {event.date}: {[p.name for p in eligible_persons]}"
+        if not eligible_persons:
+            logging.warning(f"No eligible person for {role} on {event.date}.")
+            return None
+
+        logging.info(
+            f"Eligible Persons for {role} on {event.date}: {[p.name for p in eligible_persons]}"
+        )
+
+        # Get the next worship leader in the rotation for the WORSHIPLEADER role
+        if role == Role.WORSHIPLEADER:
+            next_worship_leader = self.worship_leader_selector.get_next(
+                eligible_persons=eligible_persons
             )
+            if next_worship_leader:
+                return next_worship_leader
 
-            # If the role is WORSHIPLEADER, get the next worship leader from the rotation
-            if role == Role.WORSHIPLEADER:
-                next_worship_leader = self.worship_leader_selector.get_next(
-                    eligible_persons=eligible_persons
-                )
-                if next_worship_leader:
-                    return next_worship_leader
-
-            return random.choice(eligible_persons)
-
-        logging.warning(f"No eligible person for {role} on {event.date}.")
-        return None
+        return random.choice(eligible_persons)

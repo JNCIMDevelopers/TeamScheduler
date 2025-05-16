@@ -4,14 +4,18 @@ from datetime import date
 from unittest.mock import patch, MagicMock, ANY
 
 # Local Imports
+from schedule_builder.builders.schedule import Schedule
+from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
+from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher
+from schedule_builder.models.role import Role
 from ui.ui_schedule_handler import UIScheduleHandler
 
 
 @pytest.fixture
 def mock_schedule_handler_data():
-    mock_team = [Person(name="TestPerson", roles=[])]
+    mock_team = [Person(name="TestPerson", roles=[Role.WORSHIPLEADER])]
     mock_preachers = [
         Preacher(
             name="TestPreacher",
@@ -32,8 +36,10 @@ def mock_schedule_handler(mock_schedule_handler_data):
     return UIScheduleHandler(
         team=mock_team,
         preachers=mock_preachers,
-        rotation=mock_rotation,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
         file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
     )
 
 
@@ -42,20 +48,27 @@ def test_schedule_handler_initialization(mock_schedule_handler_data):
     mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
         mock_schedule_handler_data
     )
+    worship_leader_selector = WorshipLeaderSelector(rotation=mock_rotation)
+    eligibility_checker = EligibilityChecker(rules=[])
+    schedule_class = Schedule
 
     # Act
     schedule_handler = UIScheduleHandler(
         team=mock_team,
         preachers=mock_preachers,
-        rotation=mock_rotation,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
         file_exporter=mock_file_exporter,
+        schedule_class=schedule_class,
     )
 
     # Assert
     assert schedule_handler.team == mock_team
     assert schedule_handler.preachers == mock_preachers
-    assert schedule_handler.rotation == mock_rotation
+    assert schedule_handler.worship_leader_selector == worship_leader_selector
+    assert schedule_handler.eligibility_checker == eligibility_checker
     assert schedule_handler.file_exporter == mock_file_exporter
+    assert schedule_handler.schedule_class == schedule_class
     assert schedule_handler.earliest_date == date(2025, 4, 6)
     assert schedule_handler.latest_date == date(2025, 4, 20)
 
@@ -88,8 +101,10 @@ def test_schedule_handler_initialization_with_invalid_preacher_data(
         UIScheduleHandler(
             team=mock_team,
             preachers=mock_preachers,
-            rotation=mock_rotation,
+            worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+            eligibility_checker=EligibilityChecker(rules=[]),
             file_exporter=mock_file_exporter,
+            schedule_class=Schedule,
         )
 
 
@@ -129,8 +144,10 @@ def test_calculate_preaching_date_range(
     schedule_handler = UIScheduleHandler(
         team=mock_team,
         preachers=mock_preachers,
-        rotation=mock_rotation,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
         file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
     )
 
     # Act
@@ -165,8 +182,10 @@ def test_calculate_preaching_date_range_with_invalid_preacher_data(
     schedule_handler = UIScheduleHandler(
         team=mock_team,
         preachers=mock_preachers,
-        rotation=mock_rotation,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
         file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
     )
     schedule_handler.preachers = preacher_data
 
@@ -312,7 +331,7 @@ def test_adjust_dates_within_range(
 @patch("ui.ui_schedule_handler.get_all_sundays")
 @patch("ui.ui_schedule_handler.Schedule")
 def test_build_schedule(
-    mock_schedule_class, mock_get_all_sundays, mock_schedule_handler
+    mock_schedule_class, mock_get_all_sundays, mock_schedule_handler_data
 ):
     # Arrange
     mock_start_date = date(2025, 4, 6)
@@ -324,6 +343,18 @@ def test_build_schedule(
     mock_schedule_instance = MagicMock()
     mock_schedule_instance.build.return_value = (mock_events, mock_updated_team)
     mock_schedule_class.return_value = mock_schedule_instance
+
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
+    mock_schedule_handler = UIScheduleHandler(
+        team=mock_team,
+        preachers=mock_preachers,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
+        file_exporter=mock_file_exporter,
+        schedule_class=mock_schedule_class,
+    )
 
     # Act
     events, updated_team = mock_schedule_handler.build_schedule(
@@ -339,10 +370,38 @@ def test_build_schedule(
     mock_schedule_class.assert_called_once_with(
         team=ANY,  # Ignore memory address due to deepcopy in application code
         preachers=mock_schedule_handler.preachers,
-        rotation=mock_schedule_handler.rotation,
+        worship_leader_selector=mock_schedule_handler.worship_leader_selector,
+        eligibility_checker=mock_schedule_handler.eligibility_checker,
         event_dates=mock_sundays,
     )
     mock_schedule_instance.build.assert_called_once()
+
+
+def test_build_schedule_with_real_schedule(mock_schedule_handler_data):
+    # Arrange
+    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
+        mock_schedule_handler_data
+    )
+    schedule_handler = UIScheduleHandler(
+        team=mock_team,
+        preachers=mock_preachers,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
+        file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
+    )
+
+    start_date = date(2025, 4, 6)
+    end_date = date(2025, 4, 20)
+
+    # Act
+    events, updated_team = schedule_handler.build_schedule(
+        start_date=start_date, end_date=end_date
+    )
+
+    # Assert
+    assert isinstance(events, list)
+    assert isinstance(updated_team, list)
 
 
 @patch("ui.ui_schedule_handler.UIScheduleHandler.build_schedule")
@@ -354,8 +413,10 @@ def test_create_schedule(mock_build_schedule, mock_schedule_handler_data):
     schedule_handler = UIScheduleHandler(
         team=mock_team,
         preachers=mock_preachers,
-        rotation=mock_rotation,
+        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
+        eligibility_checker=EligibilityChecker(rules=[]),
         file_exporter=mock_file_exporter,
+        schedule_class=Schedule,
     )
 
     mock_events = ["event1", "event2"]

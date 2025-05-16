@@ -5,7 +5,25 @@ import os
 # Local Imports
 from app_factory import create_app
 from config import OUTPUT_FOLDER_PATH, LOG_FILE_PATH
+
 from schedule_builder.builders.team_initializer import TeamInitializer
+from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
+from schedule_builder.eligibility.rules import (
+    RoleCapabilityRule,
+    OnLeaveRule,
+    BlockoutDateRule,
+    PreachingDateRule,
+    RoleTimeWindowRule,
+    ConsecutiveAssignmentLimitRule,
+    ConsecutiveRoleAssignmentLimitRule,
+    WorshipLeaderTeachingRule,
+    WorshipLeaderPreachingConflictRule,
+    LuluEmceeRule,
+    GeeWorshipLeaderRule,
+    KrisAcousticRule,
+    JeffMarielAssignmentRule,
+)
+from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 
 
 def set_logging() -> None:
@@ -32,9 +50,33 @@ def main() -> None:
     team_initializer = TeamInitializer()
     team, preachers, rotation = team_initializer.initialize_team()
 
-    # Run application
+    # Initialize schedule dependencies
+    worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
+    eligibility_checker = EligibilityChecker(
+        rules=[
+            OnLeaveRule(),
+            BlockoutDateRule(),
+            PreachingDateRule(),
+            RoleCapabilityRule(),
+            WorshipLeaderTeachingRule(),
+            ConsecutiveAssignmentLimitRule(),
+            ConsecutiveRoleAssignmentLimitRule(assignment_limit=2),
+            RoleTimeWindowRule(),
+            WorshipLeaderPreachingConflictRule(),
+            LuluEmceeRule(),
+            GeeWorshipLeaderRule(),
+            KrisAcousticRule(),
+            JeffMarielAssignmentRule(),
+        ]
+    )
+
+    # Create and run application
     app = create_app(
-        team=team, preachers=preachers, rotation=rotation, title="Schedule Builder"
+        title="Schedule Builder",
+        team=team,
+        preachers=preachers,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
     )
     app.start()
 
