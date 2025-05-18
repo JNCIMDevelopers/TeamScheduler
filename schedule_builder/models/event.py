@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import List, Optional
 
 # Local Imports
-from ..helpers.person_status_checker import PersonStatusChecker
+from ..helpers.person_status_checker import get_person_status
 from ..models.person import Person
 from ..models.preacher import Preacher
 from ..models.role import Role
@@ -160,7 +160,7 @@ class Event:
             for role in unassigned_roles
         )
         unassigned_names_str = "\n".join(
-            f"{name} ({PersonStatusChecker.get_status(person=person, check_date=self.date) if person else 'UNKNOWN'})"
+            f"{name} ({get_person_status(person=person, check_date=self.date) if person else 'UNKNOWN'})"
             for name in unassigned_names
             if (person := self.get_person_by_name(name=name)) is not None
         )
