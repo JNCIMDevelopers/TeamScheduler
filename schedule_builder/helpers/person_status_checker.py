@@ -11,44 +11,38 @@ from schedule_builder.util.assignment_checker import (
 )
 
 
-class PersonStatusChecker:
+def get_person_status(person: Person, check_date: date) -> PersonStatus:
     """
-    Utility class to check the status of a team member on a given date.
+    Returns the status of a team member on a specific date.
+
+    Args:
+        person (Person): The team member whose status is being checked.
+        check_date (date): The date for which to check the status.
+
+    Returns:
+        PersonStatus: The status of the team member on the given date.
     """
+    if person.on_leave:
+        return PersonStatus.ONLEAVE
 
-    @staticmethod
-    def get_status(person: Person, check_date: date) -> PersonStatus:
-        """
-        Returns the status of a team member on a specific date.
+    if check_date in person.blockout_dates:
+        return PersonStatus.BLOCKEDOUT
 
-        Args:
-            person (Person): The team member whose status is being checked.
-            check_date (date): The date for which to check the status.
+    if check_date in person.assigned_dates:
+        return PersonStatus.ASSIGNED
 
-        Returns:
-            PersonStatus: The status of the team member on the given date.
-        """
-        if person.on_leave:
-            return PersonStatus.ONLEAVE
+    if check_date in person.preaching_dates:
+        return PersonStatus.PREACHING
 
-        if check_date in person.blockout_dates:
-            return PersonStatus.BLOCKEDOUT
+    if has_exceeded_consecutive_assignments(
+        assigned_dates=person.assigned_dates,
+        preaching_dates=person.preaching_dates,
+        reference_date=check_date,
+        limit=CONSECUTIVE_ASSIGNMENTS_LIMIT,
+    ):
+        return PersonStatus.BREAK
 
-        if check_date in person.assigned_dates:
-            return PersonStatus.ASSIGNED
+    if Role.WORSHIPLEADER in person.roles and check_date in person.teaching_dates:
+        return PersonStatus.TEACHING
 
-        if check_date in person.preaching_dates:
-            return PersonStatus.PREACHING
-
-        if has_exceeded_consecutive_assignments(
-            assigned_dates=person.assigned_dates,
-            preaching_dates=person.preaching_dates,
-            reference_date=check_date,
-            limit=CONSECUTIVE_ASSIGNMENTS_LIMIT,
-        ):
-            return PersonStatus.BREAK
-
-        if Role.WORSHIPLEADER in person.roles and check_date in person.teaching_dates:
-            return PersonStatus.TEACHING
-
-        return PersonStatus.UNASSIGNED
+    return PersonStatus.UNASSIGNED

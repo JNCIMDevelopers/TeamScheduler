@@ -3,7 +3,7 @@ import pytest
 from datetime import date
 
 # Local Imports
-from schedule_builder.helpers.person_status_checker import PersonStatusChecker
+from schedule_builder.helpers.person_status_checker import get_person_status
 from schedule_builder.models.person import Person
 from schedule_builder.models.person_status import PersonStatus
 from schedule_builder.models.role import Role
@@ -92,7 +92,7 @@ def test_get_status(
     check_date = date(2025, 4, 27)
 
     # Act
-    status = PersonStatusChecker.get_status(person=person, check_date=check_date)
+    status = get_person_status(person=person, check_date=check_date)
 
     # Assert
     assert status == expected_status
@@ -166,7 +166,7 @@ def test_get_status_priority(
     check_date = date(2025, 4, 27)
 
     # Act
-    status = PersonStatusChecker.get_status(person=person, check_date=check_date)
+    status = get_person_status(person=person, check_date=check_date)
 
     # Assert
     assert status == expected_status
