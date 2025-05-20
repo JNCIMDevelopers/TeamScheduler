@@ -7,6 +7,7 @@ from unittest.mock import patch, MagicMock, ANY
 from schedule_builder.builders.schedule import Schedule
 from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
+from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
 from schedule_builder.models.preacher import Preacher
 from schedule_builder.models.role import Role
@@ -328,6 +329,53 @@ def test_adjust_dates_within_range(
     assert actual_is_adjusted == expected_is_adjusted
 
 
+@pytest.mark.parametrize(
+    "event_date, expected_result",
+    [
+        (date(2025, 5, 11), True),  # Date found
+        (date(2025, 5, 25), False),  # Date not found
+    ],
+)
+def test_get_event_by_date(mock_schedule_handler, event_date, expected_result):
+    # Arrange
+    event1 = Event(date=date(2025, 5, 11))
+    event2 = Event(date=date(2025, 5, 18))
+    events = [event1, event2]
+    event_date_str = event_date.strftime("%Y-%m-%d")
+
+    # Act
+    actual_event = mock_schedule_handler.get_event_by_date(
+        events=events, event_date_str=event_date_str
+    )
+
+    # Assert
+    assert actual_event is (event1 if expected_result else None)
+
+
+def test_get_available_replacements_for_event(mock_schedule_handler):
+    # Arrange
+    event = MagicMock()
+    role = MagicMock()
+    person1 = MagicMock()
+    person1.name = "TestPerson1"
+    person2 = MagicMock()
+    person2.name = "TestPerson2"
+    person3 = MagicMock()
+    person3.name = "TestPerson3"
+    event.team = [person1, person2, person3]
+    event.is_assignable_if_needed.side_effect = (
+        lambda role, person: person is person1 or person is person3
+    )
+
+    # Act
+    available_names = mock_schedule_handler.get_available_replacements_for_event(
+        event, role
+    )
+
+    # Assert
+    assert available_names == [person1.name, person3.name]
+
+
 @patch("ui.ui_schedule_handler.get_all_sundays")
 @patch("ui.ui_schedule_handler.Schedule")
 def test_build_schedule(
@@ -402,46 +450,3 @@ def test_build_schedule_with_real_schedule(mock_schedule_handler_data):
     # Assert
     assert isinstance(events, list)
     assert isinstance(updated_team, list)
-
-
-@patch("ui.ui_schedule_handler.UIScheduleHandler.build_schedule")
-def test_create_schedule(mock_build_schedule, mock_schedule_handler_data):
-    # Arrange
-    mock_team, mock_preachers, mock_rotation, mock_file_exporter = (
-        mock_schedule_handler_data
-    )
-    schedule_handler = UIScheduleHandler(
-        team=mock_team,
-        preachers=mock_preachers,
-        worship_leader_selector=WorshipLeaderSelector(rotation=mock_rotation),
-        eligibility_checker=EligibilityChecker(rules=[]),
-        file_exporter=mock_file_exporter,
-        schedule_class=Schedule,
-    )
-
-    mock_events = ["event1", "event2"]
-    mock_team = ["team_member_1", "team_member_2"]
-    mock_build_schedule.return_value = (mock_events, mock_team)
-
-    start_date = date(2025, 4, 6)
-    end_date = date(2025, 4, 20)
-
-    # Act
-    schedule_handler.create_schedule(start_date=start_date, end_date=end_date)
-
-    # Assert
-    mock_build_schedule.assert_called_once_with(
-        start_date=start_date, end_date=end_date
-    )
-
-    mock_file_exporter.export_html.assert_called_once_with(
-        filepath=ANY,
-        start_date=start_date,
-        end_date=end_date,
-        events=mock_events,
-        team=mock_team,
-    )
-
-    mock_file_exporter.export_csv.assert_called_once_with(
-        filepath=ANY, events=mock_events
-    )

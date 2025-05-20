@@ -146,7 +146,7 @@ def test_handle_create_button_click_validation_error_messages(
         end_date,
         False,
     )
-    mock_schedule_handler.create_schedule.return_value = None
+    mock_schedule_handler.build_schedule.return_value = (None, None)
 
     mock_ui_manager.configure_output_links = MagicMock()
 
@@ -164,8 +164,11 @@ def test_handle_create_button_click_validation_error_messages(
 
 
 @pytest.mark.parametrize("is_adjusted", [True, False])
+@patch("ui.ui_manager.UIManager.show_schedule_popup")
 @patch("ui.ui_manager.customtkinter.CTk")
-def test_handle_create_button_click_alert_message(mock_ctk, mock_data, is_adjusted):
+def test_handle_create_button_click_alert_message(
+    mock_ctk, mock_popup, mock_data, is_adjusted
+):
     # Arrange
     mock_app, mock_schedule_handler, mock_ui_manager = mock_data
 
@@ -179,7 +182,7 @@ def test_handle_create_button_click_alert_message(mock_ctk, mock_data, is_adjust
         end_date,
         is_adjusted,
     )
-    mock_schedule_handler.create_schedule.return_value = None
+    mock_schedule_handler.build_schedule.return_value = (None, None)
 
     mock_ui_manager.configure_output_links = MagicMock()
 
@@ -194,22 +197,12 @@ def test_handle_create_button_click_alert_message(mock_ctk, mock_data, is_adjust
         else:
             mock_alert_message.assert_not_called()
 
+        mock_popup.assert_called_once()
 
-@pytest.mark.parametrize(
-    "exception, expected_message",
-    [
-        (
-            PermissionError("PermissionDenied"),
-            "Please close any open\noutput files and try again.",
-        ),
-        (Exception("GeneralError"), "An unexpected error occurred."),
-        (None, None),
-    ],
-)
+
+@patch("ui.ui_manager.UIManager.show_schedule_popup")
 @patch("ui.ui_manager.customtkinter.CTk")
-def test_handle_create_button_click_exception(
-    mock_ctk, mock_data, exception, expected_message
-):
+def test_handle_create_button_click_exception(mock_ctk, mock_popup, mock_data):
     # Arrange
     mock_app, mock_schedule_handler, mock_ui_manager = mock_data
 
@@ -223,7 +216,7 @@ def test_handle_create_button_click_exception(
         end_date,
         False,
     )
-    mock_schedule_handler.create_schedule.side_effect = exception
+    mock_schedule_handler.build_schedule.side_effect = Exception("GeneralError")
 
     mock_ui_manager.configure_output_links = MagicMock()
 
@@ -232,7 +225,7 @@ def test_handle_create_button_click_exception(
         mock_ui_manager.handle_create_button_click()
 
         # Assert
-        if exception is None:
-            mock_error_message.assert_not_called()
-        else:
-            mock_error_message.assert_called_once_with(message=expected_message)
+        mock_error_message.assert_called_once_with(
+            message="An unexpected error occurred."
+        )
+        mock_popup.assert_not_called()

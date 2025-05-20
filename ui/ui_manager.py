@@ -3,11 +3,13 @@ import os
 import sys
 import subprocess
 import traceback
+from typing import List, Tuple
+from datetime import datetime, date
 
 # Third-Party Imports
 import customtkinter
 from tkcalendar import DateEntry
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 # Local Imports
 from config import (
@@ -15,6 +17,13 @@ from config import (
     SCHEDULE_CSV_FILE_PATH,
     SCHEDULE_DETAILS_HTML_FILE_PATH,
 )
+from schedule_builder.builders.file_builder import (
+    get_schedule_data_for_csv,
+    format_data_for_csv,
+)
+from schedule_builder.models.event import Event
+from schedule_builder.models.person import Person
+from schedule_builder.models.role import Role
 from ui.ui_schedule_handler import UIScheduleHandler
 
 # Appearance settings for customtkinter
@@ -63,10 +72,9 @@ class UIManager:
 
         window_width = 500
         window_height = 375
-        screen_width = self.app.winfo_screenwidth()
-        screen_height = self.app.winfo_screenheight()
-        x = (screen_width // 2) - (window_width // 2)
-        y = (screen_height // 2) - (window_height // 2)
+        x, y = self._get_window_position(
+            window_width=window_width, window_height=window_height
+        )
         self.app.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
         # Create frame to hold all widgets
@@ -75,6 +83,21 @@ class UIManager:
 
         # Add widgets to the frame
         self.add_widgets()
+
+    def _get_window_position(
+        self, window_width: int, window_height: int
+    ) -> Tuple[int, int]:
+        """
+        Calculates the position to center the window on the screen.
+
+        Returns:
+            tuple: A tuple containing the x and y coordinates for centering the window.
+        """
+        screen_width = self.app.winfo_screenwidth()
+        screen_height = self.app.winfo_screenheight()
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2)
+        return x, y
 
     def add_widgets(self) -> None:
         """
@@ -148,6 +171,143 @@ class UIManager:
             wraplength=350,
         )
         self.app.output_link_label.pack(pady=5)
+
+    def show_schedule_popup(
+        self, events: List[Event], team: List[Person], start_date: date, end_date: date
+    ) -> None:
+        # Data
+        data = get_schedule_data_for_csv(events=events)
+        formatted_data = format_data_for_csv(data=data)
+
+        # Create a new popup window
+        popup = customtkinter.CTkToplevel(self.app)
+        popup.title("Schedule Preview")
+        window_width = 1200
+        window_height = 400
+        x, y = self._get_window_position(
+            window_width=window_width, window_height=window_height
+        )
+        popup.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+        # Make popup the focus
+        popup.transient(self.app)
+        popup.grab_set()
+        popup.focus_set()
+
+        # Create a frame for the Treeview
+        frame = ttk.Frame(popup)
+        frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Define columns (customize as needed)
+        columns = formatted_data[0]
+        tree = ttk.Treeview(frame, columns=columns, show="headings")
+        for col in columns:
+            tree.heading(col, text=col)
+
+        # Insert schedule data
+        for record in formatted_data[1:]:
+            tree.insert("", "end", values=record)
+
+        tree.pack(fill="both", expand=True)
+
+        # Add horizontal scrollbar
+        hsb = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+        tree.configure(xscrollcommand=hsb.set)
+        hsb.pack(side="bottom", fill="x")
+
+        # Add double click event handler for editing blank cells
+        self._handle_cell_editing(tree=tree, columns=columns, events=events)
+
+        # Add a close button
+        def close_popup():
+            try:
+                popup.destroy()
+                self.schedule_handler.export_schedule(
+                    start_date=start_date, end_date=end_date, events=events, team=team
+                )
+                self.configure_output_links()
+            except PermissionError:
+                self.app.logger.error(traceback.format_exc())
+                self.configure_error_message(
+                    message="Please close any open\noutput files and try again."
+                )
+            except Exception:
+                self.app.logger.error(traceback.format_exc())
+                self.configure_error_message(message="An unexpected error occurred.")
+
+        close_btn = customtkinter.CTkButton(popup, text="Close", command=close_popup)
+        close_btn.pack(pady=10)
+
+    def _handle_cell_editing(
+        self, tree: ttk.Treeview, columns: List[str], events: List[Event]
+    ) -> None:
+        """
+        Binds cell editing events to the Treeview.
+
+        Args:
+            tree (ttk.Treeview): The Treeview widget.
+            columns (List[str]): The list of column names.
+            events (List[Event]): The list of events to be displayed in the Treeview.
+        """
+
+        def on_double_click(event):
+            # Check if the click event region is a cell
+            region = tree.identify_region(event.x, event.y)
+            if region != "cell":
+                return
+
+            # Ignore click events on the first column (role)
+            row_id = tree.identify_row(event.y)
+            column = tree.identify_column(event.x)
+            column_index = int(column.replace("#", "")) - 1
+            if column_index == 0:
+                return
+
+            # Ignore click events on non-empty cells
+            values = list(tree.item(row_id, "values"))
+            current_value = values[column_index]
+            if current_value and current_value.strip():
+                return
+
+            # Get event and role information
+            role_str = values[0]
+            event_date_str = columns[column_index]
+            formatted_event_date_str = datetime.strptime(
+                event_date_str, "%B %d, %Y"
+            ).strftime("%Y-%m-%d")
+            event_obj = self.schedule_handler.get_event_by_date(
+                events=events, event_date_str=formatted_event_date_str
+            )
+            role = Role(role_str)
+
+            # Get available names for the selected event and role
+            available_names = (
+                self.schedule_handler.get_available_replacements_for_event(
+                    event=event_obj, role=role
+                )
+            )
+            if not available_names:
+                return
+
+            # Create a combobox for selecting a name
+            x, y, width, height = tree.bbox(row_id, column)
+            combo = ttk.Combobox(tree, values=available_names)
+            combo.place(x=x, y=y, width=width, height=height)
+            combo.focus_set()
+
+            def on_select(event):
+                selected_name = combo.get()
+                if selected_name:
+                    selected_person = event_obj.get_person_by_name(name=selected_name)
+                    event_obj.assign_role(role=role, person=selected_person)
+                    values[column_index] = selected_name
+                    tree.item(row_id, values=values)
+                combo.destroy()
+
+            combo.bind("<<ComboboxSelected>>", on_select)
+            combo.bind("<FocusOut>", lambda e: combo.destroy())
+
+        tree.bind("<Double-1>", on_double_click)
 
     def reset_output_labels(self) -> None:
         """
@@ -322,14 +482,14 @@ class UIManager:
 
         # Create schedule and display output links
         try:
-            self.schedule_handler.create_schedule(
+            events, updated_team = self.schedule_handler.build_schedule(
                 start_date=start_date, end_date=end_date
             )
-            self.configure_output_links()
-        except PermissionError:
-            self.app.logger.error(traceback.format_exc())
-            self.configure_error_message(
-                message="Please close any open\noutput files and try again."
+            self.show_schedule_popup(
+                events=events,
+                team=updated_team,
+                start_date=start_date,
+                end_date=end_date,
             )
         except Exception:
             self.app.logger.error(traceback.format_exc())
