@@ -37,6 +37,36 @@ def test_assign_event():
     assert date_two in person.role_assigned_dates[role_two]
 
 
+def test_unassign_event():
+    # Arrange
+    date_one = date(2024, 6, 30)
+    role_one = Role.ACOUSTIC
+    date_two = date(2024, 7, 14)
+    role_two = Role.LYRICS
+    person = Person(
+        name="TestName",
+        roles=[Role.WORSHIPLEADER, role_one, role_two],
+        blockout_dates=[],
+        preaching_dates=[],
+        on_leave=False,
+    )
+
+    person.assign_event(event_date=date_one, role=role_one)
+    person.assign_event(event_date=date_two, role=role_two)
+
+    # Act
+    person.unassign_event(event_date=date_one, role=role_one)
+
+    # Assert
+    assert len(person.assigned_dates) == 1
+    assert date_one not in person.assigned_dates
+    assert date_two in person.assigned_dates
+    assert person.last_assigned_dates[role_one] is None
+    assert person.last_assigned_dates[role_two] == date_two
+    assert date_one not in person.role_assigned_dates[role_one]
+    assert date_two in person.role_assigned_dates[role_two]
+
+
 @pytest.mark.parametrize(
     "reference_date, preaching_dates, expected",
     [

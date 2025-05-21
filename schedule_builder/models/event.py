@@ -55,6 +55,26 @@ class Event:
         self.roles[role] = person.name
         person.assign_event(event_date=self.date, role=role)
 
+    def unassign_role(self, role: Role, person: Person) -> None:
+        """
+        Unassigns a person from a role for the event.
+
+        Args:
+            role (Role): The role to unassign.
+            person (Person): The person to unassign from the role.
+
+        Raises:
+            ValueError: If the role is already unassigned or invalid.
+        """
+        if role not in Role:
+            raise ValueError(f"{role} is not a valid role.")
+
+        if self.roles[role] is None:
+            raise ValueError(f"{role.name} is already unassigned.")
+
+        self.roles[role] = None
+        person.unassign_event(event_date=self.date, role=role)
+
     def get_assigned_roles(self) -> List[Role]:
         """
         Returns the list of roles that have been assigned.

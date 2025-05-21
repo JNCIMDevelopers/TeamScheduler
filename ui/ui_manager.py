@@ -263,11 +263,9 @@ class UIManager:
             if column_index == 0:
                 return
 
-            # Ignore click events on non-empty cells
+            # Get the currently assigned name
             values = list(tree.item(row_id, "values"))
-            current_value = values[column_index]
-            if current_value and current_value.strip():
-                return
+            currently_assigned_name = values[column_index].strip()
 
             # Get event and role information
             role_str = values[0]
@@ -295,17 +293,36 @@ class UIManager:
             combo.place(x=x, y=y, width=width, height=height)
             combo.focus_set()
 
-            def on_select(event):
+            def on_select(event, currently_assigned_name):
                 selected_name = combo.get()
-                if selected_name:
-                    selected_person = event_obj.get_person_by_name(name=selected_name)
-                    event_obj.assign_role(role=role, person=selected_person)
-                    values[column_index] = selected_name
-                    tree.item(row_id, values=values)
-                combo.destroy()
+                if not selected_name or selected_name == currently_assigned_name:
+                    combo.destroy()
+                    return
 
-            combo.bind("<<ComboboxSelected>>", on_select)
-            combo.bind("<FocusOut>", lambda e: combo.destroy())
+                # Unassign the currently assigned person before assigning the new one
+                if currently_assigned_name:
+                    currently_assigned_person = event_obj.get_person_by_name(
+                        name=currently_assigned_name
+                    )
+                    event_obj.unassign_role(role=role, person=currently_assigned_person)
+                    self.app.logger.info(
+                        f"Unassigned {currently_assigned_name} from {role} on {event_obj.date}"
+                    )
+
+                # Assign the new person
+                selected_person = event_obj.get_person_by_name(name=selected_name)
+                event_obj.assign_role(role=role, person=selected_person)
+                values[column_index] = selected_person.name
+                tree.item(row_id, values=values)
+                self.app.logger.info(
+                    f"Assigned {selected_person.name} to {role} on {event_obj.date}"
+                )
+
+            combo.bind(
+                "<<ComboboxSelected>>",
+                lambda event: on_select(event, currently_assigned_name),
+            )
+            combo.bind("<FocusOut>", lambda event: combo.destroy())
 
         tree.bind("<Double-1>", on_double_click)
 
