@@ -58,6 +58,7 @@ class UIManager:
         self.app = app
         self.schedule_handler = schedule_handler
         self.title = title
+        self.active_combo = None
 
     def setup(self) -> None:
         """
@@ -231,12 +232,14 @@ class UIManager:
         )
 
         def undo_last_edit():
+            self._close_combobox()
             if self.undo_stack:
                 command = self.undo_stack.pop()
                 command.undo()
                 self.redo_stack.append(command)
 
         def redo_last_edit():
+            self._close_combobox()
             if self.redo_stack:
                 command = self.redo_stack.pop()
                 command.execute()
@@ -288,8 +291,7 @@ class UIManager:
             columns (List[str]): The list of column names.
             events (List[Event]): The list of events to be displayed in the Treeview.
         """
-
-        def on_double_click(event):
+        def on_click(event):
             # Check if the click event region is a cell
             region = tree.identify_region(event.x, event.y)
             if region != "cell":
@@ -327,15 +329,17 @@ class UIManager:
                 return
 
             # Create a combobox for selecting a name
+            self._close_combobox()
             x, y, width, height = tree.bbox(row_id, column)
-            combo = ttk.Combobox(tree, values=available_names)
+            combo = ttk.Combobox(tree, values=available_names, state="readonly")
             combo.place(x=x, y=y, width=width, height=height)
             combo.focus_set()
+            self.active_combo = combo
 
             def on_select(event, currently_assigned_name):
                 selected_name = combo.get()
                 if not selected_name or selected_name == currently_assigned_name:
-                    combo.destroy()
+                    self._close_combobox()
                     return
 
                 old_person = (
@@ -357,14 +361,31 @@ class UIManager:
                     logger=self.app.logger,
                 )
                 on_edit_command(cmd)
+                self._close_combobox()
 
             combo.bind(
                 "<<ComboboxSelected>>",
                 lambda event: on_select(event, currently_assigned_name),
             )
-            combo.bind("<FocusOut>", lambda event: combo.destroy())
+            combo.bind("<Escape>", self._close_combobox)
+            
+            return "break"  # Prevent default behavior of the treeview
 
-        tree.bind("<Double-1>", on_double_click)
+        tree.bind("<Button-1>", on_click)
+
+    def _close_combobox(self, event=None) -> None:
+        """
+        Closes the currently active combobox if it exists.
+        
+        Args:
+            event: The event that triggered this method (if any).
+        """
+        if self.active_combo:
+            try:
+                self.active_combo.destroy()
+            except Exception:
+                pass
+            self.active_combo = None
 
     def reset_output_labels(self) -> None:
         """
