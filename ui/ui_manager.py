@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 import traceback
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 from datetime import datetime, date
 
 # Third-Party Imports
@@ -24,6 +24,7 @@ from schedule_builder.builders.file_builder import (
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
+from ui.command import EditAssignmentCommand
 from ui.ui_schedule_handler import UIScheduleHandler
 
 # Appearance settings for customtkinter
@@ -175,6 +176,10 @@ class UIManager:
     def show_schedule_popup(
         self, events: List[Event], team: List[Person], start_date: date, end_date: date
     ) -> None:
+        # Undo, redo stack
+        self.undo_stack: list[EditAssignmentCommand] = []
+        self.redo_stack: list[EditAssignmentCommand] = []
+
         # Data
         data = get_schedule_data_for_csv(events=events)
         formatted_data = format_data_for_csv(data=data)
@@ -215,8 +220,38 @@ class UIManager:
         tree.configure(xscrollcommand=hsb.set)
         hsb.pack(side="bottom", fill="x")
 
+        def on_edit_command(command: EditAssignmentCommand) -> None:
+            command.execute()
+            self.undo_stack.append(command)
+            self.redo_stack.clear()
+
         # Add double click event handler for editing blank cells
-        self._handle_cell_editing(tree=tree, columns=columns, events=events)
+        self._handle_cell_editing(
+            tree=tree, columns=columns, events=events, on_edit_command=on_edit_command
+        )
+
+        def undo_last_edit():
+            if self.undo_stack:
+                command = self.undo_stack.pop()
+                command.undo()
+                self.redo_stack.append(command)
+
+        def redo_last_edit():
+            if self.redo_stack:
+                command = self.redo_stack.pop()
+                command.execute()
+                self.undo_stack.append(command)
+
+        # Add undo and redo buttons
+        undo_btn = customtkinter.CTkButton(
+            popup, text="Undo", command=undo_last_edit, width=10
+        )
+        undo_btn.pack(side="left", padx=5, pady=10)
+
+        redo_btn = customtkinter.CTkButton(
+            popup, text="Redo", command=redo_last_edit, width=10
+        )
+        redo_btn.pack(side="left", padx=5, pady=10)
 
         # Add a close button
         def close_popup():
@@ -239,7 +274,11 @@ class UIManager:
         close_btn.pack(pady=10)
 
     def _handle_cell_editing(
-        self, tree: ttk.Treeview, columns: List[str], events: List[Event]
+        self,
+        tree: ttk.Treeview,
+        columns: List[str],
+        events: List[Event],
+        on_edit_command: Callable,
     ) -> None:
         """
         Binds cell editing events to the Treeview.
@@ -299,24 +338,25 @@ class UIManager:
                     combo.destroy()
                     return
 
-                # Unassign the currently assigned person before assigning the new one
-                if currently_assigned_name:
-                    currently_assigned_person = event_obj.get_person_by_name(
-                        name=currently_assigned_name
-                    )
-                    event_obj.unassign_role(role=role, person=currently_assigned_person)
-                    self.app.logger.info(
-                        f"Unassigned {currently_assigned_name} from {role} on {event_obj.date}"
-                    )
-
-                # Assign the new person
-                selected_person = event_obj.get_person_by_name(name=selected_name)
-                event_obj.assign_role(role=role, person=selected_person)
-                values[column_index] = selected_person.name
-                tree.item(row_id, values=values)
-                self.app.logger.info(
-                    f"Assigned {selected_person.name} to {role} on {event_obj.date}"
+                old_person = (
+                    event_obj.get_person_by_name(name=currently_assigned_name)
+                    if currently_assigned_name
+                    else None
                 )
+                new_person = event_obj.get_person_by_name(name=selected_name)
+
+                # Save command to undo/redo stack
+                cmd = EditAssignmentCommand(
+                    event=event_obj,
+                    role=role,
+                    old_person=old_person,
+                    new_person=new_person,
+                    tree=tree,
+                    row_id=row_id,
+                    column_index=column_index,
+                    logger=self.app.logger,
+                )
+                on_edit_command(cmd)
 
             combo.bind(
                 "<<ComboboxSelected>>",
