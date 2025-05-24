@@ -227,10 +227,8 @@ class UIManager:
             self.redo_stack.clear()
 
         # Add double click event handler for editing blank cells
-        row_ids = list(tree.get_children())
         self._handle_cell_editing(
             tree=tree,
-            row_ids=row_ids,
             columns=columns,
             events=events,
             on_edit_command=on_edit_command,
@@ -238,6 +236,7 @@ class UIManager:
 
         def undo_last_edit():
             self._close_combobox()
+            self._unmark_all_person_cells(tree=tree)
             if self.undo_stack:
                 command = self.undo_stack.pop()
                 command.undo()
@@ -245,6 +244,7 @@ class UIManager:
 
         def redo_last_edit():
             self._close_combobox()
+            self._unmark_all_person_cells(tree=tree)
             if self.redo_stack:
                 command = self.redo_stack.pop()
                 command.execute()
@@ -264,6 +264,7 @@ class UIManager:
         # Add a close button
         def close_popup():
             try:
+                self._unmark_all_person_cells(tree=tree)
                 popup.destroy()
                 self.schedule_handler.export_schedule(
                     start_date=start_date, end_date=end_date, events=events, team=team
@@ -284,7 +285,6 @@ class UIManager:
     def _handle_cell_editing(
         self,
         tree: ttk.Treeview,
-        row_ids: List[str],
         columns: List[str],
         events: List[Event],
         on_edit_command: Callable,
@@ -299,12 +299,15 @@ class UIManager:
         """
 
         def on_click(event):
+            self._unmark_all_person_cells(tree=tree)
+
             # Check if the click event region is a cell
             region = tree.identify_region(event.x, event.y)
             if region != "cell":
                 return
 
             # Ignore click events on the first column (role) and first two rows (preacher, graphics)
+            row_ids = list(tree.get_children())
             row_id = tree.identify_row(event.y)
             column = tree.identify_column(event.x)
             column_index = int(column.replace("#", "")) - 1
@@ -369,6 +372,7 @@ class UIManager:
                 )
                 on_edit_command(cmd)
                 self._close_combobox()
+                self._mark_person_cells(tree=tree, person_name=selected_name)
 
             combo.bind(
                 "<<ComboboxSelected>>",
@@ -393,6 +397,35 @@ class UIManager:
             except Exception:
                 pass
             self.active_combo = None
+
+    def _mark_person_cells(self, tree: ttk.Treeview, person_name: str):
+        """
+        Marks all cells in the Treeview that contain the specified person's name.
+
+        Args:
+            tree (ttk.Treeview): The Treeview widget.
+            person_name (str): The name of the person to mark.
+        """
+        for row_id in tree.get_children():
+            values = list(tree.item(row_id, "values"))
+            for i in range(1, len(values)):
+                if values[i] == person_name and not values[i].endswith(" ⭐"):
+                    values[i] += " ⭐"
+            tree.item(row_id, values=values)
+
+    def _unmark_all_person_cells(self, tree: ttk.Treeview):
+        """
+        Unmarks all cells in the Treeview
+
+        Args:
+            tree (ttk.Treeview): The Treeview widget.
+        """
+        for row_id in tree.get_children():
+            values = list(tree.item(row_id, "values"))
+            for i in range(1, len(values)):
+                if values[i].endswith(" ⭐"):
+                    values[i] = values[i][:-2]
+            tree.item(row_id, values=values)
 
     def reset_output_labels(self) -> None:
         """
