@@ -227,8 +227,13 @@ class UIManager:
             self.redo_stack.clear()
 
         # Add double click event handler for editing blank cells
+        row_ids = list(tree.get_children())
         self._handle_cell_editing(
-            tree=tree, columns=columns, events=events, on_edit_command=on_edit_command
+            tree=tree,
+            row_ids=row_ids,
+            columns=columns,
+            events=events,
+            on_edit_command=on_edit_command,
         )
 
         def undo_last_edit():
@@ -279,6 +284,7 @@ class UIManager:
     def _handle_cell_editing(
         self,
         tree: ttk.Treeview,
+        row_ids: List[str],
         columns: List[str],
         events: List[Event],
         on_edit_command: Callable,
@@ -291,17 +297,18 @@ class UIManager:
             columns (List[str]): The list of column names.
             events (List[Event]): The list of events to be displayed in the Treeview.
         """
+
         def on_click(event):
             # Check if the click event region is a cell
             region = tree.identify_region(event.x, event.y)
             if region != "cell":
                 return
 
-            # Ignore click events on the first column (role)
+            # Ignore click events on the first column (role) and first two rows (preacher, graphics)
             row_id = tree.identify_row(event.y)
             column = tree.identify_column(event.x)
             column_index = int(column.replace("#", "")) - 1
-            if column_index == 0:
+            if column_index == 0 or row_id in row_ids[:2]:
                 return
 
             # Get the currently assigned name
@@ -368,7 +375,7 @@ class UIManager:
                 lambda event: on_select(event, currently_assigned_name),
             )
             combo.bind("<Escape>", self._close_combobox)
-            
+
             return "break"  # Prevent default behavior of the treeview
 
         tree.bind("<Button-1>", on_click)
@@ -376,7 +383,7 @@ class UIManager:
     def _close_combobox(self, event=None) -> None:
         """
         Closes the currently active combobox if it exists.
-        
+
         Args:
             event: The event that triggered this method (if any).
         """
