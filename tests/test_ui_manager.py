@@ -211,20 +211,20 @@ def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
                 )
             with patch("os.startfile") as mock_startfile:
                 # Act
-                ui_manager.handle_open_schedule_file(None, mock_label, filepath)
+                ui_manager._handle_open_schedule_file(None, mock_label, filepath)
 
                 # Assert
                 mock_startfile.assert_called_once_with(mock_abspath.return_value)
                 mock_subprocess.assert_not_called()
         elif platform == "darwin":
             # Act
-            ui_manager.handle_open_schedule_file(None, mock_label, filepath)
+            ui_manager._handle_open_schedule_file(None, mock_label, filepath)
 
             # Assert
             mock_subprocess.assert_called_once_with(["open", mock_abspath.return_value])
         else:
             # Act
-            ui_manager.handle_open_schedule_file(None, mock_label, filepath)
+            ui_manager._handle_open_schedule_file(None, mock_label, filepath)
 
             # Assert
             mock_subprocess.assert_called_once_with(
@@ -315,7 +315,7 @@ def test_handle_create_button_click_validation_error_messages(
 
     # Act
     with patch.object(
-        mock_ui_manager, "configure_validation_error_message"
+        mock_ui_manager, "_configure_validation_error_message"
     ) as mock_error_message:
         mock_ui_manager.handle_create_button_click()
 
@@ -350,7 +350,9 @@ def test_handle_create_button_click_alert_message(
     mock_ui_manager.configure_output_links = MagicMock()
 
     # Act
-    with patch.object(mock_ui_manager, "configure_alert_message") as mock_alert_message:
+    with patch.object(
+        mock_ui_manager, "_configure_alert_message"
+    ) as mock_alert_message:
         mock_ui_manager.handle_create_button_click()
 
         # Assert
@@ -384,7 +386,9 @@ def test_handle_create_button_click_exception(mock_ctk, mock_popup, mock_data):
     mock_ui_manager.configure_output_links = MagicMock()
 
     # Act
-    with patch.object(mock_ui_manager, "configure_error_message") as mock_error_message:
+    with patch.object(
+        mock_ui_manager, "_configure_error_message"
+    ) as mock_error_message:
         mock_ui_manager.handle_create_button_click()
 
         # Assert
