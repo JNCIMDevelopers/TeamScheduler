@@ -8,8 +8,9 @@ from datetime import datetime, date
 
 # Third-Party Imports
 import customtkinter
+import tksheet
 from tkcalendar import DateEntry
-from tkinter import messagebox, ttk
+from tkinter import messagebox
 
 # Local Imports
 from config import (
@@ -189,7 +190,7 @@ class UIManager:
         popup = customtkinter.CTkToplevel(self.app)
         popup.title("Schedule Preview")
         window_width = 1200
-        window_height = 400
+        window_height = 425
         x, y = self._get_window_position(
             window_width=window_width, window_height=window_height
         )
@@ -200,26 +201,15 @@ class UIManager:
         popup.grab_set()
         popup.focus_set()
 
-        # Create a frame for the Treeview
-        frame = ttk.Frame(popup)
+        # Create a frame for the sheet
+        frame = customtkinter.CTkFrame(popup)
         frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Define columns (customize as needed)
+        # Setup sheet
         columns = formatted_data[0]
-        tree = ttk.Treeview(frame, columns=columns, show="headings")
-        for col in columns:
-            tree.heading(col, text=col)
-
-        # Insert schedule data
-        for record in formatted_data[1:]:
-            tree.insert("", "end", values=record)
-
-        tree.pack(fill="both", expand=True)
-
-        # Add horizontal scrollbar
-        hsb = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
-        tree.configure(xscrollcommand=hsb.set)
-        hsb.pack(side="bottom", fill="x")
+        sheet = tksheet.Sheet(frame, data=formatted_data[1:], headers=columns)
+        sheet.enable_bindings(("single_select", "cell_select"))
+        sheet.pack(fill="both", expand=True)
 
         def on_edit_command(command: EditAssignmentCommand) -> None:
             command.execute()
@@ -228,23 +218,19 @@ class UIManager:
 
         # Add double click event handler for editing blank cells
         self._handle_cell_editing(
-            tree=tree,
+            sheet=sheet,
             columns=columns,
             events=events,
             on_edit_command=on_edit_command,
         )
 
         def undo_last_edit():
-            self._close_combobox()
-            self._unmark_all_person_cells(tree=tree)
             if self.undo_stack:
                 command = self.undo_stack.pop()
                 command.undo()
                 self.redo_stack.append(command)
 
         def redo_last_edit():
-            self._close_combobox()
-            self._unmark_all_person_cells(tree=tree)
             if self.redo_stack:
                 command = self.redo_stack.pop()
                 command.execute()
@@ -264,7 +250,6 @@ class UIManager:
         # Add a close button
         def close_popup():
             try:
-                self._unmark_all_person_cells(tree=tree)
                 popup.destroy()
                 self.schedule_handler.export_schedule(
                     start_date=start_date, end_date=end_date, events=events, team=team
@@ -284,7 +269,7 @@ class UIManager:
 
     def _handle_cell_editing(
         self,
-        tree: ttk.Treeview,
+        sheet: tksheet.Sheet,
         columns: List[str],
         events: List[Event],
         on_edit_command: Callable,
@@ -293,34 +278,27 @@ class UIManager:
         Binds cell editing events to the Treeview.
 
         Args:
-            tree (ttk.Treeview): The Treeview widget.
+            sheet (tksheet.Sheet): The tksheet instance to bind the events to.
             columns (List[str]): The list of column names.
             events (List[Event]): The list of events to be displayed in the Treeview.
         """
 
         def on_click(event):
-            self._unmark_all_person_cells(tree=tree)
-
-            # Check if the click event region is a cell
-            region = tree.identify_region(event.x, event.y)
-            if region != "cell":
+            selected = sheet.get_selected_cells()
+            if not selected:
                 return
 
             # Ignore click events on the first column (role) and first two rows (preacher, graphics)
-            row_ids = list(tree.get_children())
-            row_id = tree.identify_row(event.y)
-            column = tree.identify_column(event.x)
-            column_index = int(column.replace("#", "")) - 1
-            if column_index == 0 or row_id in row_ids[:2]:
+            row, col = list(selected)[0]
+            if col == 0 or row in [0, 1]:
                 return
 
             # Get the currently assigned name
-            values = list(tree.item(row_id, "values"))
-            currently_assigned_name = values[column_index].strip()
+            currently_assigned_name = sheet.get_cell_data(r=row, c=col)
 
             # Get event and role information
-            role_str = values[0]
-            event_date_str = columns[column_index]
+            role_str = sheet.get_cell_data(r=row, c=0)
+            event_date_str = sheet.headers(index=col)
             formatted_event_date_str = datetime.strptime(
                 event_date_str, "%B %d, %Y"
             ).strftime("%Y-%m-%d")
@@ -338,18 +316,22 @@ class UIManager:
             if not available_names:
                 return
 
-            # Create a combobox for selecting a name
-            self._close_combobox()
-            x, y, width, height = tree.bbox(row_id, column)
-            combo = ttk.Combobox(tree, values=available_names, state="readonly")
-            combo.place(x=x, y=y, width=width, height=height)
-            combo.focus_set()
-            self.active_combo = combo
+            # Destroy any existing dropdodown before creating a new one
+            sheet.delete_dropdown("all", "all")
 
-            def on_select(event, currently_assigned_name):
-                selected_name = combo.get()
+            # Create dropdown in the cell
+            sheet.dropdown(
+                row,
+                col,
+                values=available_names,
+                set_value=currently_assigned_name,
+                state="readonly",
+                redraw=True,
+            )
+
+            def on_dropdown_select(event):
+                selected_name = sheet.get_cell_data(r=row, c=col)
                 if not selected_name or selected_name == currently_assigned_name:
-                    self._close_combobox()
                     return
 
                 old_person = (
@@ -365,67 +347,16 @@ class UIManager:
                     role=role,
                     old_person=old_person,
                     new_person=new_person,
-                    tree=tree,
-                    row_id=row_id,
-                    column_index=column_index,
+                    sheet=sheet,
+                    row=row,
+                    column=col,
                     logger=self.app.logger,
                 )
                 on_edit_command(cmd)
-                self._close_combobox()
-                self._mark_person_cells(tree=tree, person_name=selected_name)
 
-            combo.bind(
-                "<<ComboboxSelected>>",
-                lambda event: on_select(event, currently_assigned_name),
-            )
-            combo.bind("<Escape>", self._close_combobox)
+            sheet.extra_bindings([("end_edit_cell", on_dropdown_select)])
 
-            return "break"  # Prevent default behavior of the treeview
-
-        tree.bind("<Button-1>", on_click)
-
-    def _close_combobox(self, event=None) -> None:
-        """
-        Closes the currently active combobox if it exists.
-
-        Args:
-            event: The event that triggered this method (if any).
-        """
-        if self.active_combo:
-            try:
-                self.active_combo.destroy()
-            except Exception:
-                pass
-            self.active_combo = None
-
-    def _mark_person_cells(self, tree: ttk.Treeview, person_name: str):
-        """
-        Marks all cells in the Treeview that contain the specified person's name.
-
-        Args:
-            tree (ttk.Treeview): The Treeview widget.
-            person_name (str): The name of the person to mark.
-        """
-        for row_id in tree.get_children():
-            values = list(tree.item(row_id, "values"))
-            for i in range(1, len(values)):
-                if values[i] == person_name and not values[i].endswith(" ⭐"):
-                    values[i] += " ⭐"
-            tree.item(row_id, values=values)
-
-    def _unmark_all_person_cells(self, tree: ttk.Treeview):
-        """
-        Unmarks all cells in the Treeview
-
-        Args:
-            tree (ttk.Treeview): The Treeview widget.
-        """
-        for row_id in tree.get_children():
-            values = list(tree.item(row_id, "values"))
-            for i in range(1, len(values)):
-                if values[i].endswith(" ⭐"):
-                    values[i] = values[i][:-2]
-            tree.item(row_id, values=values)
+        sheet.extra_bindings([("cell_select", on_click)])
 
     def reset_output_labels(self) -> None:
         """

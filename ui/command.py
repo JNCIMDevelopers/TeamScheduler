@@ -2,7 +2,7 @@
 import logging
 
 # Third-Party Imports
-from tkinter import ttk
+import tksheet
 
 # Local Imports
 from schedule_builder.models.event import Event
@@ -17,23 +17,23 @@ class EditAssignmentCommand:
         role: Role,
         old_person: Person,
         new_person: Person,
-        tree: ttk.Treeview,
-        row_id: str,
-        column_index: int,
+        sheet: tksheet.Sheet,
+        row: int,
+        column: int,
         logger: logging.Logger,
     ):
         self.event = event
         self.role = role
         self.old_person = old_person
         self.new_person = new_person
-        self.tree = tree
-        self.row_id = row_id
-        self.column_index = column_index
+        self.sheet = sheet
+        self.row = row
+        self.column = column
         self.logger = logger
         self.logger.debug(
             f"EditAssignmentClass initialized with event: {event}, role: {role}, "
             f"old_person: {old_person}, new_person: {new_person}, "
-            f"tree: {tree}, row_id: {row_id}, column_index: {column_index}"
+            f"row: {row}, column: {column}"
         )
 
     def execute(self) -> None:
@@ -47,7 +47,7 @@ class EditAssignmentCommand:
             self.logger.info(
                 f"Assigned {self.new_person.name} to role {self.role} on {self.event.date}"
             )
-        self.update_treeview(name=self.new_person.name if self.new_person else "")
+        self.update_sheet(name=self.new_person.name if self.new_person else "")
 
     def undo(self) -> None:
         if self.new_person:
@@ -60,9 +60,7 @@ class EditAssignmentCommand:
             self.logger.info(
                 f"Assigned {self.old_person.name} to role {self.role} on {self.event.date}"
             )
-        self.update_treeview(name=self.old_person.name if self.old_person else "")
+        self.update_sheet(name=self.old_person.name if self.old_person else "")
 
-    def update_treeview(self, name: str) -> None:
-        values = list(self.tree.item(self.row_id, "values"))
-        values[self.column_index] = name
-        self.tree.item(self.row_id, values=values)
+    def update_sheet(self, name: str) -> None:
+        self.sheet.set_cell_data(r=self.row, c=self.column, value=name)

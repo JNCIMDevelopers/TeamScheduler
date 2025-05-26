@@ -27,10 +27,9 @@ def mock_person2():
 
 
 @pytest.fixture
-def mock_tree():
-    tree = MagicMock()
-    tree.item.return_value = ("", "", "")
-    return tree
+def mock_sheet():
+    sheet = MagicMock()
+    return sheet
 
 
 @pytest.fixture
@@ -39,7 +38,7 @@ def mock_logger():
 
 
 def test_execute_assigns_and_unassigns(
-    mock_event, mock_person1, mock_person2, mock_tree, mock_logger
+    mock_event, mock_person1, mock_person2, mock_sheet, mock_logger
 ):
     # Arrange
     role = "TestRole"
@@ -48,12 +47,12 @@ def test_execute_assigns_and_unassigns(
         role=role,
         old_person=mock_person1,
         new_person=mock_person2,
-        tree=mock_tree,
-        row_id="row1",
-        column_index=1,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
         logger=mock_logger,
     )
-    cmd.update_treeview = MagicMock()
+    cmd.update_sheet = MagicMock()
 
     # Act
     cmd.execute()
@@ -61,11 +60,11 @@ def test_execute_assigns_and_unassigns(
     # Assert
     mock_event.unassign_role.assert_called_with(role=role, person=mock_person1)
     mock_event.assign_role.assert_called_with(role=role, person=mock_person2)
-    cmd.update_treeview.assert_called()
+    cmd.update_sheet.assert_called()
 
 
 def test_execute_with_no_old_person_only_assigns(
-    mock_event, mock_person2, mock_tree, mock_logger
+    mock_event, mock_person2, mock_sheet, mock_logger
 ):
     # Arrange
     role = "TestRole"
@@ -74,12 +73,12 @@ def test_execute_with_no_old_person_only_assigns(
         role=role,
         old_person=None,
         new_person=mock_person2,
-        tree=mock_tree,
-        row_id="row1",
-        column_index=1,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
         logger=mock_logger,
     )
-    cmd.update_treeview = MagicMock()
+    cmd.update_sheet = MagicMock()
 
     # Act
     cmd.execute()
@@ -87,11 +86,11 @@ def test_execute_with_no_old_person_only_assigns(
     # Assert
     mock_event.unassign_role.assert_not_called()
     mock_event.assign_role.assert_called_with(role=role, person=mock_person2)
-    cmd.update_treeview.assert_called()
+    cmd.update_sheet.assert_called()
 
 
 def test_undo_reverts_assignment(
-    mock_event, mock_person1, mock_person2, mock_tree, mock_logger
+    mock_event, mock_person1, mock_person2, mock_sheet, mock_logger
 ):
     # Arrange
     role = "TestRole"
@@ -100,12 +99,12 @@ def test_undo_reverts_assignment(
         role=role,
         old_person=mock_person1,
         new_person=mock_person2,
-        tree=mock_tree,
-        row_id="row1",
-        column_index=1,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
         logger=mock_logger,
     )
-    cmd.update_treeview = MagicMock()
+    cmd.update_sheet = MagicMock()
 
     # Act
     cmd.undo()
@@ -113,11 +112,11 @@ def test_undo_reverts_assignment(
     # Assert
     mock_event.unassign_role.assert_called_with(role=role, person=mock_person2)
     mock_event.assign_role.assert_called_with(role=role, person=mock_person1)
-    cmd.update_treeview.assert_called()
+    cmd.update_sheet.assert_called()
 
 
 def test_undo_with_no_old_person_only_unassigns(
-    mock_event, mock_person1, mock_tree, mock_logger
+    mock_event, mock_person1, mock_sheet, mock_logger
 ):
     # Arrange
     role = "TestRole"
@@ -126,12 +125,12 @@ def test_undo_with_no_old_person_only_unassigns(
         role=role,
         old_person=None,
         new_person=mock_person1,
-        tree=mock_tree,
-        row_id="row1",
-        column_index=1,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
         logger=mock_logger,
     )
-    cmd.update_treeview = MagicMock()
+    cmd.update_sheet = MagicMock()
 
     # Act
     cmd.undo()
@@ -139,4 +138,4 @@ def test_undo_with_no_old_person_only_unassigns(
     # Assert
     mock_event.unassign_role.assert_called_with(role=role, person=mock_person1)
     mock_event.assign_role.assert_not_called()
-    cmd.update_treeview.assert_called()
+    cmd.update_sheet.assert_called()
