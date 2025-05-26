@@ -23,6 +23,169 @@ def mock_data():
     return mock_app, mock_schedule_handler, mock_ui_manager
 
 
+def test_execute_edit_command(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_command = MagicMock()
+
+    # Act
+    mock_ui_manager._execute_edit_command(mock_command)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == [mock_command]
+    assert mock_ui_manager.redo_stack == []
+    mock_command.execute.assert_called_once()
+    mock_command.undo.assert_not_called()
+
+
+def test_execute_edit_command_for_multiple_commands(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_command1 = MagicMock()
+    mock_command2 = MagicMock()
+
+    # Act
+    mock_ui_manager._execute_edit_command(mock_command1)
+    mock_ui_manager._execute_edit_command(mock_command2)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == [mock_command1, mock_command2]
+    assert mock_ui_manager.redo_stack == []
+    mock_command1.execute.assert_called_once()
+    mock_command1.undo.assert_not_called()
+    mock_command2.execute.assert_called_once()
+    mock_command2.undo.assert_not_called()
+
+
+def test_undo_last_edit(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+    mock_command = MagicMock()
+    mock_ui_manager._execute_edit_command(mock_command)
+
+    # Act
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == []
+    assert mock_ui_manager.redo_stack == [mock_command]
+    mock_command.execute.assert_called_once()
+    mock_command.undo.assert_called_once()
+
+
+def test_undo_last_edit_with_empty_undo_stack(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+
+    # Act
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == []
+    assert mock_ui_manager.redo_stack == []
+
+
+def test_undo_last_edit_idempotency(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+    mock_command = MagicMock()
+    mock_ui_manager._execute_edit_command(mock_command)
+
+    # Act
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == []
+    assert mock_ui_manager.redo_stack == [mock_command]
+    mock_command.execute.assert_called_once()
+    mock_command.undo.assert_called_once()
+
+
+def test_redo_last_edit(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+    mock_command = MagicMock()
+    mock_ui_manager._execute_edit_command(mock_command)
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+
+    # Act
+    mock_ui_manager._redo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == [mock_command]
+    assert mock_ui_manager.redo_stack == []
+    assert mock_command.execute.call_count == 2
+    mock_command.undo.asser_called_once()
+
+
+def test_redo_last_edit_with_empty_redo_stack(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+
+    # Act
+    mock_ui_manager._redo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == []
+    assert mock_ui_manager.redo_stack == []
+
+
+def test_redo_last_edit_idempotency(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+    mock_command = MagicMock()
+    mock_ui_manager._execute_edit_command(mock_command)
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+
+    # Act
+    mock_ui_manager._redo_last_edit(sheet=mock_sheet)
+    mock_ui_manager._redo_last_edit(sheet=mock_sheet)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == [mock_command]
+    assert mock_ui_manager.redo_stack == []
+    assert mock_command.execute.call_count == 2
+    mock_command.undo.assert_called_once()
+
+
+def test_multiple_command_undo_redo_operations(mock_data):
+    # Arrange
+    _, _, mock_ui_manager = mock_data
+    mock_sheet = MagicMock()
+    mock_command1 = MagicMock()
+    mock_command2 = MagicMock()
+    mock_command3 = MagicMock()
+    mock_command4 = MagicMock()
+
+    # Act
+    mock_ui_manager._execute_edit_command(mock_command1)
+    mock_ui_manager._execute_edit_command(mock_command2)
+    mock_ui_manager._execute_edit_command(mock_command3)
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+    mock_ui_manager._undo_last_edit(sheet=mock_sheet)
+    mock_ui_manager._redo_last_edit(sheet=mock_sheet)
+    mock_ui_manager._execute_edit_command(mock_command4)
+
+    # Assert
+    assert mock_ui_manager.undo_stack == [mock_command1, mock_command2, mock_command4]
+    assert mock_ui_manager.redo_stack == []
+    mock_command1.execute.assert_called_once()
+    mock_command1.undo.assert_not_called()
+    assert mock_command2.execute.call_count == 2
+    mock_command3.execute.assert_called_once()
+    mock_command3.undo.assert_called_once()
+    mock_command2.undo.assert_called_once()
+    mock_command4.execute.assert_called_once()
+    mock_command4.undo.assert_not_called()
+
+
 @pytest.mark.parametrize("platform", ["win32", "darwin", "linux"])
 @patch("os.path.abspath")
 @patch("subprocess.call")

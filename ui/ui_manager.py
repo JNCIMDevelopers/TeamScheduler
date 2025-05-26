@@ -59,7 +59,8 @@ class UIManager:
         self.app = app
         self.schedule_handler = schedule_handler
         self.title = title
-        self.active_combo = None
+        self.undo_stack: list[EditAssignmentCommand] = []
+        self.redo_stack: list[EditAssignmentCommand] = []
 
     def setup(self) -> None:
         """
@@ -175,12 +176,58 @@ class UIManager:
         )
         self.app.output_link_label.pack(pady=5)
 
+    def _execute_edit_command(self, command: EditAssignmentCommand) -> None:
+        """
+        Executes an edit command and manages the undo/redo stacks.
+
+        Args:
+            command (EditAssignmentCommand): The command to execute.
+        """
+        command.execute()
+        self.undo_stack.append(command)
+        self.redo_stack.clear()
+
+    def _undo_last_edit(self, sheet: tksheet.Sheet) -> None:
+        """
+        Undoes the last edit made to the schedule.
+
+        Args:
+            sheet (tksheet.Sheet): The tksheet instance to update after undoing.
+        """
+        sheet.dehighlight_all()
+        if self.undo_stack:
+            command = self.undo_stack.pop()
+            command.undo()
+            self.redo_stack.append(command)
+
+    def _redo_last_edit(self, sheet: tksheet.Sheet) -> None:
+        """
+        Redoes the last undone edit made to the schedule.
+
+        Args:
+            sheet (tksheet.Sheet): The tksheet instance to update after redoing.
+        """
+        sheet.dehighlight_all()
+        if self.redo_stack:
+            command = self.redo_stack.pop()
+            command.execute()
+            self.undo_stack.append(command)
+
     def show_schedule_popup(
         self, events: List[Event], team: List[Person], start_date: date, end_date: date
     ) -> None:
-        # Undo, redo stack
-        self.undo_stack: list[EditAssignmentCommand] = []
-        self.redo_stack: list[EditAssignmentCommand] = []
+        """
+        Displays a popup window with an editable preview of the schedule.
+
+        Args:
+            events (List[Event]): The list of events to display in the schedule.
+            team (List[Person]): The list of team members involved in the schedule.
+            start_date (date): The start date for the schedule.
+            end_date (date): The end date for the schedule.
+        """
+        # Reset undo and redo stacks
+        self.undo_stack = []
+        self.redo_stack = []
 
         # Data
         data = get_schedule_data_for_csv(events=events)
@@ -211,40 +258,22 @@ class UIManager:
         sheet.enable_bindings(("single_select", "cell_select"))
         sheet.pack(fill="both", expand=True)
 
-        def on_edit_command(command: EditAssignmentCommand) -> None:
-            command.execute()
-            self.undo_stack.append(command)
-            self.redo_stack.clear()
-
         # Add double click event handler for editing blank cells
         self._handle_cell_editing(
             sheet=sheet,
             events=events,
-            on_edit_command=on_edit_command,
+            on_edit_command=self._execute_edit_command,
         )
 
-        def undo_last_edit():
-            sheet.dehighlight_all()
-            if self.undo_stack:
-                command = self.undo_stack.pop()
-                command.undo()
-                self.redo_stack.append(command)
-
-        def redo_last_edit():
-            sheet.dehighlight_all()
-            if self.redo_stack:
-                command = self.redo_stack.pop()
-                command.execute()
-                self.undo_stack.append(command)
-
-        # Add undo and redo buttons
+        # Add undo button
         undo_btn = customtkinter.CTkButton(
-            popup, text="Undo", command=undo_last_edit, width=10
+            popup, text="Undo", command=lambda: self._undo_last_edit(sheet), width=10
         )
         undo_btn.pack(side="left", padx=5, pady=10)
 
+        # Add redo button
         redo_btn = customtkinter.CTkButton(
-            popup, text="Redo", command=redo_last_edit, width=10
+            popup, text="Redo", command=lambda: self._redo_last_edit(sheet), width=10
         )
         redo_btn.pack(side="left", padx=5, pady=10)
 
