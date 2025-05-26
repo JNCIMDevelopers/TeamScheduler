@@ -219,18 +219,19 @@ class UIManager:
         # Add double click event handler for editing blank cells
         self._handle_cell_editing(
             sheet=sheet,
-            columns=columns,
             events=events,
             on_edit_command=on_edit_command,
         )
 
         def undo_last_edit():
+            sheet.dehighlight_all()
             if self.undo_stack:
                 command = self.undo_stack.pop()
                 command.undo()
                 self.redo_stack.append(command)
 
         def redo_last_edit():
+            sheet.dehighlight_all()
             if self.redo_stack:
                 command = self.redo_stack.pop()
                 command.execute()
@@ -250,6 +251,7 @@ class UIManager:
         # Add a close button
         def close_popup():
             try:
+                sheet.dehighlight_all()
                 popup.destroy()
                 self.schedule_handler.export_schedule(
                     start_date=start_date, end_date=end_date, events=events, team=team
@@ -270,7 +272,6 @@ class UIManager:
     def _handle_cell_editing(
         self,
         sheet: tksheet.Sheet,
-        columns: List[str],
         events: List[Event],
         on_edit_command: Callable,
     ) -> None:
@@ -279,8 +280,8 @@ class UIManager:
 
         Args:
             sheet (tksheet.Sheet): The tksheet instance to bind the events to.
-            columns (List[str]): The list of column names.
             events (List[Event]): The list of events to be displayed in the Treeview.
+            on_edit_command (Callable): Function for editing cells.
         """
 
         def on_click(event):
@@ -353,10 +354,21 @@ class UIManager:
                     logger=self.app.logger,
                 )
                 on_edit_command(cmd)
+                self._highlight_cells_with_value(sheet=sheet, value=selected_name)
 
             sheet.extra_bindings([("end_edit_cell", on_dropdown_select)])
 
         sheet.extra_bindings([("cell_select", on_click)])
+
+    def _highlight_cells_with_value(
+        self, sheet: tksheet.Sheet, value: str, bg: str = "#fff59d"
+    ):
+        sheet.dehighlight_all()
+        data = sheet.get_sheet_data()
+        for r, row in enumerate(data):
+            for c, cell in enumerate(row):
+                if cell == value:
+                    sheet.highlight_cells(row=r, column=c, bg=bg)
 
     def reset_output_labels(self) -> None:
         """
