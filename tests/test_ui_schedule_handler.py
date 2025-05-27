@@ -110,6 +110,35 @@ def test_schedule_handler_initialization_with_invalid_preacher_data(
 
 
 @pytest.mark.parametrize(
+    "start_date, end_date, expected_message",
+    [
+        (None, date(2025, 4, 6), "Missing Input!"),
+        (date(2025, 4, 6), None, "Missing Input!"),
+        (None, None, "Missing Input!"),
+        (date(2025, 4, 13), date(2025, 4, 6), "Invalid Input!"),
+        (
+            date(2025, 3, 23),
+            date(2025, 3, 30),
+            "No preaching schedule available within specified dates!",
+        ),
+        (date(2025, 4, 6), date(2025, 4, 13), None),  # Valid case
+    ],
+)
+def test_validate_dates(mock_schedule_handler, start_date, end_date, expected_message):
+    # Arrange
+    mock_schedule_handler.earliest_date = date(2025, 4, 6)
+    mock_schedule_handler.latest_date = date(2025, 4, 20)
+
+    # Act
+    validation_message = mock_schedule_handler.validate_dates(
+        start_date=start_date, end_date=end_date
+    )
+
+    # Assert
+    assert validation_message == expected_message
+
+
+@pytest.mark.parametrize(
     "preaching_dates, expected_earliest_date, expected_latest_date",
     [
         (

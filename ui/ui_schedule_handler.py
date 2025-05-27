@@ -53,6 +53,29 @@ class UIScheduleHandler:
         self.logger.debug(f"Earliest Preaching Date: {str(self.earliest_date)}")
         self.logger.debug(f"Latest Preaching Date: {str(self.latest_date)}")
 
+    def validate_dates(self, start_date: date, end_date: date) -> str | None:
+        """
+        Validates that there is a preaching schedule available within the specified dates.
+
+        Args:
+            start_date (date): The start date of the schedule.
+            end_date (date): The end date of the schedule.
+        """
+        if not start_date or not end_date:
+            return "Missing Input!"
+
+        if start_date > end_date:
+            return "Invalid Input!"
+
+        if (
+            not self.is_within_date_range(start_date)
+            and not self.is_within_date_range(end_date)
+            and not self.is_preaching_schedule_within_date_range(start_date, end_date)
+        ):
+            return "No preaching schedule available within specified dates!"
+
+        return None
+
     def calculate_preaching_date_range(self) -> Tuple[date, date]:
         """
         Calculates the earliest and latest preaching dates from the preachers' schedules.

@@ -232,78 +232,19 @@ def test_handle_open_schedule_file(mock_subprocess, mock_abspath, platform):
             )
 
 
-@pytest.mark.parametrize(
-    "start_date, end_date, is_start_date_within_range, is_end_date_within_range, is_preaching_schedule_within_range, expected_message",
-    [
-        (None, date(2025, 4, 6), True, True, True, "Missing Input!"),  # No start date
-        (date(2025, 4, 6), None, True, True, True, "Missing Input!"),  # No end date
-        (None, None, True, True, True, "Missing Input!"),  # No start or end date
-        (
-            date(2025, 4, 13),
-            date(2025, 4, 6),
-            True,
-            True,
-            True,
-            "Invalid Input!",
-        ),  # End Date < Start Date
-        (
-            date(2025, 4, 6),
-            date(2025, 4, 13),
-            False,
-            False,
-            False,
-            "No preaching schedule available within specified dates!",
-        ),  # Dates outside of range
-        (
-            date(2025, 4, 6),
-            date(2025, 4, 13),
-            True,
-            False,
-            False,
-            None,
-        ),  # Only start date within range
-        (
-            date(2025, 4, 6),
-            date(2025, 4, 13),
-            False,
-            True,
-            False,
-            None,
-        ),  # Only end date within range
-        (
-            date(2025, 4, 6),
-            date(2025, 4, 13),
-            False,
-            False,
-            True,
-            None,
-        ),  # Only preaching schedule within range
-    ],
-)
+@pytest.mark.parametrize("expected_message", ["Invalid", None])
 @patch("ui.ui_manager.customtkinter.CTk")
 def test_handle_create_button_click_validation_error_messages(
-    mock_ctk,
-    mock_data,
-    start_date,
-    end_date,
-    is_start_date_within_range,
-    is_end_date_within_range,
-    is_preaching_schedule_within_range,
-    expected_message,
+    mock_ctk, mock_data, expected_message
 ):
     # Arrange
     mock_app, mock_schedule_handler, mock_ui_manager = mock_data
+    start_date = date(2025, 4, 6)
+    end_date = date(2025, 4, 13)
     mock_app.start_date_entry.get_date.return_value = start_date
     mock_app.end_date_entry.get_date.return_value = end_date
 
-    mock_schedule_handler.is_within_date_range.side_effect = [
-        is_start_date_within_range,
-        is_end_date_within_range,
-    ]
-    mock_schedule_handler.is_preaching_schedule_within_date_range.return_value = (
-        is_preaching_schedule_within_range
-    )
-
+    mock_schedule_handler.validate_dates.return_value = expected_message
     mock_schedule_handler.adjust_dates_within_range.return_value = (
         start_date,
         end_date,
@@ -320,10 +261,10 @@ def test_handle_create_button_click_validation_error_messages(
         mock_ui_manager.handle_create_button_click()
 
         # Assert
-        if expected_message is None:
-            mock_error_message.assert_not_called()
-        else:
+        if expected_message:
             mock_error_message.assert_called_once_with(text=expected_message)
+        else:
+            mock_error_message.assert_not_called()
 
 
 @pytest.mark.parametrize("is_adjusted", [True, False])
@@ -339,7 +280,7 @@ def test_handle_create_button_click_alert_message(
     end_date = date(2025, 4, 13)
     mock_app.start_date_entry.get_date.return_value = start_date
     mock_app.end_date_entry.get_date.return_value = end_date
-
+    mock_schedule_handler.validate_dates.return_value = None
     mock_schedule_handler.adjust_dates_within_range.return_value = (
         start_date,
         end_date,
@@ -375,7 +316,7 @@ def test_handle_create_button_click_exception(mock_ctk, mock_popup, mock_data):
     end_date = date(2025, 4, 13)
     mock_app.start_date_entry.get_date.return_value = start_date
     mock_app.end_date_entry.get_date.return_value = end_date
-
+    mock_schedule_handler.validate_dates.return_value = None
     mock_schedule_handler.adjust_dates_within_range.return_value = (
         start_date,
         end_date,

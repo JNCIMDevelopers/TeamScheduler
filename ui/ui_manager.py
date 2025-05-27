@@ -102,26 +102,11 @@ class UIManager:
         self.app.logger.debug(f"Start Date Entry: {str(start_date)}")
         self.app.logger.debug(f"End Date Entry: {str(end_date)}")
 
-        # Missing input validation
-        if not start_date or not end_date:
-            self._configure_validation_error_message(text="Missing Input!")
-            return
-
-        # Invalid date range validation
-        if start_date > end_date:
-            self._configure_validation_error_message(text="Invalid Input!")
-            return
-
-        if (
-            not self.schedule_handler.is_within_date_range(start_date)
-            and not self.schedule_handler.is_within_date_range(end_date)
-            and not self.schedule_handler.is_preaching_schedule_within_date_range(
-                start_date, end_date
-            )
-        ):
-            self._configure_validation_error_message(
-                text="No preaching schedule available within specified dates!"
-            )
+        date_validation_message = self.schedule_handler.validate_dates(
+            start_date=start_date, end_date=end_date
+        )
+        if date_validation_message:
+            self._configure_validation_error_message(text=date_validation_message)
             return
 
         # Adjust dates if they are outside the available range
