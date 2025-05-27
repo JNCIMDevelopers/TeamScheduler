@@ -5,3 +5,4 @@ tkcalendar
 types-python-dateutil
 ruff
 mypy
+tksheet

@@ -107,6 +107,70 @@ def test_get_assigned_roles():
     assert role in assigned_roles
 
 
+def test_unassign_role():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 7, 7)
+    person = Person(
+        name="TestName",
+        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+        blockout_dates=[],
+        preaching_dates=[],
+        on_leave=False,
+    )
+
+    event = Event(date=reference_date, team=[person])
+    event.assign_role(role=role, person=person)
+
+    # Act
+    event.unassign_role(role=role, person=person)
+    assigned_name = event.roles[role]
+    last_assigned_date = person.last_assigned_dates[role]
+
+    # Assert
+    assert assigned_name is None
+    assert reference_date not in person.assigned_dates
+    assert last_assigned_date is None
+
+
+def test_unassign_role_when_role_is_invalid():
+    # Arrange
+    role = "InvalidRole"
+    reference_date = date(2024, 7, 7)
+    person = Person(
+        name="TestName",
+        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+        blockout_dates=[],
+        preaching_dates=[],
+        on_leave=False,
+    )
+
+    event = Event(date=reference_date, team=[person])
+
+    # Assert
+    with pytest.raises(ValueError):
+        event.unassign_role(role=role, person=person)
+
+
+def test_unassign_role_when_role_is_not_assigned():
+    # Arrange
+    role = Role.ACOUSTIC
+    reference_date = date(2024, 7, 7)
+    person = Person(
+        name="TestName",
+        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+        blockout_dates=[],
+        preaching_dates=[],
+        on_leave=False,
+    )
+
+    event = Event(date=reference_date, team=[person])
+
+    # Act and Assert
+    with pytest.raises(ValueError):
+        event.unassign_role(role=role, person=person)
+
+
 def test_get_unassigned_roles():
     # Arrange
     unassigned_role = Role.SUNDAYSCHOOLTEACHER

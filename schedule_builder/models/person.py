@@ -46,6 +46,18 @@ class Person:
         self.last_assigned_dates[role] = event_date
         self.role_assigned_dates[role].append(event_date)
 
+    def unassign_event(self, event_date: date, role: Role) -> None:
+        """
+        Unassigns the person from an event on the given date for a specified role.
+
+        Args:
+            event_date (date): The date of the event.
+            role (Role): The role to unassign the person from
+        """
+        self.assigned_dates.remove(event_date)
+        self.last_assigned_dates[role] = None
+        self.role_assigned_dates[role].remove(event_date)
+
     def get_next_preaching_date(self, reference_date: date) -> Optional[date]:
         """
         Returns the next preaching date on or after the given reference date.
