@@ -1,5 +1,5 @@
 # Standard Library Imports
-from datetime import timedelta
+from datetime import timedelta, date
 
 # Local Imports
 from config import (
@@ -197,3 +197,15 @@ class JeffMarielAssignmentRule(EligibilityRule):
 
         other_person = "Mariel" if person.name == "Jeff" else "Jeff"
         return other_person not in event.roles.values()
+
+
+class MarkDrumsRule(EligibilityRule):
+    """
+    Special Rule 5: Do not assign Mark to drums until September 2025
+    """
+
+    def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
+        if role != Role.DRUMS or person.name != "Mark":
+            return True
+
+        return event.date >= date(2025, 9, 1)
