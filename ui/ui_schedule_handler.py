@@ -49,7 +49,7 @@ class UIScheduleHandler:
         self.eligibility_checker = eligibility_checker
         self.file_exporter = file_exporter
         self.schedule_class = schedule_class
-        self.earliest_date, self.latest_date = self.calculate_preaching_date_range()
+        self.earliest_date, self.latest_date = self._calculate_preaching_date_range()
         self.logger.debug(f"Earliest Preaching Date: {str(self.earliest_date)}")
         self.logger.debug(f"Latest Preaching Date: {str(self.latest_date)}")
 
@@ -68,69 +68,13 @@ class UIScheduleHandler:
             return "Invalid Input!"
 
         if (
-            not self.is_within_date_range(start_date)
-            and not self.is_within_date_range(end_date)
-            and not self.is_preaching_schedule_within_date_range(start_date, end_date)
+            not self._is_within_date_range(start_date)
+            and not self._is_within_date_range(end_date)
+            and not self._is_preaching_schedule_within_date_range(start_date, end_date)
         ):
             return "No preaching schedule available within specified dates!"
 
         return None
-
-    def calculate_preaching_date_range(self) -> Tuple[date, date]:
-        """
-        Calculates the earliest and latest preaching dates from the preachers' schedules.
-
-        Returns:
-            Tuple[date, date]: A tuple containing the earliest and latest preaching dates.
-
-        Raises:
-            ValueError: If no preachers are available or no preaching dates are found.
-        """
-        if self.preachers is None or not self.preachers:
-            raise ValueError("No preachers available to calculate date range.")
-
-        all_dates = [
-            preaching_date
-            for preacher in self.preachers
-            for preaching_date in preacher.dates
-        ]
-
-        if not all_dates:
-            raise ValueError("No preaching dates available.")
-
-        all_unique_dates = set(all_dates)
-
-        earliest_date = min(all_unique_dates)
-        latest_date = max(all_unique_dates)
-
-        return (earliest_date, latest_date)
-
-    def is_within_date_range(self, reference_date: date) -> bool:
-        """
-        Checks if a given date falls within the allowable preaching date range.
-
-        Args:
-            reference_date (date): The date to check.
-
-        Returns:
-            bool: True if the date is within the allowable range, False otherwise.
-        """
-        return self.earliest_date <= reference_date <= self.latest_date
-
-    def is_preaching_schedule_within_date_range(
-        self, start_date: date, end_date: date
-    ) -> bool:
-        """
-        Checks if the preaching schedule falls within the specified date range.
-
-        Args:
-            start_date (date): The start date of the range.
-            end_date (date): The end date of the range.
-
-        Returns:
-            bool: True if the preaching schedule is within the range, False otherwise.
-        """
-        return start_date <= self.earliest_date <= self.latest_date <= end_date
 
     def adjust_dates_within_range(
         self, start_date: date, end_date: date
@@ -244,3 +188,59 @@ class UIScheduleHandler:
             filepath=SCHEDULE_CSV_FILE_PATH,
             events=events,
         )
+
+    def _calculate_preaching_date_range(self) -> Tuple[date, date]:
+        """
+        Calculates the earliest and latest preaching dates from the preachers' schedules.
+
+        Returns:
+            Tuple[date, date]: A tuple containing the earliest and latest preaching dates.
+
+        Raises:
+            ValueError: If no preachers are available or no preaching dates are found.
+        """
+        if self.preachers is None or not self.preachers:
+            raise ValueError("No preachers available to calculate date range.")
+
+        all_dates = [
+            preaching_date
+            for preacher in self.preachers
+            for preaching_date in preacher.dates
+        ]
+
+        if not all_dates:
+            raise ValueError("No preaching dates available.")
+
+        all_unique_dates = set(all_dates)
+
+        earliest_date = min(all_unique_dates)
+        latest_date = max(all_unique_dates)
+
+        return (earliest_date, latest_date)
+
+    def _is_within_date_range(self, reference_date: date) -> bool:
+        """
+        Checks if a given date falls within the allowable preaching date range.
+
+        Args:
+            reference_date (date): The date to check.
+
+        Returns:
+            bool: True if the date is within the allowable range, False otherwise.
+        """
+        return self.earliest_date <= reference_date <= self.latest_date
+
+    def _is_preaching_schedule_within_date_range(
+        self, start_date: date, end_date: date
+    ) -> bool:
+        """
+        Checks if the preaching schedule falls within the specified date range.
+
+        Args:
+            start_date (date): The start date of the range.
+            end_date (date): The end date of the range.
+
+        Returns:
+            bool: True if the preaching schedule is within the range, False otherwise.
+        """
+        return start_date <= self.earliest_date <= self.latest_date <= end_date

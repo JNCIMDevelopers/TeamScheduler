@@ -181,7 +181,7 @@ def test_calculate_preaching_date_range(
     )
 
     # Act
-    earliest_date, latest_date = schedule_handler.calculate_preaching_date_range()
+    earliest_date, latest_date = schedule_handler._calculate_preaching_date_range()
 
     # Assert
     assert earliest_date == expected_earliest_date
@@ -221,7 +221,7 @@ def test_calculate_preaching_date_range_with_invalid_preacher_data(
 
     # Act and Assert
     with pytest.raises(ValueError):
-        schedule_handler.calculate_preaching_date_range()
+        schedule_handler._calculate_preaching_date_range()
 
 
 @pytest.mark.parametrize(
@@ -239,7 +239,7 @@ def test_is_within_date_range(mock_schedule_handler, reference_date, expected_re
     mock_schedule_handler.latest_date = date(2025, 4, 27)
 
     # Act
-    is_within_range = mock_schedule_handler.is_within_date_range(
+    is_within_range = mock_schedule_handler._is_within_date_range(
         reference_date=reference_date
     )
 
@@ -285,7 +285,7 @@ def test_is_preaching_schedule_within_date_range(
     mock_schedule_handler.latest_date = date(2025, 4, 27)
 
     # Act
-    is_within_range = mock_schedule_handler.is_preaching_schedule_within_date_range(
+    is_within_range = mock_schedule_handler._is_preaching_schedule_within_date_range(
         start_date=start_date, end_date=end_date
     )
 
