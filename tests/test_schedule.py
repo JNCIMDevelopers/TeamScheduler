@@ -21,6 +21,7 @@ from schedule_builder.eligibility.rules import (
     GeeWorshipLeaderRule,
     KrisAcousticRule,
     JeffMarielAssignmentRule,
+    MarkDrumsRule,
 )
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.event import Event
@@ -46,6 +47,7 @@ def eligibility_checker():
             GeeWorshipLeaderRule(),
             KrisAcousticRule(),
             JeffMarielAssignmentRule(),
+            MarkDrumsRule(),
         ]
     )
 
@@ -784,4 +786,53 @@ def test_get_eligible_person_for_special_condition_4(
 
     # Assert
     expected_person = person_to_assign if is_eligible else None
+    assert eligible_person == expected_person
+
+
+@pytest.mark.parametrize(
+    "role, person_name, event_date, is_eligible",
+    [
+        (Role.DRUMS, "Mark", date(2025, 9, 1), True),
+        (Role.DRUMS, "Mark", date(2025, 8, 31), False),
+        (Role.DRUMS, "TestName", date(2025, 8, 31), True),
+        (Role.DRUMS, "TestName", date(2025, 9, 1), True),
+        (Role.EMCEE, "Mark", date(2025, 8, 31), True),
+    ],
+)
+def test_get_eligible_person_for_special_condition_5(
+    role, person_name, event_date, is_eligible, eligibility_checker
+):
+    # Arrange
+    person = Person(
+        name=person_name,
+        roles=[Role.DRUMS, Role.EMCEE],
+        blockout_dates=[],
+        preaching_dates=[],
+        teaching_dates=[],
+        on_leave=False,
+    )
+    team = [person]
+    preacher = Preacher(
+        name="TestPreacher", graphics_support="Test", dates=[event_date]
+    )
+    preachers = [preacher]
+    event = Event(
+        date=event_date,
+        team=team,
+        preachers=preachers,
+    )
+    worship_leader_selector = WorshipLeaderSelector(rotation=[])
+    schedule = Schedule(
+        team=team,
+        event_dates=[event_date],
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
+        preachers=preachers,
+    )
+
+    # Act
+    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
+
+    # Assert
+    expected_person = person if is_eligible else None
     assert eligible_person == expected_person
