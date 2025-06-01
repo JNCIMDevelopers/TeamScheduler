@@ -18,10 +18,7 @@ from config import (
     SCHEDULE_CSV_FILE_PATH,
     SCHEDULE_DETAILS_HTML_FILE_PATH,
 )
-from schedule_builder.builders.file_builder import (
-    get_schedule_data_for_csv,
-    format_data_for_csv,
-)
+from schedule_builder.builders.file_builder import get_schedule_data_for_csv
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
 from schedule_builder.models.role import Role
@@ -154,8 +151,7 @@ class UIManager:
         self.redo_stack = []
 
         # Data
-        data = get_schedule_data_for_csv(events=events)
-        formatted_data = format_data_for_csv(data=data)
+        schedule_data = get_schedule_data_for_csv(events=events)
 
         # Create a new popup window
         popup = customtkinter.CTkToplevel(self.app)
@@ -177,8 +173,8 @@ class UIManager:
         frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # Setup sheet
-        columns = formatted_data[0]
-        sheet = tksheet.Sheet(frame, data=formatted_data[1:], headers=columns)
+        columns = schedule_data[0]
+        sheet = tksheet.Sheet(frame, data=schedule_data[1:], headers=columns)
         sheet.enable_bindings(("single_select", "cell_select"))
         sheet.pack(fill="both", expand=True)
 

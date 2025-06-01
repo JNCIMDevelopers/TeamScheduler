@@ -8,7 +8,6 @@ from schedule_builder.builders.file_builder import (
     generate_team_schedule_html,
     create_html,
     get_schedule_data_for_csv,
-    format_data_for_csv,
     create_csv,
 )
 from schedule_builder.models.event import Event
@@ -57,8 +56,7 @@ class FileExporter:
             filepath (str): The path to save the CSV file.
             events (List[Event]): A list of scheduled events.
         """
-        csv_data = get_schedule_data_for_csv(events=events)
-        formatted_csv_data = format_data_for_csv(data=csv_data)
-        self.logger.debug(f"CSV Data:\n{formatted_csv_data}\n")
+        data = get_schedule_data_for_csv(events=events)
+        self.logger.debug(f"CSV Data:\n{data}\n")
 
-        create_csv(data=formatted_csv_data, filepath=filepath)
+        create_csv(data=data, filepath=filepath)
