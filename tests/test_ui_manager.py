@@ -360,7 +360,22 @@ def test_schedule_edit_integrity():
     person2 = Person(name="TestPerson2", roles=[role_to_edit_1])
     person3 = Person(name="TestPerson3", roles=[role_to_edit_2])
     person4 = Person(name="TestPerson4", roles=[role_to_edit_2])
-    team = [person1, person2, person3, person4]
+    person5 = Person(name="TestPerson5", roles=[Role.EMCEE])
+    person6 = Person(name="TestPerson6", roles=[Role.KEYS])
+    person7 = Person(name="TestPerson7", roles=[Role.DRUMS])
+    person8 = Person(name="TestPerson8", roles=[Role.BASS])
+    person9 = Person(name="TestPerson9", roles=[Role.AUDIO])
+    team = [
+        person1,
+        person2,
+        person3,
+        person4,
+        person5,
+        person6,
+        person7,
+        person8,
+        person9,
+    ]
     preacher = Preacher(
         name="Pastor", graphics_support="Support", dates=[start_date, end_date]
     )
