@@ -1,4 +1,5 @@
 # Standard Library Imports
+import copy
 import os
 import pytest
 from datetime import date
@@ -8,8 +9,17 @@ from unittest.mock import MagicMock, patch
 import customtkinter
 
 # Local Imports
-from ui.ui_manager import UIManager
+from schedule_builder.models.person import Person
+from schedule_builder.models.role import Role
+from schedule_builder.models.preacher import Preacher
+from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
+from schedule_builder.eligibility.eligibility_checker import EligibilityChecker
+from schedule_builder.eligibility.rules import RoleCapabilityRule
+from schedule_builder.builders.schedule import Schedule
+from schedule_builder.helpers.file_exporter import FileExporter
+from ui.command import EditAssignmentCommand
 from ui.ui_schedule_handler import UIScheduleHandler
+from ui.ui_manager import UIManager
 
 
 @pytest.fixture
@@ -337,3 +347,96 @@ def test_handle_create_button_click_exception(mock_ctk, mock_popup, mock_data):
             message="An unexpected error occurred."
         )
         mock_popup.assert_not_called()
+
+
+def test_schedule_edit_integrity():
+    # Arrange
+    start_date = date(2025, 4, 27)
+    end_date = date(2025, 5, 4)
+    role_to_edit_1 = Role.WORSHIPLEADER
+    role_to_edit_2 = Role.ACOUSTIC
+
+    person1 = Person(name="TestPerson1", roles=[role_to_edit_1])
+    person2 = Person(name="TestPerson2", roles=[role_to_edit_1])
+    person3 = Person(name="TestPerson3", roles=[role_to_edit_2])
+    person4 = Person(name="TestPerson4", roles=[role_to_edit_2])
+    team = [person1, person2, person3, person4]
+    preacher = Preacher(
+        name="Pastor", graphics_support="Support", dates=[start_date, end_date]
+    )
+    preachers = [preacher]
+    worship_leader_selector = WorshipLeaderSelector(rotation=[])
+    eligibility_checker = EligibilityChecker(rules=[RoleCapabilityRule()])
+    file_exporter = FileExporter()
+    schedule_class = Schedule
+
+    # Create schedule handler and build initial schedule
+    schedule_handler = UIScheduleHandler(
+        team=team,
+        preachers=preachers,
+        worship_leader_selector=worship_leader_selector,
+        eligibility_checker=eligibility_checker,
+        file_exporter=file_exporter,
+        schedule_class=schedule_class,
+    )
+    events, updated_team = schedule_handler.build_schedule(start_date, end_date)
+
+    # Create deep copy of events before any edits to compare later
+    initial_events = copy.deepcopy(events)
+
+    # First edit
+    event_index_1 = 0
+    event_to_edit_1 = events[event_index_1]
+    assigned_person_to_edit_1 = event_to_edit_1.get_person_by_name(
+        event_to_edit_1.roles[role_to_edit_1]
+    )
+    old_person_1 = assigned_person_to_edit_1
+    new_person_1 = person1 if assigned_person_to_edit_1 == person2 else person2
+    cmd_1 = EditAssignmentCommand(
+        event=event_to_edit_1,
+        role=role_to_edit_1,
+        old_person=old_person_1,
+        new_person=new_person_1,
+        sheet=MagicMock(),  # Exclude UI testing
+        row=0,
+        column=0,
+        logger=MagicMock(),  # Exclude logging testing
+    )
+
+    # Second edit
+    event_index_2 = 1
+    event_to_edit_2 = events[event_index_2]
+    assigned_person_to_edit_2 = event_to_edit_2.get_person_by_name(
+        event_to_edit_2.roles[role_to_edit_2]
+    )
+    old_person_2 = assigned_person_to_edit_2
+    new_person_2 = person3 if assigned_person_to_edit_2 == person4 else person4
+    cmd_2 = EditAssignmentCommand(
+        event=event_to_edit_2,
+        role=role_to_edit_2,
+        old_person=old_person_2,
+        new_person=new_person_2,
+        sheet=MagicMock(),  # Exclude UI testing
+        row=0,
+        column=0,
+        logger=MagicMock(),  # Exclude logging testing
+    )
+
+    # Act
+    cmd_1.execute()
+    cmd_2.execute()
+
+    # Assert
+    for i, (initial_event, final_event) in enumerate(zip(initial_events, events)):
+        for role in Role.get_schedule_order():
+            initial_assignment = initial_event.roles[role]
+            final_assignment = final_event.roles[role]
+            if i == event_index_1 and role == role_to_edit_1:
+                # This the first user edit
+                assert final_assignment == new_person_1.name
+            elif i == event_index_2 and role == role_to_edit_2:
+                # This is the second user edit
+                assert final_assignment == new_person_2.name
+            else:
+                # All other assignments should be unchanged
+                assert initial_assignment == final_assignment
