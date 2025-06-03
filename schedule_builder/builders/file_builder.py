@@ -216,26 +216,6 @@ def get_schedule_data_for_csv(events: List[Event]) -> List[List[str]]:
     return data
 
 
-def format_data_for_csv(data: List[List[str]]) -> List[List[str]]:
-    """
-    Format the data for CSV by combining role with assigned persons.
-
-    Args:
-        data (List[List[str]]): A list of rows, where each row is a list of strings.
-
-    Returns:
-        List[List[str]]: A list of formatted rows for the CSV file.
-    """
-    headers = data[0]  # Extract the first row as headers
-    formatted_data = []
-    formatted_data.append(headers)
-
-    for row in data[1:]:
-        formatted_data.append(row)
-
-    return formatted_data
-
-
 def create_csv(data: List[List[str]], filepath: str) -> None:
     """
     Create a CSV file with the provided data.
