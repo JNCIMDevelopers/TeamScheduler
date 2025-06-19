@@ -18,6 +18,7 @@ from schedule_builder.eligibility.rules import (
     KrisAcousticRule,
     JeffMarielAssignmentRule,
     MarkDrumsRule,
+    AubreyLiveRule,
 )
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
@@ -593,6 +594,53 @@ class TestMarkDrumsRule:
             preachers=[preacher],
         )
         rule = MarkDrumsRule()
+
+        # Act
+        is_eligible = rule.is_eligible(person, role, event)
+
+        # Assert
+        assert is_eligible == expected
+
+class TestAubreyLiveRule:
+    @pytest.mark.parametrize(
+        "role, person_name, bassist, expected",
+        [
+            (Role.LIVE, "Aubrey", "Dave", True),
+            (Role.LIVE, "Aubrey", "Jeff", True),  # Not Expected Bassist
+            (Role.LIVE, "TestName", "Dave", False),  # Not Expected Assignee
+            (Role.LIVE, "Aubrey", None, True),  # No Bassist
+            (Role.LYRICS, "Aubrey", "Dave", True),  # Not Expected Role
+        ],
+    )
+    def test_aubrey_live_rule(
+        self, role, person_name, bassist, expected, person
+    ):
+        # Arrange
+        rule = AubreyLiveRule()
+        person.name = person_name
+        person.roles = [role]
+        event_date = date(2025, 6, 15)
+        preacher = Preacher(
+            name="TestPreacher", graphics_support="Test", dates=[event_date]
+        )
+        bassist = (
+            Person(
+                name=bassist,
+                roles=[Role.BASS],
+                blockout_dates=[],
+                preaching_dates=[],
+                teaching_dates=[],
+                on_leave=False,
+            )
+            if bassist
+            else None
+        )
+
+        team = [person] + ([bassist] if bassist else [])
+        event = Event(date=event_date, team=team, preachers=[preacher])
+
+        if bassist:
+            event.assign_role(role=Role.BASS, person=bassist)
 
         # Act
         is_eligible = rule.is_eligible(person, role, event)

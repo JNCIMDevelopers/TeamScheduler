@@ -23,6 +23,8 @@ from schedule_builder.eligibility.rules import (
     KrisAcousticRule,
     JeffMarielAssignmentRule,
     MarkDrumsRule,
+    AubreyConsecutiveAssignmentLimitRule,
+    AubreyLiveRule,
 )
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 
@@ -69,6 +71,8 @@ def main() -> None:
             KrisAcousticRule(),
             JeffMarielAssignmentRule(),
             MarkDrumsRule(),
+            AubreyConsecutiveAssignmentLimitRule(),
+            AubreyLiveRule(),
         ]
     )
 

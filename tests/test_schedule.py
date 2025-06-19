@@ -22,6 +22,7 @@ from schedule_builder.eligibility.rules import (
     KrisAcousticRule,
     JeffMarielAssignmentRule,
     MarkDrumsRule,
+    AubreyLiveRule,
 )
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.event import Event
@@ -48,6 +49,7 @@ def eligibility_checker():
             KrisAcousticRule(),
             JeffMarielAssignmentRule(),
             MarkDrumsRule(),
+            AubreyLiveRule(),
         ]
     )
 

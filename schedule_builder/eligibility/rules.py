@@ -209,3 +209,36 @@ class MarkDrumsRule(EligibilityRule):
             return True
 
         return event.date >= date(2025, 9, 1)
+
+    
+class AubreyConsecutiveAssignmentLimitRule(EligibilityRule):
+    """
+    Special Rule 6: Limit consecutive assignments to 2 for Aubrey.
+    """
+
+    def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
+        if person.name != "Aubrey":
+            return True
+        
+        return not has_exceeded_consecutive_assignments(
+            assigned_dates=person.assigned_dates,
+            preaching_dates=person.preaching_dates,
+            reference_date=event.date,
+            limit=CONSECUTIVE_ASSIGNMENTS_LIMIT-1,
+        )
+
+
+class AubreyLiveRule(EligibilityRule):
+    """
+    Special Rule 7: Assign Aubrey to LIVE role when Dave is assigned to BASS.
+    """
+
+    def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
+        if role not in [Role.LIVE, Role.LYRICS]:
+            return True
+
+        bassist = event.get_person_by_name(name=event.roles[Role.BASS])
+        if bassist and bassist.name == "Dave":
+            return person.name == "Aubrey"
+
+        return True
