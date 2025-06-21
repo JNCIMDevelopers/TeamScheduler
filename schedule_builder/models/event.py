@@ -103,9 +103,7 @@ class Event:
             List[str]: A list of assigned names.
         """
         assigned_names = set(self.roles.values())
-        return [
-            person.name for person in self.team if person.name in assigned_names
-        ]
+        return [person.name for person in self.team if person.name in assigned_names]
 
     def get_unassigned_names(self) -> List[str]:
         """
@@ -171,7 +169,6 @@ class Event:
         """
         preacher = self.get_assigned_preacher
         assigned_roles = self.get_assigned_roles()
-        unassigned_names = self.get_assigned_names()
         unassigned_roles = self.get_unassigned_roles()
         unassigned_names = self.get_unassigned_names()
 

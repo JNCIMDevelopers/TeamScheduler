@@ -609,6 +609,7 @@ class TestAubreyAssignmentRule:
             ("Aubrey", "Dave", True),
             ("Aubrey", "TestName", False),
             ("TestName", "Dave", True),
+            ("Aubrey", None, False),
         ],
     )
     def test_aubrey_assignment_rule(self, person_name, assigned_name, expected, event_date, preacher):

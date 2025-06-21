@@ -209,7 +209,7 @@ class MarkDrumsRule(EligibilityRule):
             return True
 
         return event.date >= date(2025, 9, 1)
-    
+
 
 class AubreyAssignmentRule(EligibilityRule):
     """
@@ -219,6 +219,5 @@ class AubreyAssignmentRule(EligibilityRule):
     def is_eligible(self, person: Person, role: Role, event: Event) -> bool:
         if person.name != "Aubrey":
             return True
-        
-        return "Dave" in event.get_assigned_names() 
 
+        return "Dave" in event.get_assigned_names()
