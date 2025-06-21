@@ -18,6 +18,7 @@ from schedule_builder.eligibility.rules import (
     KrisAcousticRule,
     JeffMarielAssignmentRule,
     MarkDrumsRule,
+    AubreyAssignmentRule,
 )
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
@@ -599,3 +600,47 @@ class TestMarkDrumsRule:
 
         # Assert
         assert is_eligible == expected
+
+    
+class TestAubreyAssignmentRule:
+    @pytest.mark.parametrize(
+        "person_name, assigned_name, expected",
+        [
+            ("Aubrey", "Dave", True),
+            ("Aubrey", "TestName", False),
+            ("TestName", "Dave", True),
+        ],
+    )
+    def test_aubrey_assignment_rule(self, person_name, assigned_name, expected, event_date, preacher):
+        # Arrange
+        rule = AubreyAssignmentRule()
+        person = Person(
+            name=person_name,
+            roles=[Role.LIVE],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        )
+        assigned_person = Person(
+            name=assigned_name,
+            roles=[Role.BASS],
+            blockout_dates=[],
+            preaching_dates=[],
+            teaching_dates=[],
+            on_leave=False,
+        )      
+        event = Event(
+            date=event_date,
+            team=[person, assigned_person], 
+            preachers=[preacher]
+        )
+
+        if assigned_person:
+            event.assign_role(role=Role.BASS, person=assigned_person)
+        # Act
+        is_eligible = rule.is_eligible(person, Role.LIVE, event)
+
+        # Assert
+        assert is_eligible == expected
+
