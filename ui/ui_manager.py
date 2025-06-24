@@ -504,6 +504,9 @@ class UIManager:
             if not available_names:
                 return
 
+            # Add a blank option to the dropdown
+            available_names = [""] + available_names
+
             # Destroy any existing dropdodown before creating a new one
             sheet.delete_dropdown("all", "all")
 
@@ -519,7 +522,7 @@ class UIManager:
 
             def on_dropdown_select(event):
                 selected_name = sheet.get_cell_data(r=row, c=col)
-                if not selected_name or selected_name == currently_assigned_name:
+                if selected_name is None or selected_name == currently_assigned_name:
                     return
 
                 old_person = (
@@ -527,7 +530,11 @@ class UIManager:
                     if currently_assigned_name
                     else None
                 )
-                new_person = event_obj.get_person_by_name(name=selected_name)
+                new_person = (
+                    event_obj.get_person_by_name(name=selected_name)
+                    if selected_name
+                    else None
+                )
 
                 # Save command to undo/redo stack
                 cmd = EditAssignmentCommand(
@@ -551,6 +558,9 @@ class UIManager:
         self, sheet: tksheet.Sheet, value: str, bg: str = "#fff59d"
     ):
         sheet.dehighlight_all()
+        if not value:
+            return
+
         data = sheet.get_sheet_data()
         for r, row in enumerate(data):
             for c, cell in enumerate(row):

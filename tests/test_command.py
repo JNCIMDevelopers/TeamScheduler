@@ -89,6 +89,32 @@ def test_execute_with_no_old_person_only_assigns(
     cmd.update_sheet.assert_called()
 
 
+def test_execute_with_no_new_person_only_unassigns(
+    mock_event, mock_person1, mock_sheet, mock_logger
+):
+    # Arrange
+    role = "TestRole"
+    cmd = EditAssignmentCommand(
+        event=mock_event,
+        role=role,
+        old_person=mock_person1,
+        new_person=None,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
+        logger=mock_logger,
+    )
+    cmd.update_sheet = MagicMock()
+
+    # Act
+    cmd.execute()
+
+    # Assert
+    mock_event.unassign_role.assert_called_with(role=role, person=mock_person1)
+    mock_event.assign_role.assert_not_called()
+    cmd.update_sheet.assert_called()
+
+
 def test_undo_reverts_assignment(
     mock_event, mock_person1, mock_person2, mock_sheet, mock_logger
 ):
@@ -138,4 +164,30 @@ def test_undo_with_no_old_person_only_unassigns(
     # Assert
     mock_event.unassign_role.assert_called_with(role=role, person=mock_person1)
     mock_event.assign_role.assert_not_called()
+    cmd.update_sheet.assert_called()
+
+
+def test_undo_with_no_new_person_only_assigns(
+    mock_event, mock_person1, mock_sheet, mock_logger
+):
+    # Arrange
+    role = "TestRole"
+    cmd = EditAssignmentCommand(
+        event=mock_event,
+        role=role,
+        old_person=mock_person1,
+        new_person=None,
+        sheet=mock_sheet,
+        row=1,
+        column=1,
+        logger=mock_logger,
+    )
+    cmd.update_sheet = MagicMock()
+
+    # Act
+    cmd.undo()
+
+    # Assert
+    mock_event.unassign_role.assert_not_called()
+    mock_event.assign_role.assert_called_with(role=role, person=mock_person1)
     cmd.update_sheet.assert_called()
