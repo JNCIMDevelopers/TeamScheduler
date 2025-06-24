@@ -601,7 +601,7 @@ class TestMarkDrumsRule:
         # Assert
         assert is_eligible == expected
 
-    
+
 class TestAubreyAssignmentRule:
     @pytest.mark.parametrize(
         "person_name, assigned_name, expected",
@@ -612,7 +612,9 @@ class TestAubreyAssignmentRule:
             ("Aubrey", None, False),
         ],
     )
-    def test_aubrey_assignment_rule(self, person_name, assigned_name, expected, event_date, preacher):
+    def test_aubrey_assignment_rule(
+        self, person_name, assigned_name, expected, event_date, preacher
+    ):
         # Arrange
         rule = AubreyAssignmentRule()
         person = Person(
@@ -630,11 +632,9 @@ class TestAubreyAssignmentRule:
             preaching_dates=[],
             teaching_dates=[],
             on_leave=False,
-        )      
+        )
         event = Event(
-            date=event_date,
-            team=[person, assigned_person], 
-            preachers=[preacher]
+            date=event_date, team=[person, assigned_person], preachers=[preacher]
         )
 
         if assigned_person:
@@ -644,4 +644,3 @@ class TestAubreyAssignmentRule:
 
         # Assert
         assert is_eligible == expected
-
