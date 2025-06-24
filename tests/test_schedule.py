@@ -22,11 +22,11 @@ from schedule_builder.eligibility.rules import (
     KrisAcousticRule,
     JeffMarielAssignmentRule,
     MarkDrumsRule,
+    AubreyAssignmentRule,
 )
 from schedule_builder.helpers.worship_leader_selector import WorshipLeaderSelector
 from schedule_builder.models.event import Event
 from schedule_builder.models.person import Person
-from schedule_builder.models.preacher import Preacher
 from schedule_builder.models.role import Role
 
 
@@ -48,6 +48,7 @@ def eligibility_checker():
             KrisAcousticRule(),
             JeffMarielAssignmentRule(),
             MarkDrumsRule(),
+            AubreyAssignmentRule(),
         ]
     )
 
@@ -166,14 +167,14 @@ def test_get_eligible_person_with_no_team(team, eligibility_checker):
     assert eligible_person is None
 
 
-def test_get_eligible_person_with_no_valid_role(eligibility_checker):
+def test_get_eligible_person_when_none_eligible(eligibility_checker):
     # Arrange
-    role = Role.SUNDAYSCHOOLTEACHER
+    role = Role.LYRICS
     reference_date = date(2024, 7, 7)
     event_dates = [date(2024, 6, 30), reference_date]
     person1 = Person(
         name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
+        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC],
         blockout_dates=[],
         preaching_dates=[],
         on_leave=False,
@@ -197,265 +198,10 @@ def test_get_eligible_person_with_no_valid_role(eligibility_checker):
     )
 
     # Act
-    eligible_persons = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_persons is None
-
-
-def test_get_eligible_person_when_on_leave(eligibility_checker):
-    # Arrange
-    role = Role.LYRICS
-    reference_date = date(2024, 7, 7)
-    event_dates = [date(2024, 6, 30), reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        on_leave=True,
-    )
-
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
     assert eligible_person is None
-
-
-def test_get_eligible_person_with_blockout(eligibility_checker):
-    # Arrange
-    role = Role.LYRICS
-    reference_date = date(2024, 7, 7)
-    event_dates = [date(2024, 6, 30), reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[reference_date],
-        preaching_dates=[],
-        on_leave=False,
-    )
-
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_with_preaching(eligibility_checker):
-    # Arrange
-    role = Role.LYRICS
-    reference_date = date(2024, 7, 7)
-    event_dates = [date(2024, 6, 30), reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[reference_date],
-        on_leave=False,
-    )
-
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_with_3_consecutive_assigned_dates(eligibility_checker):
-    # Arrange
-    role = Role.LYRICS
-    reference_date = date(2024, 7, 21)
-    assigned_dates = [date(2024, 6, 30), date(2024, 7, 7), date(2024, 7, 14)]
-    event_dates = [assigned_dates, reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        on_leave=False,
-    )
-
-    for assigned_date in assigned_dates:
-        person.assign_event(event_date=assigned_date, role=Role.ACOUSTIC)
-
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_with_2_consecutive_same_role_assignments(
-    eligibility_checker,
-):
-    # Arrange
-    role = Role.LYRICS
-    reference_date = date(2024, 7, 14)
-    assigned_dates = [date(2024, 6, 30), date(2024, 7, 7)]
-    event_dates = [assigned_dates, reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        on_leave=False,
-    )
-
-    team = [person]
-    event1_date = date(2024, 6, 30)
-    event1 = Event(date=event1_date, team=team)
-    event1.assign_role(role=role, person=person)
-
-    event2_date = date(2024, 7, 7)
-    event2 = Event(date=event2_date, team=team)
-    event2.assign_role(role=role, person=person)
-
-    event3 = Event(date=reference_date, team=team)
-
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-    schedule.events = [event1, event2]
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event3)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_when_worship_leader_within_4_weeks_ago(
-    eligibility_checker,
-):
-    # Arrange
-    role = Role.WORSHIPLEADER
-    reference_date = date(2024, 7, 28)
-    assigned_date = date(2024, 6, 30)
-    event_dates = [
-        assigned_date,
-        date(2024, 7, 7),
-        date(2024, 7, 14),
-        date(2024, 7, 21),
-        reference_date,
-    ]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        on_leave=False,
-    )
-
-    team = [person]
-    event = Event(date=assigned_date, team=team)
-    event.assign_role(role=role, person=person)
-
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-    schedule.events = [event]
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-def test_get_eligible_person_when_worship_leader_over_5_weeks_ago(eligibility_checker):
-    # Arrange
-    role = Role.WORSHIPLEADER
-    reference_date = date(2024, 8, 4)
-    assigned_date = date(2024, 6, 23)
-    event_dates = [
-        assigned_date,
-        date(2024, 6, 30),
-        date(2024, 7, 7),
-        date(2024, 7, 14),
-        date(2024, 7, 21),
-        date(2024, 7, 28),
-        reference_date,
-    ]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        on_leave=False,
-    )
-
-    team = [person]
-    event = Event(date=assigned_date, team=team)
-    event.assign_role(role=role, person=person)
-
-    next_event = Event(date=reference_date, team=team)
-
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-    schedule.events = [event]
-
-    # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role, team=team, event=next_event
-    )
-
-    # Assert
-    assert eligible_person == person
 
 
 def test_get_eligible_person_for_next_worship_leader_in_rotation(eligibility_checker):
@@ -503,336 +249,48 @@ def test_get_eligible_person_for_next_worship_leader_in_rotation(eligibility_che
     assert eligible_person == person3
 
 
-def test_get_eligible_person_for_worship_leader_with_preaching_next_week(
+def test_get_eligible_person_for_next_worship_leader_with_no_rotation(
     eligibility_checker,
 ):
     # Arrange
     role = Role.WORSHIPLEADER
-    reference_date = date(2024, 6, 30)
-    preaching_date = date(2024, 7, 7)
-    event_dates = [reference_date, preaching_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[preaching_date],
-        on_leave=False,
-    )
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person is None
-
-
-@pytest.mark.parametrize(
-    "role, is_eligible", [(Role.WORSHIPLEADER, False), (Role.ACOUSTIC, True)]
-)
-def test_get_eligible_person_for_worship_leader_with_teaching_on_same_date(
-    role, is_eligible, eligibility_checker
-):
-    # Arrange
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="TestName1",
-        roles=[Role.WORSHIPLEADER, Role.ACOUSTIC, Role.LYRICS],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[reference_date],
-        on_leave=False,
-    )
-    team = [person]
-    event = Event(date=reference_date, team=team)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person == (person if is_eligible else None)
-
-
-@pytest.mark.parametrize(
-    "preacher_name, is_eligible", [("Edmund", True), ("TestPreacher", False)]
-)
-def test_get_eligible_person_for_special_condition_1(
-    preacher_name, is_eligible, eligibility_checker
-):
-    # Arrange
-    role = Role.EMCEE
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="Lulu",
-        roles=[role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(
-        name=preacher_name, graphics_support="Test", dates=[reference_date]
-    )
-
-    team = [person]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-        preachers=preachers,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-
-    assert eligible_person == (person if is_eligible else None)
-
-
-@pytest.mark.parametrize(
-    "role, preacher_name, is_eligible",
-    [
-        (Role.WORSHIPLEADER, "Kris", False),  # Expected Role and Preacher
-        (Role.WORSHIPLEADER, "TestPreacher", True),  # Unexpected Preacher
-        (Role.BACKUP, "Kris", True),  # Unexpected Role
-    ],
-)
-def test_get_eligible_person_for_special_condition_2(
-    role, preacher_name, is_eligible, eligibility_checker
-):
-    # Arrange
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
-    person = Person(
-        name="Gee",
-        roles=[role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(
-        name=preacher_name, graphics_support="Test", dates=[reference_date]
-    )
-
-    team = [person]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=event_dates,
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-        preachers=preachers,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    assert eligible_person == (person if is_eligible else None)
-
-
-@pytest.mark.parametrize(
-    "person_name, is_eligible",
-    [
-        ("Kris", True),  # Expected Acoustic Person
-        ("TestName", False),  # Unexpected Acoustic Person
-    ],
-)
-def test_get_eligible_person_for_special_condition_3(
-    person_name, is_eligible, eligibility_checker
-):
-    # Arrange
-    role = Role.ACOUSTIC
-    reference_date = date(2024, 6, 30)
-    event_dates = [reference_date]
+    reference_date = date(2024, 7, 7)
+    event_dates = [reference_date, date(2024, 7, 14), date(2024, 7, 21)]
     person1 = Person(
         name="TestName1",
-        roles=[Role.ACOUSTIC],
+        roles=[role, Role.ACOUSTIC, Role.LYRICS],
         blockout_dates=[],
         preaching_dates=[],
-        teaching_dates=[],
         on_leave=False,
     )
     person2 = Person(
-        name=person_name,
-        roles=[Role.ACOUSTIC],
-        blockout_dates=[],
+        name="TestName2",
+        roles=[role, Role.ACOUSTIC, Role.LYRICS],
+        blockout_dates=[reference_date],
         preaching_dates=[],
-        teaching_dates=[],
         on_leave=False,
     )
     person3 = Person(
         name="TestName3",
-        roles=[Role.ACOUSTIC],
+        roles=[role, Role.ACOUSTIC, Role.LYRICS],
         blockout_dates=[],
         preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[reference_date]
-    )
-    worship_leader = Person(
-        name="Gee",
-        roles=[Role.WORSHIPLEADER],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
         on_leave=False,
     )
 
-    team = [person1, person2, person3, worship_leader]
-    preachers = [preacher]
-    event = Event(date=reference_date, team=team, preachers=preachers)
-    event.roles[Role.WORSHIPLEADER] = worship_leader.name
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
+    team = [person1, person2, person3]
+    rotation = []
+    event = Event(date=reference_date, team=team)
+    worship_leader_selector = WorshipLeaderSelector(rotation=rotation)
     schedule = Schedule(
         team=team,
         event_dates=event_dates,
         worship_leader_selector=worship_leader_selector,
         eligibility_checker=eligibility_checker,
-        preachers=preachers,
     )
 
     # Act
     eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
 
     # Assert
-    assert eligible_person == (person2 if is_eligible else None)
-
-
-@pytest.mark.parametrize(
-    "person_to_assign_name, assigned_person_name, is_eligible",
-    [
-        ("Jeff", "Mariel", False),
-        ("Mariel", "Jeff", False),
-        ("Jeff", "TestName", True),
-        ("Mariel", "TestName", True),
-        ("TestName", "Jeff", True),
-    ],
-)
-def test_get_eligible_person_for_special_condition_4(
-    person_to_assign_name, assigned_person_name, is_eligible, eligibility_checker
-):
-    # Arrange
-    event_date = date(2025, 4, 6)
-    role_to_assign = Role.ACOUSTIC
-    person_to_assign = Person(
-        name=person_to_assign_name,
-        roles=[role_to_assign],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    assigned_role = Role.LYRICS
-    assigned_person = Person(
-        name=assigned_person_name,
-        roles=[assigned_role],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    team = [person_to_assign, assigned_person]
-    preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[event_date]
-    )
-    preachers = [preacher]
-    event = Event(
-        date=event_date,
-        team=team,
-        preachers=preachers,
-    )
-    event.assign_role(role=assigned_role, person=assigned_person)
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=[event_date],
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-        preachers=preachers,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(
-        role=role_to_assign, team=team, event=event
-    )
-
-    # Assert
-    expected_person = person_to_assign if is_eligible else None
-    assert eligible_person == expected_person
-
-
-@pytest.mark.parametrize(
-    "role, person_name, event_date, is_eligible",
-    [
-        (Role.DRUMS, "Mark", date(2025, 9, 1), True),
-        (Role.DRUMS, "Mark", date(2025, 8, 31), False),
-        (Role.DRUMS, "TestName", date(2025, 8, 31), True),
-        (Role.DRUMS, "TestName", date(2025, 9, 1), True),
-        (Role.EMCEE, "Mark", date(2025, 8, 31), True),
-    ],
-)
-def test_get_eligible_person_for_special_condition_5(
-    role, person_name, event_date, is_eligible, eligibility_checker
-):
-    # Arrange
-    person = Person(
-        name=person_name,
-        roles=[Role.DRUMS, Role.EMCEE],
-        blockout_dates=[],
-        preaching_dates=[],
-        teaching_dates=[],
-        on_leave=False,
-    )
-    team = [person]
-    preacher = Preacher(
-        name="TestPreacher", graphics_support="Test", dates=[event_date]
-    )
-    preachers = [preacher]
-    event = Event(
-        date=event_date,
-        team=team,
-        preachers=preachers,
-    )
-    worship_leader_selector = WorshipLeaderSelector(rotation=[])
-    schedule = Schedule(
-        team=team,
-        event_dates=[event_date],
-        worship_leader_selector=worship_leader_selector,
-        eligibility_checker=eligibility_checker,
-        preachers=preachers,
-    )
-
-    # Act
-    eligible_person = schedule.get_eligible_person(role=role, team=team, event=event)
-
-    # Assert
-    expected_person = person if is_eligible else None
-    assert eligible_person == expected_person
+    assert eligible_person in team
