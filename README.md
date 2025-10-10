@@ -1,5 +1,6 @@
-# TeamScheduler
-A program that builds a schedule for the JNCIM worship and sunday school ministries.
+# Team Scheduler API
+
+A modern REST API for church team scheduling with automatic role assignment based on availability and business rules.
 
 
 ## Table of Contents
